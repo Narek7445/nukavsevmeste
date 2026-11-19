@@ -584,6 +584,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
    seasonPeopleMap.get(season).add((e.firstName+' '+e.lastName).trim().toLocaleLowerCase('ru'));
   });
   const seasons=[...seasonCountsMap.keys()].sort((a,b)=>a-b);
+  const specialSeasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(v=>v&&!/^[1-9][0-9]?$/.test(v)))];
   const old=filter;
   $('seasonFilter').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('')+specialSeasons.map(s=>'<option value="'+escapeHTML(s)+'">'+escapeHTML(s)+'</option>').join('');
   renderParticipantsDirectory();
