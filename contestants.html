@@ -255,5 +255,8 @@ async function init(){
  ['search','season','score'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('grid').addEventListener('click',e=>{const card=e.target.closest('[data-profile]');if(card)openProfile(card.dataset.profile)});$('grid').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-profile]')){e.preventDefault();openProfile(e.target.dataset.profile)}});init();
 })();
 </script>
+
+<script>
+(()=>{const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}}</script>
 </body>
 </html>
