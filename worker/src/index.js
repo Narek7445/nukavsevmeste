@@ -107,7 +107,7 @@ async function readPolls(env, ids) {
   const polls = {};
   for (const id of ids) polls[id] = { yes: 0, no: 0 };
   for (const row of result.results || []) {
-    if (!polls[row.performance_id]) continue;
+    if (!polls[row.performance_id]) polls[row.performance_id] = { yes: 0, no: 0 };
     polls[row.performance_id][row.choice] = Number(row.count) || 0;
   }
   return polls;
