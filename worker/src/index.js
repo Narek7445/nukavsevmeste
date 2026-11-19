@@ -101,9 +101,9 @@ async function ensureVoteTable(env) {
 
 async function readPolls(env, ids) {
   await ensureVoteTable(env);
-  if (!ids.length) return {};
-  const placeholders = ids.map(() => "?").join(",");
-  const result = await env.DB.prepare("SELECT performance_id, choice, COUNT(*) AS count FROM performance_votes WHERE performance_id IN (" + placeholders + ") GROUP BY performance_id, choice").bind(...ids).all();
+  const result = ids.length
+    ? await env.DB.prepare("SELECT performance_id, choice, COUNT(*) AS count FROM performance_votes WHERE performance_id IN (" + ids.map(() => "?").join(",") + ") GROUP BY performance_id, choice").bind(...ids).all()
+    : await env.DB.prepare("SELECT performance_id, choice, COUNT(*) AS count FROM performance_votes GROUP BY performance_id, choice").all();
   const polls = {};
   for (const id of ids) polls[id] = { yes: 0, no: 0 };
   for (const row of result.results || []) {
