@@ -177,7 +177,7 @@ async function init(){
   }catch(err){
    console.error(err);
    $('resultCount').textContent='Не удалось загрузить общий архив';
-   $('grid').innerHTML='<div class="empty">Не удалось загрузить participants.json. Обновите страницу позже.</div>';
+   $('grid').innerHTML='<div class="empty">Не удалось загрузить данные из Cloudflare D1. Обновите страницу позже.</div>';
   }
  }
  ['search','season','score'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('grid').addEventListener('click',e=>{const card=e.target.closest('[data-profile]');if(card)openProfile(card.dataset.profile)});$('grid').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-profile]')){e.preventDefault();openProfile(e.target.dataset.profile)}});init();
