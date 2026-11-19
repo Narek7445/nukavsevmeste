@@ -530,7 +530,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   $('participantsDirectoryCount').textContent=people.length+' '+(people.length%10===1&&people.length%100!==11?'участник':people.length%10>=2&&people.length%10<=4&&(people.length%100<12||people.length%100>14)?'участника':'участников');
   $('participantsDirectoryGrid').innerHTML=people.length?people.map(person=>{
    const photo=person.photos[0]||'';
-   const initials=person.name.split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('');
+   const initials=person.name.split(/\s+/).slice(0,2).map(x=>x[0]||'').join('');
    return '<button type="button" class="participant-directory-card" data-profile="'+escapeHTML(person.name)+'" aria-label="Открыть профиль: '+escapeHTML(person.name)+'"><span class="participant-directory-photo">'+(photo?'<img src="'+photo+'" alt="Фото: '+escapeHTML(person.name)+'" loading="lazy">':'<span class="participant-directory-placeholder">'+escapeHTML(initials)+'</span>')+'</span><span class="participant-directory-name">'+escapeHTML(person.name)+'</span></button>';
   }).join(''):'<div class="participants-directory-empty">Участники появятся здесь после добавления выступлений в архив.</div>';
  }
