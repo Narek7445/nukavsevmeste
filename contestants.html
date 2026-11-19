@@ -119,7 +119,7 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
  const score=e=>Number(e.score)||100;
- const photoFor=e=>{if(e.photo)return e.photo;if(Array.isArray(e.photos)&&e.photos.length)return e.photos[0];const key=name(e).toLocaleLowerCase('ru');const found=entries.find(x=>name(x).toLocaleLowerCase('ru')===key&&(x.photo||(Array.isArray(x.photos)&&x.photos.length)));return found?(found.photo||(found.photos||[])[0]):''};
+ const photoFor=e=>{const own=Array.isArray(e.photos)?e.photos.find(Boolean):'';return own||e.photo||''};
  const PAGE_SIZE=30;
  let visibleCount=PAGE_SIZE,filteredList=[];
  function render(){
