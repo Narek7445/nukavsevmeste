@@ -82,4 +82,5 @@ async function init(){
 }
 $('search').addEventListener('input',render);$('season').addEventListener('change',render);init();
 })();
-</script></body></html>
+</script><script>(()=>{const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}})();</script>
+</body></html>
