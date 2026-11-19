@@ -493,7 +493,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 </head>
 <body>
 <main class="page" id="archivePage">
-  <header class="topline"><div class="topline-brand"><div class="eyebrow">Ну-ка, все вместе!</div><h1>Стобальные выступления</h1></div><div class="site-menu-wrap"><button class="site-menu-toggle" id="siteMenuToggle" type="button" aria-label="Открыть меню" title="Меню" aria-expanded="false" aria-controls="siteMenu"><span class="menu-lines" aria-hidden="true"><i></i><i></i><i></i></span></button><nav class="site-menu" id="siteMenu" aria-label="Разделы сайта" hidden><a href="#archivePage">Главная</a><a href="seasons.html">Сезоны</a><a href="contestants.html">Все конкурсанты</a><a href="rating.html">Любимцы зрителей</a><a href="#participantsDirectory">Участники</a><a href="#searchInput">Поиск выступлений</a><a href="#seasonDirectory">Архив по сезонам</a><a href="#record-holder">Рекордсмен</a><a href="#statistics">Статистика</a><a href="#songQuiz">Угадай песню и сезон</a><a href="#feedbackTitle">Оставить отзыв</a></nav></div></header>
+  <header class="topline"><div class="topline-brand"><div class="eyebrow">Ну-ка, все вместе!</div><h1>Стобальные выступления</h1></div><div class="site-menu-wrap"><button class="site-menu-toggle" id="siteMenuToggle" type="button" aria-label="Открыть меню" title="Меню" aria-expanded="false" aria-controls="siteMenu"><span class="menu-lines" aria-hidden="true"><i></i><i></i><i></i></span></button><nav class="site-menu" id="siteMenu" aria-label="Разделы сайта" hidden><a href="#archivePage">Главная</a><a href="seasons.html">Сезоны</a><a href="contestants.html">Все конкурсанты</a><a href="rating.html">Любимцы зрителей</a><a href="#participantsDirectory">Участники</a><a href="#searchInput">Поиск выступлений</a><a href="#seasonDirectory">Архив по сезонам</a><a href="#record-holder">Рекордсмен</a><a href="#statistics">Статистика</a><a href="#songQuiz">Угадай песню и сезон</a><a href="#visitorFeedbackTitle">Оставить отзыв</a></nav></div></header>
 
   <section class="controls" aria-label="Поиск и фильтр выступлений">
     <div class="search-wrap"><input id="searchInput" type="search" autocomplete="off" placeholder="Поиск по участнику или песне..." aria-label="Поиск по участнику или песне" aria-autocomplete="list" aria-controls="searchHints"><div class="search-hints" id="searchHints" role="listbox" hidden></div></div>
@@ -555,15 +555,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 (()=>{const form=document.getElementById('visitorFeedbackForm');if(!form)return;const status=document.getElementById('feedbackStatus'),button=document.getElementById('feedbackSubmit');form.addEventListener('submit',async e=>{e.preventDefault();button.disabled=true;button.textContent='Отправка…';status.textContent='';try{const res=await fetch('https://nukavsevmeste-api.nukavsevmeste.workers.dev/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('feedbackName').value,message:document.getElementById('feedbackMessage').value,website:form.elements.website.value})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Не удалось отправить отзыв.');form.reset();status.textContent='Спасибо! Ваш отзыв отправлен.';button.textContent='Отправить ещё';}catch(err){status.textContent=err.message||'Ошибка отправки. Попробуйте ещё раз.';button.textContent='Повторить отправку';}finally{button.disabled=false;}})})();
 </script>
 
-<section class="feedback-section" aria-labelledby="feedbackTitle">
- <div class="feedback-head"><div><div class="feedback-kicker">Обратная связь</div><h2 class="feedback-title" id="feedbackTitle">Поделитесь мнением</h2><p class="feedback-copy">Что вам нравится на сайте? Чего не хватает? Ваш отзыв поможет сделать архив лучше.</p></div></div>
- <form class="feedback-form" id="feedbackForm">
-  <div><label for="feedbackName">Имя (необязательно)</label><input id="feedbackName" name="name" maxlength="80" placeholder="Как к вам обращаться?"></div>
-  <div class="feedback-honeypot" aria-hidden="true"><label for="feedbackWebsite">Ваш сайт</label><input id="feedbackWebsite" name="website" tabindex="-1" autocomplete="off"></div>
-  <div class="feedback-message"><label for="feedbackMessage">Ваше мнение</label><textarea id="feedbackMessage" name="message" minlength="5" maxlength="2000" required placeholder="Напишите, что думаете о проекте…"></textarea></div>
-  <div class="feedback-submit"><button id="feedbackSubmit" type="submit">Отправить отзыв →</button><span class="feedback-status" id="feedbackStatus" role="status"></span></div>
- </form>
-</section>
+
 
 <footer class="footer"><span>Архив стобальных выступлений</span></footer>
 </main>
@@ -807,8 +799,6 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 <script>
 (()=>{const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}}</script>
 
-<script>
-(()=>{const form=document.getElementById('feedbackForm');if(!form)return;const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';form.addEventListener('submit',async e=>{e.preventDefault();const button=document.getElementById('feedbackSubmit'),status=document.getElementById('feedbackStatus');button.disabled=true;status.textContent='Отправляем…';try{const res=await fetch(API+'/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('feedbackName').value,message:document.getElementById('feedbackMessage').value,website:document.getElementById('feedbackWebsite').value})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Не удалось отправить отзыв.');form.reset();status.textContent='Спасибо! Ваш отзыв отправлен.'}catch(err){status.textContent=err.message||'Ошибка отправки. Попробуйте позже.'}finally{button.disabled=false}})})();
-</script>
+
 
 </body></html>
