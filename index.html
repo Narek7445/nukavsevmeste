@@ -258,12 +258,23 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  .btn{padding:11px 12px;font-size:9px}
 }
 
-.meta-indicators{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 17px}.meta-indicators .meta{margin:0}.episode-indicator{background:#e5edf7;color:#315b83}</style>
+.meta-indicators{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 17px}.meta-indicators .meta{margin:0}.episode-indicator{background:#e5edf7;color:#315b83}
+.search-wrap{position:relative;flex:1 1 340px;min-width:0;max-width:560px;z-index:6}
+.search-wrap input{width:100%;border:1px solid #c9bcb2;border-radius:3px;background:var(--surface);color:var(--ink);font:500 15px var(--sans);padding:14px 16px;box-shadow:0 3px 12px #39212a08}
+.search-wrap input:focus{border-color:var(--wine);box-shadow:0 0 0 3px #762f4512;outline:none}
+.search-hints{position:absolute;top:calc(100% + 7px);left:0;right:0;background:#fffdf9;border:1px solid #d8c9c0;border-radius:5px;box-shadow:0 14px 32px #21151d30;overflow:hidden;max-height:300px;overflow-y:auto}
+.search-hints[hidden]{display:none}
+.search-hint{display:block;width:100%;padding:12px 15px;border:0;border-bottom:1px solid #eee5df;background:transparent;text-align:left;color:var(--ink);cursor:pointer;font:600 14px var(--sans)}
+.search-hint:last-child{border-bottom:0}.search-hint:hover,.search-hint:focus{background:#f5eaf0;outline:none}
+.search-hint small{display:block;margin-top:4px;color:#81777b;font:400 12px var(--sans)}
+@media(max-width:760px){.controls{flex-wrap:wrap;gap:10px}.search-wrap{flex:1 1 100%;max-width:none}.select-wrap{flex:1 1 190px;width:auto}.count{margin-left:auto}}
+</style>
 </head>
 <body>
 <main class="page">
   <header class="topline"><h1>Стобальные выступления</h1><div class="eyebrow">Ну-ка, все вместе!</div></header>
-  <section class="controls" aria-label="Фильтр по сезону">
+  <section class="controls" aria-label="Поиск и фильтр выступлений">
+    <div class="search-wrap"><input id="searchInput" type="search" autocomplete="off" placeholder="Поиск по участнику или песне..." aria-label="Поиск по участнику или песне" aria-autocomplete="list" aria-controls="searchHints"><div class="search-hints" id="searchHints" role="listbox" hidden></div></div>
     <div class="select-wrap"><select id="seasonFilter" aria-label="Выбрать сезон"><option value="all">Все сезоны</option></select></div>
     <div class="count" id="count">0 выступлений</div>
   </section>
@@ -326,16 +337,19 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  function escapeHTML(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
  let activeIndex=0;
  function sortEntries(list){return list.slice().sort((a,b)=>Number(b.season)-Number(a.season)||String(a.lastName||'').localeCompare(String(b.lastName||''),'ru')||String(a.firstName||'').localeCompare(String(b.firstName||''),'ru')||String(a.id||'').localeCompare(String(b.id||'')));}
+ function matchesSearch(e,q){if(!q)return true;const hay=[e.firstName,e.lastName,e.firstName+' '+e.lastName,e.lastName+' '+e.firstName,e.song,e.season,e.episode].join(' ').toLocaleLowerCase('ru');return hay.includes(q.toLocaleLowerCase('ru'))}
+ function filteredEntries(){const season=$('seasonFilter').value,q=$('searchInput').value.trim();return sortEntries(entries.filter(e=>(season==='all'||Number(e.season)===Number(season))&&matchesSearch(e,q)))}
+ function renderHints(){const q=$('searchInput').value.trim().toLocaleLowerCase('ru'),box=$('searchHints');if(!q){box.hidden=true;box.innerHTML='';return}const found=sortEntries(entries.filter(e=>matchesSearch(e,q))).slice(0,7);box.innerHTML=found.map(e=>'<button type="button" class="search-hint" role="option" data-hint="'+escapeHTML(e.id)+'">'+escapeHTML(e.firstName+' '+e.lastName)+'<small>«'+escapeHTML(e.song)+'» · '+escapeHTML(e.season)+' сезон</small></button>').join('');box.hidden=!found.length}
  function render(){
   const filter=$('seasonFilter').value;
   const seasons=[...new Set(entries.map(e=>Number(e.season)))].sort((a,b)=>a-b);
   const old=filter;
   $('seasonFilter').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('');
   $('seasonFilter').value=old==='all'||seasons.includes(Number(old))?old:'all';
-  const shown=sortEntries(entries.filter(e=>$('seasonFilter').value==='all'||Number(e.season)===Number($('seasonFilter').value)));
+  const shown=filteredEntries();
   if(activeIndex>=shown.length)activeIndex=0;
   $('count').textContent=shown.length+' '+(shown.length%10===1&&shown.length%100!==11?'выступление':shown.length%10>=2&&shown.length%10<=4&&(shown.length%100<12||shown.length%100>14)?'выступления':'выступлений');
-  $('entries').innerHTML=shown.length?(()=>{const e=shown[activeIndex];return '<article class="entry"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(e.firstName+' '+e.lastName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(e.firstName)+' '+escapeHTML(e.lastName)+'</h2><div class="meta-indicators"><span class="meta season-indicator">'+escapeHTML(e.season)+' сезон</span>'+(e.episode?'<span class="meta episode-indicator">'+(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'Выпуск '+escapeHTML(e.episode))+'</span>':'')+'</div><p class="song">'+'«'+escapeHTML(e.song.replace(/^«\s*|\s*»$/g,''))+'»</p>'+(e.comment?'<p class="participant-comment">'+escapeHTML(e.comment).replace(/\n/g,'<br>')+'</p>':'')+'</div></article>'})():'<div class="empty">Пока нет добавленных выступлений</div>';
+  $('entries').innerHTML=shown.length?(()=>{const e=shown[activeIndex];return '<article class="entry"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(e.firstName+' '+e.lastName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(e.firstName)+' '+escapeHTML(e.lastName)+'</h2><div class="meta-indicators"><span class="meta season-indicator">'+escapeHTML(e.season)+' сезон</span>'+(e.episode?'<span class="meta episode-indicator">'+(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'Выпуск '+escapeHTML(e.episode))+'</span>':'')+'</div><p class="song">'+'«'+escapeHTML(e.song.replace(/^«\s*|\s*»$/g,''))+'»</p>'+(e.comment?'<p class="participant-comment">'+escapeHTML(e.comment).replace(/\n/g,'<br>')+'</p>':'')+'</div></article>'})():'<div class="empty">'+(entries.length?'По вашему запросу ничего не найдено':'Пока нет добавленных выступлений')+'</div>';
   $('prevEntry').disabled=shown.length<2;$('nextEntry').disabled=shown.length<2;
   $('prevEntry').style.display=$('nextEntry').style.display=shown.length>1?'grid':'none';
   $('carouselDots').innerHTML=shown.map((e,i)=>'<button type="button" class="carousel-dot '+(i===activeIndex?'active':'')+'" data-slide="'+i+'" aria-label="Выступление '+(i+1)+'"></button>').join('');
@@ -350,7 +364,11 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  function reset(){ $('entryForm').reset();$('editId').value='';photoData='';$('saveButton').textContent='Добавить выступление';$('formError').textContent=''}
  function notify(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',2300)}
  $('seasonFilter').addEventListener('change',()=>{activeIndex=0;render()});
- function moveSlide(direction){const shown=sortEntries(entries.filter(e=>$('seasonFilter').value==='all'||Number(e.season)===Number($('seasonFilter').value)));if(!shown.length)return;activeIndex=(activeIndex+direction+shown.length)%shown.length;render()}
+ $('searchInput').addEventListener('input',()=>{activeIndex=0;renderHints();render()});
+ $('searchHints').addEventListener('click',e=>{const hint=e.target.closest('[data-hint]');if(!hint)return;const item=entries.find(x=>String(x.id)===hint.dataset.hint);if(!item)return;$('searchInput').value=item.firstName+' '+item.lastName;$('searchHints').hidden=true;activeIndex=0;render()});
+ $('searchInput').addEventListener('keydown',e=>{if(e.key==='Escape')$('searchHints').hidden=true;if(e.key==='Enter'){const first=$('searchHints').querySelector('[data-hint]');if(first&&!$('searchHints').hidden){e.preventDefault();first.click()}}});
+ document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))$('searchHints').hidden=true});
+ function moveSlide(direction){const shown=filteredEntries();if(!shown.length)return;activeIndex=(activeIndex+direction+shown.length)%shown.length;render()}
  $('prevEntry').addEventListener('click',()=>moveSlide(-1));
  $('nextEntry').addEventListener('click',()=>moveSlide(1));
  $('carouselDots').addEventListener('click',e=>{const dot=e.target.closest('[data-slide]');if(dot){activeIndex=Number(dot.dataset.slide);render()}});
