@@ -258,7 +258,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  .btn{padding:11px 12px;font-size:9px}
 }
 
-</style>
+.meta-indicators{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 17px}.meta-indicators .meta{margin:0}.episode-indicator{background:#e5edf7;color:#315b83}</style>
 </head>
 <body>
 <main class="page">
@@ -335,7 +335,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   const shown=sortEntries(entries.filter(e=>$('seasonFilter').value==='all'||Number(e.season)===Number($('seasonFilter').value)));
   if(activeIndex>=shown.length)activeIndex=0;
   $('count').textContent=shown.length+' '+(shown.length===1?'участник':shown.length>=2&&shown.length<=4?'участника':'участников');
-  $('entries').innerHTML=shown.length?(()=>{const e=shown[activeIndex];return '<article class="entry"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(e.firstName+' '+e.lastName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(e.firstName)+' '+escapeHTML(e.lastName)+'</h2><p class="meta">'+escapeHTML(e.season)+' сезон'+(e.episode?' · '+(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'Выпуск '+escapeHTML(e.episode)):'')+'</p><p class="song">'+'«'+escapeHTML(e.song.replace(/^«\s*|\s*»$/g,''))+'»</p>'+(e.comment?'<p class="participant-comment">'+escapeHTML(e.comment).replace(/\n/g,'<br>')+'</p>':'')+'</div></article>'})():'<div class="empty">Пока нет добавленных выступлений</div>';
+  $('entries').innerHTML=shown.length?(()=>{const e=shown[activeIndex];return '<article class="entry"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(e.firstName+' '+e.lastName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(e.firstName)+' '+escapeHTML(e.lastName)+'</h2><div class="meta-indicators"><span class="meta season-indicator">'+escapeHTML(e.season)+' сезон</span>'+(e.episode?'<span class="meta episode-indicator">'+(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'Выпуск '+escapeHTML(e.episode))+'</span>':'')+'</div><p class="song">'+'«'+escapeHTML(e.song.replace(/^«\s*|\s*»$/g,''))+'»</p>'+(e.comment?'<p class="participant-comment">'+escapeHTML(e.comment).replace(/\n/g,'<br>')+'</p>':'')+'</div></article>'})():'<div class="empty">Пока нет добавленных выступлений</div>';
   $('prevEntry').disabled=shown.length<2;$('nextEntry').disabled=shown.length<2;
   $('prevEntry').style.display=$('nextEntry').style.display=shown.length>1?'grid':'none';
   $('carouselDots').innerHTML=shown.map((e,i)=>'<button type="button" class="carousel-dot '+(i===activeIndex?'active':'')+'" data-slide="'+i+'" aria-label="Выступление '+(i+1)+'"></button>').join('');
