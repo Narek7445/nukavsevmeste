@@ -72,6 +72,22 @@ input[type=file]{padding:9px}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 @media(max-width:760px){.page{padding-top:26px}.topline{align-items:flex-start;flex-direction:column;margin-bottom:25px}.eyebrow{font-size:9px}.entry{grid-template-columns:1fr;gap:5px;padding:12px}.photo{height:64vw;min-height:230px;max-height:390px}.entry-info{padding:19px 10px 17px}.entry-info:before{margin-bottom:15px}.controls{align-items:flex-start;flex-direction:column}.select-wrap{width:100%}.count{margin-left:0}.field-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.footer{flex-direction:column}.record{align-items:flex-start;flex-direction:column}.record-actions{width:100%}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* Atmospheric full-screen show background */
+body{background:#080911;color:#fff}
+body:before{position:fixed;inset:-18px;z-index:-2;opacity:1;background:url("https://tvmag.ru/upload/iblock/a03/hw0423ryj2i.jpg") center 42%/cover no-repeat;filter:blur(13px) brightness(.34) saturate(.9);transform:scale(1.06)}
+body:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(115deg,rgba(4,7,17,.72),rgba(18,8,19,.48) 55%,rgba(5,8,17,.72))}
+.page{position:relative;z-index:1}
+.topline{border-bottom-color:rgba(255,255,255,.22)}
+h1{color:#fff;text-shadow:0 2px 20px #0008}
+.eyebrow{color:#f0c77e}
+.controls .count{color:#eee1d7}
+select{background:rgba(255,253,249,.96)}
+.entry{background:rgba(255,253,249,.96);border-color:rgba(255,255,255,.45);box-shadow:0 18px 55px rgba(0,0,0,.3);backdrop-filter:blur(8px)}
+.photo{background:linear-gradient(135deg,#e7d9cd,#d7c2b2)}
+.footer{border-top-color:rgba(255,255,255,.25);color:rgba(255,255,255,.7)}
+.admin-hint{display:none!important}
+@media(max-width:760px){body:before{background-position:52% center;filter:blur(10px) brightness(.3)}}
 </style>
 </head>
 <body>
@@ -82,7 +98,7 @@ input[type=file]{padding:9px}
     <div class="count" id="count">0 выступлений</div>
   </section>
   <section class="entries" id="entries" aria-live="polite"></section>
-  <footer class="footer"><span>Архив стобальных выступлений</span><span class="admin-hint">Панель администратора · Numpad 8</span></footer>
+  <footer class="footer"><span>Архив стобальных выступлений</span></footer>
 </main>
 
 <div class="overlay" id="loginOverlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
