@@ -95,6 +95,24 @@ function validateArchive(value) {
   return null;
 }
 
+async function ensureVoteTable(env) {
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS performance_votes (performance_id TEXT NOT NULL, voter_id TEXT NOT NULL, choice TEXT NOT NULL CHECK(choice IN ('yes','no')), created_at TEXT NOT NULL, PRIMARY KEY(performance_id, voter_id))").run();
+}
+
+async function readPolls(env, ids) {
+  await ensureVoteTable(env);
+  if (!ids.length) return {};
+  const placeholders = ids.map(() => "?").join(",");
+  const result = await env.DB.prepare("SELECT performance_id, choice, COUNT(*) AS count FROM performance_votes WHERE performance_id IN (" + placeholders + ") GROUP BY performance_id, choice").bind(...ids).all();
+  const polls = {};
+  for (const id of ids) polls[id] = { yes: 0, no: 0 };
+  for (const row of result.results || []) {
+    if (!polls[row.performance_id]) continue;
+    polls[row.performance_id][row.choice] = Number(row.count) || 0;
+  }
+  return polls;
+}
+
 async function handleApi(request, env, url) {
   const path = url.pathname;
 
@@ -104,6 +122,32 @@ async function handleApi(request, env, url) {
       return json({ participants, updatedAt: await env.DB.prepare("SELECT updated_at FROM app_state WHERE key = ?").bind("participants").first().then(row => row?.updated_at || null) }, 200, { "cache-control": "public, max-age=30, stale-while-revalidate=120" });
     } catch (error) {
       return json({ error: "Не удалось прочитать архив.", detail: error.message }, 500);
+    }
+  }
+
+  if (request.method === "GET" && path === "/api/polls") {
+    const ids = [...new Set((url.searchParams.get("ids") || "").split(",").map(x => x.trim()).filter(x => /^[a-zA-Z0-9._-]{1,100}$/.test(x)))].slice(0, 100);
+    try { return json({ polls: await readPolls(env, ids) }, 200, { "cache-control": "no-store" }); }
+    catch (error) { return json({ error: "Не удалось загрузить результаты опроса.", detail: error.message }, 500); }
+  }
+
+  if (request.method === "POST" && path === "/api/polls/vote") {
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "Некорректный JSON." }, 400); }
+    const performanceId = String(body?.performanceId || "");
+    const voterId = String(body?.voterId || "");
+    const choice = String(body?.choice || "");
+    if (!/^[a-zA-Z0-9._-]{1,100}$/.test(performanceId) || !/^[a-zA-Z0-9._-]{16,100}$/.test(voterId) || !["yes", "no"].includes(choice)) {
+      return json({ error: "Проверьте данные голоса." }, 400);
+    }
+    try {
+      await ensureVoteTable(env);
+      const inserted = await env.DB.prepare("INSERT OR IGNORE INTO performance_votes (performance_id, voter_id, choice, created_at) VALUES (?, ?, ?, ?)")
+        .bind(performanceId, voterId, choice, new Date().toISOString()).run();
+      const polls = await readPolls(env, [performanceId]);
+      return json({ ok: true, alreadyVoted: !(inserted.meta?.changes > 0), poll: polls[performanceId] }, 200, { "cache-control": "no-store" });
+    } catch (error) {
+      return json({ error: "Не удалось сохранить голос.", detail: error.message }, 500);
     }
   }
 
