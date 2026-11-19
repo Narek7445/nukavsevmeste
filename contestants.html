@@ -111,11 +111,11 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 .profile-main-photo:hover:after{opacity:1}
 .profile-gallery img{cursor:zoom-in;transition:transform .2s,box-shadow .2s}
 .profile-gallery img:hover{transform:translateY(-3px);box-shadow:0 9px 22px #183d3426}
-.profile-performance-top{align-items:center;gap:10px;margin-bottom:16px}
-.profile-performance .tag{padding:9px 13px;font-size:13px;letter-spacing:.04em}
-.profile-performance .tag:first-child{background:#e7efe7;color:#176b68;font-size:15px}
-.profile-performance .tag.score{width:66px;height:66px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex-direction:column;border-radius:50%;border:3px solid #d9a36f;background:radial-gradient(circle,#fffaf0 0%,#f5dfc7 100%);color:#8f4b25;font:800 22px 'Manrope',sans-serif;letter-spacing:-.06em;box-shadow:0 3px 10px #8f4b2518}
-.profile-performance .tag.score:after{content:"БАЛЛОВ";font:800 7px 'DM Sans',sans-serif;letter-spacing:.08em;margin-top:1px}
+.profile-performance-top{display:flex;align-items:center;gap:9px;margin-bottom:16px}
+.profile-performance .tag{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:9px 14px;border-radius:11px;font-size:14px;font-weight:800;letter-spacing:.02em}
+.profile-performance .tag:first-child{background:#e8f0e9;color:var(--teal)}
+.profile-performance .tag.score{width:auto;height:auto;border:1px solid #ead6c7;border-radius:11px;background:#fff0e4;color:#a94f22;font:800 14px 'DM Sans',sans-serif;letter-spacing:.02em;box-shadow:none}
+.profile-performance .tag.score:after{content:none}
 .photo-lightbox{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:28px;background:rgba(8,20,21,.94);backdrop-filter:blur(10px)}
 .photo-lightbox.open{display:flex}
 .photo-lightbox img{max-width:min(88vw,1100px);max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 70px #0008}
