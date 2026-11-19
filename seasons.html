@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4efe8">
+<title>Сезоны — Ну-ка, все вместе!</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+:root{--ink:#241d24;--muted:#83777d;--paper:#f4efe8;--card:#fffdf9;--wine:#71334b;--wine-dark:#421d30;--gold:#c7a36a;--line:#e4d9cf}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 88% 0%,#ead8cf 0,transparent 34%),radial-gradient(circle at 0 65%,#eee3d8 0,transparent 26%),var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif}
+.page{width:min(1240px,100%);margin:auto;padding:24px clamp(16px,4vw,54px) 70px}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.brand-mark{display:grid;place-items:center;width:39px;height:39px;border-radius:12px;background:var(--wine);color:#fff;font:24px Georgia,serif;box-shadow:0 5px 14px #71334b35}
+.nav-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.nav-link{padding:10px 14px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--wine);font-size:12px;font-weight:800;transition:.2s}.nav-link:hover,.nav-link.active{background:var(--wine);border-color:var(--wine);color:#fff}
+.hero{position:relative;overflow:hidden;margin:28px 0 24px;padding:clamp(26px,5vw,58px);border-radius:26px;background:linear-gradient(118deg,#281a29 0%,#54283e 64%,#754251 100%);color:#fff;box-shadow:0 20px 50px #321a2b25}
+.hero:after{content:'♫';position:absolute;right:5%;top:50%;transform:translateY(-54%) rotate(-12deg);font:clamp(150px,25vw,300px)/1 Georgia,serif;color:#ffffff0d;pointer-events:none}
+.kicker{color:#e3c99e;font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
+.hero h1{position:relative;z-index:1;margin:13px 0 12px;font:600 clamp(42px,7vw,78px)/.98 Georgia,serif;letter-spacing:-.055em}
+.hero p{position:relative;z-index:1;max-width:590px;margin:0;color:#f0e4e7;font-size:15px;line-height:1.7}
+.season-panel{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px;margin:-1px 0 32px;padding:18px 20px;border:1px solid #e5d7cb;border-radius:19px;background:#fffdf9e8;box-shadow:0 12px 32px #39212a0c;backdrop-filter:blur(10px)}
+.season-label{display:block;margin-bottom:7px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.season-select-wrap{position:relative;max-width:460px}.season-select-wrap:after{content:'⌄';position:absolute;right:17px;top:50%;transform:translateY(-55%);color:var(--wine);font-size:20px;pointer-events:none}
+select{appearance:none;width:100%;padding:15px 48px 15px 16px;border:1px solid #d8c8bf;border-radius:12px;background:#fff;color:var(--wine-dark);font:800 15px 'DM Sans',sans-serif;outline:none;cursor:pointer}
+select:focus{border-color:var(--wine);box-shadow:0 0 0 4px #71334b16}
+.season-summary{text-align:right}.summary-number{display:block;color:var(--wine);font:600 30px/1 Georgia,serif}.summary-caption{display:block;margin-top:5px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.content-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin:0 2px 17px}.content-head h2{margin:0;color:var(--wine-dark);font:600 clamp(25px,4vw,36px)/1.1 Georgia,serif}.content-head p{margin:6px 0 0;color:var(--muted);font-size:12px}
+.episode-section{margin:0 0 30px;scroll-margin-top:20px}
+.episode-heading{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.episode-number{display:grid;place-items:center;flex:none;width:48px;height:48px;border:1px solid #d8c2a0;border-radius:15px;background:linear-gradient(145deg,#fffaf0,#f1e4d3);color:var(--wine);font:600 22px Georgia,serif;box-shadow:0 5px 13px #5133290c}
+.episode-title{margin:0;color:var(--wine-dark);font:600 24px/1.1 Georgia,serif}.episode-count{margin-top:5px;color:var(--muted);font-size:11px;font-weight:700}
+.performance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.performance-card{position:relative;display:grid;grid-template-columns:minmax(155px,.82fr) minmax(0,1.18fr);min-height:230px;overflow:hidden;border:1px solid #e4d8cd;border-radius:20px;background:var(--card);box-shadow:0 9px 25px #35202a0b;transition:transform .25s,box-shadow .25s}
+.performance-card:hover{transform:translateY(-4px);box-shadow:0 18px 36px #35202a18}
+.performance-photo{position:relative;min-height:230px;overflow:hidden;background:linear-gradient(145deg,#e8d9ce,#cbb5a9)}
+.performance-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.performance-card:hover .performance-photo img{transform:scale(1.045)}
+.photo-placeholder{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font:600 55px Georgia,serif;background:radial-gradient(circle at 30% 20%,#ffffff35,transparent 42%),linear-gradient(145deg,#a87979,#503349)}
+.photo-placeholder span{opacity:.9}
+.performance-photo:after{content:'';position:absolute;inset:9px;border:1px solid #ffffff80;border-radius:9px;pointer-events:none}
+.card-body{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding:22px 20px 18px}
+.card-overline{display:flex;align-items:center;gap:7px;margin-bottom:13px;color:#987b55;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.card-overline:before{content:'';width:19px;height:1px;background:var(--gold)}
+.participant-name{margin:0 0 12px;color:var(--wine-dark);font:600 clamp(21px,2.4vw,29px)/1.04 Georgia,serif;letter-spacing:-.035em;overflow-wrap:anywhere}
+.song-label{margin:0 0 5px;color:#a18e8a;font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.song-title{margin:0;color:#51444a;font:600 16px/1.35 Georgia,serif;overflow-wrap:anywhere}
+.card-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;width:100%;margin-top:auto;padding-top:18px}
+.season-chip{max-width:55%;padding:7px 9px;border-radius:7px;background:#f4eee8;color:#826e68;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.score-block{display:flex;align-items:baseline;gap:5px;padding:8px 11px;border:1px solid #e6d2ae;border-radius:11px;background:linear-gradient(135deg,#fff8e9,#f5e8d0);color:#805a2d;white-space:nowrap}
+.score-number{font:600 27px/.9 Georgia,serif}.score-word{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.score-block.perfect{border-color:#cda96b;background:linear-gradient(135deg,#f9edce,#e9d3a3);color:#70461e;box-shadow:0 4px 13px #b18a4b20}
+.empty{padding:55px 20px;border:1px dashed #d4c2b7;border-radius:19px;background:#fff9;text-align:center;color:var(--muted);line-height:1.7}
+.empty strong{display:block;margin-bottom:6px;color:var(--wine);font:600 25px Georgia,serif}
+.error{color:#9a3447}
+.footer{display:flex;justify-content:space-between;gap:15px;margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:#978b88;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+@media(max-width:900px){.performance-grid{grid-template-columns:1fr}.performance-card{grid-template-columns:minmax(170px,.75fr) minmax(0,1.25fr)}}
+@media(max-width:560px){.page{padding:15px 12px 45px}.nav{align-items:flex-start}.brand{font-size:12px}.brand-mark{width:34px;height:34px}.nav-links{gap:5px}.nav-link{padding:8px 10px;font-size:10px}.hero{margin:18px 0 20px;border-radius:19px}.hero p{font-size:13px}.season-panel{grid-template-columns:1fr;gap:13px;padding:15px}.season-summary{text-align:left;display:flex;align-items:baseline;gap:8px}.summary-number{font-size:24px}.summary-caption{margin:0}.performance-card{grid-template-columns: minmax(112px,.72fr) minmax(0,1.28fr);min-height:205px;border-radius:16px}.performance-photo{min-height:205px}.card-body{padding:15px 12px 13px}.participant-name{font-size:20px}.song-title{font-size:14px}.card-overline{font-size:8px;margin-bottom:10px}.card-bottom{padding-top:13px;align-items:flex-end}.score-number{font-size:23px}.score-block{padding:7px 8px}.season-chip{font-size:8px;padding:6px 7px}.episode-number{width:42px;height:42px}.episode-title{font-size:21px}}
+@media(max-width:380px){.performance-card{grid-template-columns:100px minmax(0,1fr)}.performance-photo{min-height:195px}.card-body{padding:13px 10px}.participant-name{font-size:18px}.song-title{font-size:13px}.score-word{font-size:8px}}
+</style>
+</head>
+<body>
+<main class="page">
+<nav class="nav"><a class="brand" href="index.html"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div class="nav-links"><a class="nav-link active" href="seasons.html">Сезоны</a><a class="nav-link" href="contestants.html">Все конкурсанты</a><a class="nav-link" href="index.html">На главную</a></div></nav>
+<header class="hero"><div class="kicker">Полная история выступлений</div><h1>Сезоны.<br>Выпуск за выпуском.</h1><p>Выберите сезон и погрузитесь в его историю: все выпуски, участники, песни и баллы — в одном красивом архиве.</p></header>
+<section class="season-panel" aria-label="Выбор сезона"><div><label class="season-label" for="seasonSelect">Выберите сезон</label><div class="season-select-wrap"><select id="seasonSelect" disabled><option value="">Загружаем сезоны…</option></select></div></div><div class="season-summary"><span class="summary-number" id="summaryCount">—</span><span class="summary-caption" id="summaryCaption">выступлений в сезоне</span></div></section>
+<section id="seasonContent" aria-live="polite"><div class="empty"><strong>Загружаем архив</strong>Собираем выступления со всех сезонов…</div></section>
+<footer class="footer"><span>Ну-ка, все вместе!</span><span>Архив выступлений</span></footer>
+</main>
+<script>
+(()=>{
+ const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';
+ const $=id=>document.getElementById(id);
+ let entries=[];
+ const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ const normalize=value=>String(value??'').trim();
+ const seasonSort=(a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')};
+ const episodeSort=(a,b)=>{const na=Number(a),nb=Number(b);if(Number.isFinite(na)&&Number.isFinite(nb))return na-nb;if(Number.isFinite(na))return -1;if(Number.isFinite(nb))return 1;const rank=x=>/^полуфинал$/i.test(x)?9000:/^финал$/i.test(x)?10000:5000;return rank(a)-rank(b)||a.localeCompare(b,'ru')};
+ function imageFor(item){const images=[...(Array.isArray(item.photos)?item.photos:[]),item.photo||''].filter((value,index,array)=>typeof value==='string'&&value&&array.indexOf(value)===index);return images[0]||''}
+ function card(item,index){
+  const photo=imageFor(item),name=[normalize(item.firstName),normalize(item.lastName)].filter(Boolean).join(' '),score=Number(item.score),validScore=Number.isFinite(score)&&score>0;
+  const initials=(name.split(/\s+/).slice(0,2).map(part=>part[0]||'').join('')||'♫').toLocaleUpperCase('ru');
+  return '<article class="performance-card"><div class="performance-photo">'+(photo?'<img src="'+escapeHTML(photo)+'" alt="Фотография: '+escapeHTML(name)+'" loading="lazy">':'<div class="photo-placeholder"><span>'+escapeHTML(initials)+'</span></div>')+'</div><div class="card-body"><div class="card-overline">Выступление · '+String(index+1).padStart(2,'0')+'</div><h3 class="participant-name">'+escapeHTML(name||'Участник не указан')+'</h3><p class="song-label">Исполненная песня</p><p class="song-title">'+escapeHTML(item.song||'Название не указано')+'</p><div class="card-bottom"><span class="season-chip">'+escapeHTML(item.season)+(item.episode?' · выпуск '+escapeHTML(item.episode):'')+'</span><div class="score-block '+(score===100?'perfect':'')+'"><span class="score-number">'+(validScore?escapeHTML(score):'—')+'</span><span class="score-word">баллов</span></div></div></div></article>';
+ }
+ function renderSeason(season){
+  const selected=entries.filter(item=>normalize(item.season)===season);
+  $('summaryCount').textContent=selected.length.toLocaleString('ru-RU');
+  $('summaryCaption').textContent=selected.length===1?'выступление в сезоне':selected.length>=2&&selected.length<=4?'выступления в сезоне':'выступлений в сезоне';
+  if(!selected.length){$('seasonContent').innerHTML='<div class="empty"><strong>Пока нет выступлений</strong>Для выбранного сезона ещё нет записей в архиве.</div>';return}
+  const groups=new Map();
+  selected.forEach(item=>{const episode=normalize(item.episode)||'Выпуск не указан';if(!groups.has(episode))groups.set(episode,[]);groups.get(episode).push(item)});
+  const ordered=[...groups.entries()].sort((a,b)=>episodeSort(a[0],b[0]));
+  const totalPeople=new Set(selected.map(item=>(normalize(item.firstName)+' '+normalize(item.lastName)).trim().toLocaleLowerCase('ru')).filter(Boolean)).size;
+  $('seasonContent').innerHTML='<div class="content-head"><div><h2>'+escapeHTML(season==='Битва сезонов'?season:season+' сезон')+'</h2><p>'+ordered.length+' выпуск(а) · '+totalPeople+' участников · '+selected.length+' выступлений</p></div></div>'+ordered.map(([episode,items],groupIndex)=>'<section class="episode-section"><div class="episode-heading"><div class="episode-number">'+( /^\d+$/.test(episode)?String(Number(episode)).padStart(2,'0'):'♫')+'</div><div><h3 class="episode-title">'+escapeHTML(/^\d+$/.test(episode)?episode+' выпуск':episode)+'</h3><div class="episode-count">'+items.length+' '+(items.length===1?'выступление':items.length>=2&&items.length<=4?'выступления':'выступлений')+'</div></div></div><div class="performance-grid">'+items.map((item,index)=>card(item,index)).join('')+'</div></section>').join('');
+ }
+ $('seasonSelect').addEventListener('change',event=>{const season=event.target.value;if(season)renderSeason(season);else{$('summaryCount').textContent='—';$('seasonContent').innerHTML='<div class="empty"><strong>Выберите сезон</strong>После выбора здесь появятся выпуски и карточки участников.</div>'}});
+ async function init(){try{const response=await fetch(API+'/api/participants',{cache:'no-store'});if(!response.ok)throw new Error('Сервер вернул ошибку '+response.status);const data=await response.json();if(!Array.isArray(data.participants))throw new Error('Некорректный формат архива');entries=data.participants;const seasons=[...new Set(entries.map(item=>normalize(item.season)).filter(Boolean))].sort(seasonSort);$('seasonSelect').innerHTML='<option value="">Выберите сезон</option>'+seasons.map(season=>'<option value="'+escapeHTML(season)+'">'+escapeHTML(season)+(Number.isFinite(Number(season))?' сезон':'')+'</option>').join('');$('seasonSelect').disabled=!seasons.length;if(seasons.length){$('seasonContent').innerHTML='<div class="empty"><strong>Ваш сезон — ваша история</strong>Выберите сезон в списке выше, чтобы увидеть все выпуски и выступления.</div>';$('summaryCount').textContent='—'}else{$('seasonContent').innerHTML='<div class="empty"><strong>Архив пока пуст</strong>Выступления появятся здесь после добавления в админ-панели.</div>';$('seasonSelect').disabled=true}}catch(error){$('seasonContent').innerHTML='<div class="empty error"><strong>Не удалось загрузить архив</strong>'+escapeHTML(error.message||'Попробуйте обновить страницу позже.')+'</div>';$('seasonSelect').disabled=true}}
+ init();
+})();
+</script>
+</body></html>
