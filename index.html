@@ -268,6 +268,39 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .search-hint:last-child{border-bottom:0}.search-hint:hover,.search-hint:focus{background:#f5eaf0;outline:none}
 .search-hint small{display:block;margin-top:4px;color:#81777b;font:400 12px var(--sans)}
 @media(max-width:760px){.controls{flex-wrap:wrap;gap:10px}.search-wrap{flex:1 1 100%;max-width:none}.select-wrap{flex:1 1 190px;width:auto}.count{margin-left:auto}}
+/* Final layout alignment: search, season filter and counters */
+.controls{display:flex;align-items:center;flex-wrap:nowrap;gap:14px}
+.search-wrap{flex:1 1 420px;width:auto;max-width:560px;min-width:220px}
+.search-wrap input{display:block;height:48px;border:1px solid rgba(255,255,255,.72);border-radius:999px;background:rgba(255,250,244,.97);padding:0 20px;color:#402b4a;font:500 14px var(--sans);box-shadow:0 8px 25px #170e2b35}
+.search-wrap input::placeholder{color:#8b7b8c;opacity:1}
+.search-wrap input:focus{border-color:#ffc96d;box-shadow:0 0 0 4px #ffc96d35,0 8px 25px #170e2b35}
+.search-hints{top:calc(100% + 9px);border:1px solid #ead8e8;border-radius:16px;background:rgba(255,251,247,.99);box-shadow:0 16px 38px #100b2a45;z-index:20}
+.search-hint{padding:13px 17px;color:#432747;font-size:14px;line-height:1.35}
+.search-hint:hover,.search-hint:focus{background:#f5eaf3}
+.search-hint small{color:#78677c;line-height:1.4}
+.select-wrap{flex:0 1 250px;width:250px;min-width:175px}
+.controls select{height:48px;border-radius:999px;padding-top:0;padding-bottom:0;font-size:14px}
+.count{flex:0 0 auto;white-space:nowrap;margin-left:auto}
+@media(max-width:1000px) and (min-width:761px){
+ .controls{flex-wrap:wrap}
+ .search-wrap{flex:1 1 100%;max-width:none}
+ .select-wrap{flex:0 1 250px}
+}
+@media(max-width:760px){
+ .controls{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
+ .search-wrap{grid-column:1/-1;width:100%;max-width:none;min-width:0}
+ .search-wrap input{height:47px;width:100%;font-size:16px}
+ .select-wrap{grid-column:1;grid-row:2;width:100%;min-width:0;max-width:none}
+ .controls select{height:46px;width:100%;font-size:13px;padding-left:15px;padding-right:38px}
+ .count{grid-column:2;grid-row:2;align-self:center;margin:0;padding:10px 12px;font-size:8px;letter-spacing:.08em}
+ .search-hints{max-height:min(42vh,280px);border-radius:13px}
+ .search-hint{padding:12px 14px;font-size:13px}
+}
+@media(max-width:360px){
+ .controls{grid-template-columns:minmax(0,1fr)}
+ .select-wrap{grid-column:1;grid-row:2}
+ .count{grid-column:1;grid-row:3;justify-self:start}
+}
 </style>
 </head>
 <body>
@@ -365,7 +398,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  function notify(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',2300)}
  $('seasonFilter').addEventListener('change',()=>{activeIndex=0;render()});
  $('searchInput').addEventListener('input',()=>{activeIndex=0;renderHints();render()});
- $('searchHints').addEventListener('click',e=>{const hint=e.target.closest('[data-hint]');if(!hint)return;const item=entries.find(x=>String(x.id)===hint.dataset.hint);if(!item)return;$('searchInput').value=item.firstName+' '+item.lastName;$('searchHints').hidden=true;activeIndex=0;render()});
+ $('searchHints').addEventListener('click',e=>{const hint=e.target.closest('[data-hint]');if(!hint)return;const item=entries.find(x=>String(x.id)===hint.dataset.hint);if(!item)return;$('searchInput').value=item.firstName+' '+item.lastName;$('seasonFilter').value=String(item.season);$('searchHints').hidden=true;activeIndex=0;render()});
  $('searchInput').addEventListener('keydown',e=>{if(e.key==='Escape')$('searchHints').hidden=true;if(e.key==='Enter'){const first=$('searchHints').querySelector('[data-hint]');if(first&&!$('searchHints').hidden){e.preventDefault();first.click()}}});
  document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))$('searchHints').hidden=true});
  function moveSlide(direction){const shown=filteredEntries();if(!shown.length)return;activeIndex=(activeIndex+direction+shown.length)%shown.length;render()}
