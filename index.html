@@ -307,6 +307,34 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .search-wrap{position:relative;z-index:41}
 .search-hints{position:absolute;z-index:42}
 .carousel-shell{position:relative;z-index:1}
+
+
+/* Participant profile pages */
+[hidden]{display:none!important}
+.profile-page{position:relative;z-index:2;width:min(1100px,100%);margin:0 auto;padding:30px clamp(16px,5vw,64px) 70px;color:#30243b}
+.profile-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:24px}
+.profile-back,.profile-share{border:1px solid #ffffffa8;border-radius:999px;background:rgba(255,250,244,.95);color:#603b70;padding:11px 17px;font:700 11px var(--sans);letter-spacing:.06em;cursor:pointer;box-shadow:0 6px 20px #160c2c30}
+.profile-hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);gap:clamp(20px,4vw,48px);align-items:center;padding:clamp(14px,2.5vw,28px);border:1px solid #ffffffc9;border-radius:26px 26px 26px 8px;background:linear-gradient(120deg,#fffaf2f5,#f5eaf7f5 60%,#eaf5f0f5);box-shadow:0 20px 55px #100b2a45}
+.profile-photo{aspect-ratio:4/5;max-height:440px;overflow:hidden;background:linear-gradient(135deg,#f6b56b,#e58b8b 48%,#8c79b8);display:grid;place-items:center}
+.profile-photo img{width:100%;height:100%;object-fit:contain}
+.profile-photo .photo-placeholder{font-size:90px}
+.profile-info{min-width:0;padding:12px}
+.profile-kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#a15c91}
+.profile-name{font:600 clamp(30px,5vw,58px)/1.03 var(--serif);color:#432747;margin:12px 0 18px;overflow-wrap:anywhere}
+.profile-stats{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 18px}
+.profile-stat{border-radius:99px;padding:9px 13px;background:linear-gradient(100deg,#8d5593,#b65e82);color:white;font-size:11px;font-weight:800;letter-spacing:.04em}
+.profile-comment{margin:18px 0 0;padding:15px 17px;border-left:3px solid #e6a65e;border-radius:0 12px 12px 0;background:#f6eaf2;color:#66536d;font:italic 15px/1.6 var(--sans);white-space:pre-wrap}
+.profile-section-title{margin:34px 0 16px;color:#fff7ed;font:600 clamp(24px,3vw,34px) var(--serif);text-shadow:0 3px 20px #160c2c80}
+.profile-performances{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.profile-performance{padding:19px 20px;border:1px solid #ffffffb8;border-radius:17px 17px 17px 5px;background:linear-gradient(120deg,#fffaf2f5,#f3eaf7f5);box-shadow:0 10px 28px #100b2a30}
+.profile-performance-meta{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.profile-performance-meta .meta{margin:0}
+.profile-performance-song{margin:0;color:#503454;font:600 clamp(18px,2.2vw,24px)/1.3 var(--serif)}
+.profile-empty{padding:35px;border:1px dashed #ffffffa8;border-radius:18px;background:#fffaf0e8;color:#624e68;text-align:center}
+@media(max-width:700px){.profile-page{padding:20px 14px 42px}.profile-hero{grid-template-columns:1fr;gap:14px}.profile-photo{aspect-ratio:16/10;max-height:300px}.profile-info{padding:8px 5px}.profile-performances{grid-template-columns:1fr}.profile-top{align-items:flex-start}}
+
+.profile-open-btn{display:inline-flex;margin-top:20px;border:0;border-radius:99px;padding:11px 16px;background:linear-gradient(100deg,#8d5593,#b65e82);color:#fff;font:800 10px var(--sans);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;box-shadow:0 5px 14px #8c4d912e}.profile-open-btn:hover{filter:brightness(.92);transform:translateY(-1px)}
+.entry[data-open-profile]{cursor:pointer}
 </style>
 </head>
 <body>
@@ -324,6 +352,13 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   <div class="carousel-bottom"><div class="carousel-dots" id="carouselDots" aria-label="Выбрать выступление"></div><span class="slide-position" id="slidePosition"></span></div>
  </div>
   <footer class="footer"><span>Архив стобальных выступлений</span></footer>
+</main>
+
+<main class="profile-page" id="participantPage" hidden>
+ <div class="profile-top"><button class="profile-back" id="profileBack" type="button">← Все выступления</button><button class="profile-share" id="profileShare" type="button">Поделиться профилем</button></div>
+ <section class="profile-hero" id="profileHero"></section>
+ <h2 class="profile-section-title">Стобальные выступления</h2>
+ <section class="profile-performances" id="profilePerformances"></section>
 </main>
 
 <div class="overlay" id="loginOverlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
@@ -388,7 +423,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   const shown=filteredEntries();
   if(activeIndex>=shown.length)activeIndex=0;
   $('count').textContent=shown.length+' '+(shown.length%10===1&&shown.length%100!==11?'выступление':shown.length%10>=2&&shown.length%10<=4&&(shown.length%100<12||shown.length%100>14)?'выступления':'выступлений');
-  $('entries').innerHTML=shown.length?(()=>{const e=shown[activeIndex];return '<article class="entry"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(e.firstName+' '+e.lastName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(e.firstName)+' '+escapeHTML(e.lastName)+'</h2><div class="meta-indicators"><span class="meta season-indicator">'+escapeHTML(e.season)+' сезон</span>'+(e.episode?'<span class="meta episode-indicator">'+(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'Выпуск '+escapeHTML(e.episode))+'</span>':'')+'</div><p class="song">'+'«'+escapeHTML(e.song.replace(/^«\s*|\s*»$/g,''))+'»</p>'+(e.comment?'<p class="participant-comment">'+escapeHTML(e.comment).replace(/\n/g,'<br>')+'</p>':'')+'</div></article>'})():'<div class="empty">'+(entries.length?'По вашему запросу ничего не найдено':'Пока нет добавленных выступлений')+'</div>';
+  $('entries').innerHTML=shown.length?(()=>{const e=shown[activeIndex],personName=e.firstName+' '+e.lastName;return '<article class="entry" data-open-profile="'+escapeHTML(personName)+'"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(personName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(personName)+'</h2><div class="meta-indicators"><span class="meta season-indicator">'+escapeHTML(e.season)+' сезон</span>'+(e.episode?'<span class="meta episode-indicator">'+(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'Выпуск '+escapeHTML(e.episode))+'</span>':'')+'</div><p class="song">'+'«'+escapeHTML(e.song.replace(/^«\s*|\s*»$/g,''))+'»</p>'+(e.comment?'<p class="participant-comment">'+escapeHTML(e.comment).replace(/\n/g,'<br>')+'</p>':'')+'<button class="profile-open-btn" type="button" data-profile="'+escapeHTML(personName)+'">Страница участника →</button></div></article>'})():'<div class="empty">'+(entries.length?'По вашему запросу ничего не найдено':'Пока нет добавленных выступлений')+'</div>';
   $('prevEntry').disabled=shown.length<2;$('nextEntry').disabled=shown.length<2;
   $('prevEntry').style.display=$('nextEntry').style.display=shown.length>1?'grid':'none';
   $('carouselDots').innerHTML=shown.map((e,i)=>'<button type="button" class="carousel-dot '+(i===activeIndex?'active':'')+'" data-slide="'+i+'" aria-label="Выступление '+(i+1)+'"></button>').join('');
@@ -407,7 +442,15 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  $('searchHints').addEventListener('click',e=>{const hint=e.target.closest('[data-hint]');if(!hint)return;const item=entries.find(x=>String(x.id)===hint.dataset.hint);if(!item)return;$('searchInput').value=item.firstName+' '+item.lastName;$('seasonFilter').value=String(item.season);$('searchHints').hidden=true;activeIndex=0;render()});
  $('searchInput').addEventListener('keydown',e=>{if(e.key==='Escape')$('searchHints').hidden=true;if(e.key==='Enter'){const first=$('searchHints').querySelector('[data-hint]');if(first&&!$('searchHints').hidden){e.preventDefault();first.click()}}});
  document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))$('searchHints').hidden=true});
+
+ function personEntries(name){const key=String(name).trim().toLocaleLowerCase('ru');return sortEntries(entries.filter(e=>(String(e.firstName+' '+e.lastName).trim().toLocaleLowerCase('ru')===key)))}
+ function openParticipant(name){const list=personEntries(name);if(!list.length)return;location.hash='participant='+encodeURIComponent(list[0].firstName+' '+list[0].lastName)}
+ function renderParticipantPage(){const page=$('participantPage'),archive=$('.page'),raw=location.hash.startsWith('#participant=')?location.hash.slice(13):'';if(!raw){page.hidden=true;archive.hidden=false;return}let name;try{name=decodeURIComponent(raw)}catch{name=raw}const list=personEntries(name);if(!list.length){page.hidden=true;archive.hidden=false;return}archive.hidden=true;page.hidden=false;const first=list.find(e=>e.photo)||list[0],comment=list.find(e=>e.comment)?.comment||'',uniqueSeasons=[...new Set(list.map(e=>Number(e.season)))].sort((a,b)=>a-b);$('profileHero').innerHTML='<div class="profile-photo">'+(first.photo?'<img src="'+first.photo+'" alt="Фото: '+escapeHTML(first.firstName+' '+first.lastName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="profile-info"><div class="profile-kicker">Участник · Ну-ка, все вместе!</div><h1 class="profile-name">'+escapeHTML(first.firstName+' '+first.lastName)+'</h1><div class="profile-stats"><span class="profile-stat">'+list.length+' '+(list.length%10===1&&list.length%100!==11?'выступление':list.length%10>=2&&list.length%10<=4&&(list.length%100<12||list.length%100>14)?'выступления':'выступлений')+'</span><span class="profile-stat">'+uniqueSeasons.length+' '+(uniqueSeasons.length===1?'сезон':'сезона')+'</span></div>'+(comment?'<p class="profile-comment">'+escapeHTML(comment)+'</p>':'')+'</div>';$('profilePerformances').innerHTML=list.map(e=>'<article class="profile-performance"><div class="profile-performance-meta"><span class="meta season-indicator">'+escapeHTML(e.season)+' сезон</span>'+(e.episode?'<span class="meta episode-indicator">'+(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'Выпуск '+escapeHTML(e.episode))+'</span>':'')+'</div><p class="profile-performance-song">«'+escapeHTML(String(e.song).replace(/^«\s*|\s*»$/g,''))+'»</p></article>').join('');document.title=first.firstName+' '+first.lastName+' — Стобальные выступления'}
  function moveSlide(direction){const shown=filteredEntries();if(!shown.length)return;activeIndex=(activeIndex+direction+shown.length)%shown.length;render()}
+ $('entries').addEventListener('click',e=>{const trigger=e.target.closest('[data-profile]');const card=e.target.closest('[data-open-profile]');const name=trigger?.dataset.profile||card?.dataset.openProfile;if(name)openParticipant(name)});
+ $('profileBack').addEventListener('click',()=>{location.hash=''});
+ $('profileShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);notify('Ссылка на профиль скопирована')}catch{notify('Скопируйте ссылку из адресной строки браузера')}});
+ window.addEventListener('hashchange',renderParticipantPage);
  $('prevEntry').addEventListener('click',()=>moveSlide(-1));
  $('nextEntry').addEventListener('click',()=>moveSlide(1));
  $('carouselDots').addEventListener('click',e=>{const dot=e.target.closest('[data-slide]');if(dot){activeIndex=Number(dot.dataset.slide);render()}});
@@ -425,7 +468,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>close(b.dataset.close)));
  document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)close(o.id)}));
  document.addEventListener('keydown',e=>{if(e.code==='Numpad8'&&!e.repeat){e.preventDefault();if($('adminOverlay').classList.contains('open'))return;open('loginOverlay');setTimeout(()=>$('password').focus(),30)}if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(o=>close(o.id))});
- load().then(data=>{entries=Array.isArray(data)?data:[];activeIndex=0;render()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить общий архив participants.json')});
+ load().then(data=>{entries=Array.isArray(data)?data:[];activeIndex=0;render();renderParticipantPage()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить общий архив participants.json')});
 })();
 </script>
 </body></html>
