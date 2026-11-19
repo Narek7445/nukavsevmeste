@@ -505,7 +505,37 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   </section>
   <section class="season-directory" id="seasonDirectory" aria-label="Страницы сезонов"><h2 class="season-directory-title">Архив по сезонам</h2><div class="season-directory-grid" id="seasonDirectoryGrid"></div></section>
   <section class="statistics-section" id="statistics" aria-labelledby="statisticsTitle"><div class="statistics-heading"><div><div class="statistics-kicker">Цифры и достижения</div><h2 id="statisticsTitle">Статистика</h2><p>Аналитика стобальных выступлений по сезонам.</p></div><div class="statistics-total"><strong id="statisticsTotal">0</strong><span>100-бальных выступлений</span></div></div><article class="chart-card"><div class="chart-title-row"><div><h3>100-бальные выступления по сезонам</h3><p>Количество выступлений в каждом сезоне</p></div><span class="chart-unit">Выступления</span></div><div class="season-chart" id="hundredPointsChart" role="img" aria-label="Количество стобальных выступлений по сезонам"></div></article></section>
-  <footer class="footer"><span>Архив стобальных выступлений</span></footer>
+  
+<section class="visitor-feedback" aria-labelledby="visitorFeedbackTitle">
+ <div class="visitor-feedback-copy"><span class="feedback-kicker">Обратная связь</span><h2 id="visitorFeedbackTitle">Нам важно ваше мнение</h2><p>Поделитесь впечатлениями о сайте, расскажите, что понравилось или что стоит улучшить.</p></div>
+ <form id="visitorFeedbackForm" class="visitor-feedback-form">
+  <label for="feedbackName">Ваше имя <span>(необязательно)</span></label><input id="feedbackName" name="name" maxlength="80" placeholder="Как к вам обращаться?">
+  <label for="feedbackMessage">Ваш отзыв</label><textarea id="feedbackMessage" name="message" minlength="5" maxlength="2000" rows="5" required placeholder="Напишите своё мнение…"></textarea>
+  <div class="feedback-form-bottom"><span id="feedbackStatus" role="status" aria-live="polite">Отзыв увидит команда сайта.</span><button type="submit" id="feedbackSubmit">Отправить отзыв →</button></div>
+  <input name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" class="feedback-honeypot">
+ </form>
+</section>
+<style>
+.visitor-feedback{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(22px,4vw,54px);align-items:center;margin:42px 0 25px;padding:clamp(22px,4vw,38px);border:1px solid #ffffff35;border-radius:18px;background:linear-gradient(130deg,rgba(255,250,242,.97),rgba(245,235,249,.97) 58%,rgba(233,247,242,.97));color:#432747;box-shadow:0 15px 36px #100b2a24}
+.feedback-kicker{font-size:10px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:#a15a8b}
+.visitor-feedback-copy h2{font:700 clamp(25px,3vw,36px)/1.08 Georgia,serif;margin:8px 0;color:#432747}
+.visitor-feedback-copy p{font-size:14px;line-height:1.65;color:#76677b;margin:0;max-width:440px}
+.visitor-feedback-form{display:grid;gap:8px}
+.visitor-feedback-form label{font-size:11px;font-weight:800;color:#59435f}
+.visitor-feedback-form label span{font-weight:500;color:#95869a}
+.visitor-feedback-form input,.visitor-feedback-form textarea{width:100%;padding:12px 13px;border:1px solid #ddcddd;border-radius:9px;background:#fffdfb;color:#352b39;font:14px/1.5 inherit;resize:vertical}
+.visitor-feedback-form input:focus,.visitor-feedback-form textarea:focus{outline:2px solid #b887b5;outline-offset:1px}
+.feedback-form-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:4px}
+.feedback-form-bottom span{font-size:11px;color:#76677b}
+.feedback-form-bottom button{border:0;border-radius:9px;padding:12px 17px;background:#783b73;color:#fff;font:700 12px inherit;cursor:pointer}
+.feedback-form-bottom button:disabled{opacity:.6;cursor:wait}
+.feedback-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;opacity:0!important}
+@media(max-width:700px){.visitor-feedback{grid-template-columns:1fr;border-radius:13px}.feedback-form-bottom{align-items:stretch;flex-direction:column}.feedback-form-bottom button{width:100%}}
+</style>
+<script>
+(()=>{const form=document.getElementById('visitorFeedbackForm');if(!form)return;const status=document.getElementById('feedbackStatus'),button=document.getElementById('feedbackSubmit');form.addEventListener('submit',async e=>{e.preventDefault();button.disabled=true;button.textContent='Отправка…';status.textContent='';try{const res=await fetch('https://nukavsevmeste-api.nukavsevmeste.workers.dev/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('feedbackName').value,message:document.getElementById('feedbackMessage').value,website:form.elements.website.value})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Не удалось отправить отзыв.');form.reset();status.textContent='Спасибо! Ваш отзыв отправлен.';button.textContent='Отправить ещё';}catch(err){status.textContent=err.message||'Ошибка отправки. Попробуйте ещё раз.';button.textContent='Повторить отправку';}finally{button.disabled=false;}})})();
+</script>
+<footer class="footer"><span>Архив стобальных выступлений</span></footer>
 </main>
 
 <main class="profile-page season-page" id="seasonPage" hidden>
@@ -743,4 +773,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  load().then(async data=>{entries=Array.isArray(data)?data:[];activeIndex=0;await loadPolls();render();startSongQuiz();renderParticipantPage()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить данные из Cloudflare D1')});
 })();
 </script>
+
+<script>
+(()=>{const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}}</script>
 </body></html>
