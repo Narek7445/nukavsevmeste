@@ -267,6 +267,15 @@ async function handleApi(request, env, url) {
       }
     }
 
+    if (request.method === "DELETE" && path.startsWith("/api/admin/images/")) {
+      if (!env.IMAGES) return json({ error: "Хранилище R2 ещё не подключено." }, 503);
+      let key;
+      try { key = decodeURIComponent(path.slice("/api/admin/images/".length)); } catch { return json({ error: "Некорректный ключ изображения." }, 400); }
+      if (!key || !key.startsWith("participants/") || key.includes("..") || key.includes("\\")) return json({ error: "Некорректный ключ изображения." }, 400);
+      try { await env.IMAGES.delete(key); return json({ ok: true, deletedKey: key }); }
+      catch (error) { return json({ error: "Не удалось удалить фотографию из R2.", detail: error.message }, 500); }
+    }
+
     if (request.method === "POST" && path === "/api/admin/upload") {
       if (!env.IMAGES) return json({ error: "Хранилище R2 ещё не подключено." }, 503);
       let form;
