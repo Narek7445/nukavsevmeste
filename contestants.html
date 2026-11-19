@@ -93,6 +93,17 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 .profile-performance .episode{margin-top:9px}
 .profile-performance .comment{margin-bottom:0}
 @media(max-width:720px){.profile-hero{grid-template-columns:1fr}.profile-main-photo{aspect-ratio:4/3;max-height:360px}.profile-performances{grid-template-columns:1fr}.profile-nav{align-items:stretch}.profile-back,.profile-share{font-size:11px;padding:10px 12px}}
+
+.audience-poll{margin-top:15px;padding:14px 15px;border:1px solid rgba(23,107,104,.2);border-radius:13px;background:linear-gradient(135deg,#f6faf6,#f8f1e9);color:#203b3d}
+.audience-poll-title{font-weight:800;font-size:13px;margin-bottom:10px}
+.audience-poll-actions{display:flex;gap:8px}
+.audience-poll button{flex:1;border:1px solid #cbdad2;border-radius:9px;padding:9px 12px;background:#fff;color:#205c58;font:700 12px inherit;cursor:pointer}
+.audience-poll button:disabled{opacity:.6;cursor:default}
+.audience-poll-results{display:grid;gap:7px;margin-top:10px}
+.audience-poll-row{display:grid;grid-template-columns:34px 1fr 40px;align-items:center;gap:8px;font-size:11px;font-weight:700}
+.audience-poll-track{height:7px;border-radius:99px;background:#e0e8e1;overflow:hidden}
+.audience-poll-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#e9a16a,#25847b)}
+.audience-poll-total{margin-top:8px;color:#718184;font-size:10px}
 </style>
 </head>
 <body>
@@ -120,6 +131,15 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
  const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
  const score=e=>Number(e.score)||100;
  const photoFor=e=>{const own=Array.isArray(e.photos)?e.photos.find(Boolean):'';return own||e.photo||''};
+
+ const POLL_API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';let pollResults={};
+ function pollVoterId(){let id='';try{id=localStorage.getItem('nuka-poll-voter-id')||'';if(!id){id=crypto.randomUUID();localStorage.setItem('nuka-poll-voter-id',id)}}catch{id=crypto.randomUUID()}return id}
+ function hasVoted(id){try{return localStorage.getItem('nuka-poll-voted-'+id)==='1'}catch{return false}}
+ function markVoted(id){try{localStorage.setItem('nuka-poll-voted-'+id,'1')}catch{}}
+ function pollMarkup(e){const id=String(e.id||''),p=pollResults[id]||{yes:0,no:0},total=p.yes+p.no,voted=hasVoted(id),yp=total?Math.round(p.yes/total*100):0,np=total?100-yp:0;return '<section class="audience-poll" data-poll="'+safe(id)+'"><div class="audience-poll-title">Вы бы встали на месте экспертов?</div><div class="audience-poll-actions"><button type="button" data-vote="yes" '+(voted?'disabled':'')+'>Да · '+p.yes+'</button><button type="button" data-vote="no" '+(voted?'disabled':'')+'>Нет · '+p.no+'</button></div>'+(total?'<div class="audience-poll-results"><div class="audience-poll-row"><span>Да</span><div class="audience-poll-track"><div class="audience-poll-fill" style="width:'+yp+'%"></div></div><span>'+yp+'%</span></div><div class="audience-poll-row"><span>Нет</span><div class="audience-poll-track"><div class="audience-poll-fill" style="width:'+np+'%"></div></div><span>'+np+'%</span></div></div>':'')+'<div class="audience-poll-total">'+(voted?'Ваш голос учтён · ':'')+total+' голосов</div></section>'}
+ async function loadPolls(){try{const r=await fetch(POLL_API+'/api/polls',{cache:'no-store'});if(r.ok){const d=await r.json();pollResults=d.polls||{}}}catch{}}
+ async function submitPollVote(button){const box=button.closest('[data-poll]');if(!box)return;const id=box.dataset.poll;if(!id||hasVoted(id))return;box.querySelectorAll('button').forEach(b=>b.disabled=true);try{const r=await fetch(POLL_API+'/api/polls/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({performanceId:id,voterId:pollVoterId(),choice:button.dataset.vote})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Не удалось сохранить голос');pollResults[id]=d.poll||{yes:0,no:0};markVoted(id);const profile=new URLSearchParams(location.search).get('profile')||'';renderProfile(profile)}catch(err){box.querySelectorAll('button').forEach(b=>b.disabled=false);alert(err.message||'Не удалось сохранить голос')}}
+
  const PAGE_SIZE=30;
  let visibleCount=PAGE_SIZE,filteredList=[];
  function render(){
@@ -149,7 +169,7 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
   const facts=list.find(e=>Array.isArray(e.facts)&&e.facts.length)?.facts||[];
   const seasons=[...new Set(list.map(e=>String(e.season||'').trim()).filter(Boolean))];
   const countWord=list.length%10===1&&list.length%100!==11?'выступление':list.length%10>=2&&list.length%10<=4&&(list.length%100<12||list.length%100>14)?'выступления':'выступлений';
-  $('profileContent').innerHTML='<section class="profile-hero"><div class="profile-main-photo">'+(photos.length?'<img src="'+photos[0]+'" alt="Фото: '+safe(name(first))+'" fetchpriority="high" decoding="async">':safe(name(first).split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('')) )+'</div><div><div class="profile-kicker">Участник шоу · Ну-ка, все вместе!</div><h1 class="profile-name">'+safe(name(first))+'</h1><div class="profile-stats"><span class="profile-stat">'+list.length+' '+countWord+'</span><span class="profile-stat">'+seasons.length+' '+(seasons.length===1?'сезон':'сезона')+'</span><span class="profile-stat">'+list.filter(e=>score(e)===100).length+' стобалльных</span></div>'+(list.find(e=>e.comment)?.comment?'<p class="profile-comment">'+safe(list.find(e=>e.comment).comment)+'</p>':'')+(records.length?'<section class="profile-detail"><h2>Рекорды</h2><ul>'+records.map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'')+(facts.length?'<section class="profile-detail"><h2>Интересные факты</h2><ul>'+facts.map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'')+'</div></section>'+(photos.length>1?'<section class="profile-detail"><h2 class="profile-gallery-title">Фотогалерея</h2><div class="profile-gallery">'+photos.map((src,i)=>'<img src="'+src+'" alt="Фотография '+(i+1)+'" loading="lazy" decoding="async">').join('')+'</div></section>':'')+'<section class="profile-detail"><h2 class="profile-performances-title">Выступления участника</h2><div class="profile-performances">'+list.map(e=>'<article class="profile-performance"><div class="profile-performance-top"><span class="tag">'+safe(e.season)+(Number.isFinite(Number(e.season))?' сезон':'')+'</span><span class="tag score">'+score(e)+' баллов</span></div><p class="song">«'+safe(String(e.song||'Песня не указана').replace(/^«\\s*|\\s*»$/g,''))+'»</p><div class="episode">'+(e.episode?(/^(полуфинал|финал)$/i.test(String(e.episode))?safe(e.episode):'Выпуск '+safe(e.episode)):'Выпуск не указан')+'</div>'+(e.comment?'<p class="comment">'+safe(e.comment)+'</p>':'')+'</article>').join('')+'</div></section>';
+  $('profileContent').innerHTML='<section class="profile-hero"><div class="profile-main-photo">'+(photos.length?'<img src="'+photos[0]+'" alt="Фото: '+safe(name(first))+'" fetchpriority="high" decoding="async">':safe(name(first).split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('')) )+'</div><div><div class="profile-kicker">Участник шоу · Ну-ка, все вместе!</div><h1 class="profile-name">'+safe(name(first))+'</h1><div class="profile-stats"><span class="profile-stat">'+list.length+' '+countWord+'</span><span class="profile-stat">'+seasons.length+' '+(seasons.length===1?'сезон':'сезона')+'</span><span class="profile-stat">'+list.filter(e=>score(e)===100).length+' стобалльных</span></div>'+(list.find(e=>e.comment)?.comment?'<p class="profile-comment">'+safe(list.find(e=>e.comment).comment)+'</p>':'')+(records.length?'<section class="profile-detail"><h2>Рекорды</h2><ul>'+records.map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'')+(facts.length?'<section class="profile-detail"><h2>Интересные факты</h2><ul>'+facts.map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'')+'</div></section>'+(photos.length>1?'<section class="profile-detail"><h2 class="profile-gallery-title">Фотогалерея</h2><div class="profile-gallery">'+photos.map((src,i)=>'<img src="'+src+'" alt="Фотография '+(i+1)+'" loading="lazy" decoding="async">').join('')+'</div></section>':'')+'<section class="profile-detail"><h2 class="profile-performances-title">Выступления участника</h2><div class="profile-performances">'+list.map(e=>'<article class="profile-performance"><div class="profile-performance-top"><span class="tag">'+safe(e.season)+(Number.isFinite(Number(e.season))?' сезон':'')+'</span><span class="tag score">'+score(e)+' баллов</span></div><p class="song">«'+safe(String(e.song||'Песня не указана').replace(/^«\\s*|\\s*»$/g,''))+'»</p><div class="episode">'+(e.episode?(/^(полуфинал|финал)$/i.test(String(e.episode))?safe(e.episode):'Выпуск '+safe(e.episode)):'Выпуск не указан')+'</div>'+(e.comment?'<p class="comment">'+safe(e.comment)+'</p>':'')+pollMarkup(e)+'</article>').join('')+'</div></section>';
   document.title=name(first)+' — Все конкурсанты';
   return true;
  }
@@ -162,7 +182,7 @@ async function init(){
    const apiData=await apiResponse.json();
    if(!Array.isArray(apiData.participants))throw new Error('Некорректный формат архива');
    const d=apiData.participants;
-   entries=d;
+   entries=d;await loadPolls();
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
    const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
    $('performanceCount').textContent=entries.length.toLocaleString('ru-RU');
@@ -179,7 +199,7 @@ async function init(){
      document.querySelector('.result-line').style.display='none';
      $('grid').style.display='none';
      $('profileView').removeAttribute('hidden');
-     $('profileBack').addEventListener('click',()=>{location.href='contestants.html'});
+     $('profileContent').addEventListener('click',e=>{const vote=e.target.closest('[data-vote]');if(vote){e.stopPropagation();submitPollVote(vote)}});$('profileBack').addEventListener('click',()=>{location.href='contestants.html'});
      $('profileShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href)}catch{}$('profileShare').textContent='Ссылка скопирована'});
     }else{
      $('resultCount').textContent='Профиль не найден';
