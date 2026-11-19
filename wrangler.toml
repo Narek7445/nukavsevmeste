@@ -1,0 +1,17 @@
+name = "nukavsevmeste-api"
+main = "worker/src/index.js"
+compatibility_date = "2026-11-19"
+
+[vars]
+# Set this to the exact public GitHub Pages origin, e.g. https://narek7445.github.io
+ALLOWED_ORIGIN = "https://narek7445.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nukavsevmeste-db"
+database_id = "REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID"
+migrations_dir = "worker"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "nukavsevmeste-images"
