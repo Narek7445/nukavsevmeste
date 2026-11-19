@@ -143,10 +143,11 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 async function init(){
   try{
    const API_BASE='https://nukavsevmeste-api.nukavsevmeste.workers.dev';
-   let d=[];
-   try{const apiResponse=await fetch(API_BASE+'/api/participants',{cache:'no-store'});if(apiResponse.ok){const apiData=await apiResponse.json();if(Array.isArray(apiData.participants)&&apiData.participants.length)d=apiData.participants}}catch(err){console.warn('Cloudflare API unavailable; using JSON backup',err)}
-   if(!d.length){const r=await fetch('./participants.json',{cache:'default',priority:'high'});if(!r.ok)throw new Error('HTTP '+r.status);d=await r.json()}
-   if(!Array.isArray(d))throw new Error('Некорректный формат архива');
+   const apiResponse=await fetch(API_BASE+'/api/participants',{cache:'no-store'});
+   if(!apiResponse.ok)throw new Error('HTTP '+apiResponse.status);
+   const apiData=await apiResponse.json();
+   if(!Array.isArray(apiData.participants))throw new Error('Некорректный формат архива');
+   const d=apiData.participants;
    entries=d;
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
    const seasons=[...new Set(entries.map(e=>Number(e.season)).filter(Number.isFinite))].sort((a,b)=>a-b);
