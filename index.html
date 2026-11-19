@@ -382,11 +382,30 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .song-quiz-controls{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:clamp(4px,1.5vw,16px)}.song-quiz-prompt{margin-bottom:16px;color:#593d68;font:700 19px var(--serif)}.song-quiz-controls label{margin:10px 0 6px;color:#725a79}.song-quiz-controls select{width:100%;border:1px solid #d8c5dd;border-radius:11px;background:#fff;color:#422b50;padding:13px 42px 13px 14px;font:600 14px var(--sans)}.song-quiz-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.song-quiz-check,.song-quiz-next{border:0;border-radius:99px;padding:12px 16px;font:800 10px var(--sans);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:transform .2s,filter .2s}.song-quiz-check{background:linear-gradient(100deg,#8c4d91,#bd5b80);color:white;box-shadow:0 5px 15px #8c4d9138}.song-quiz-next{background:#fff;color:#684276;border:1px solid #d9c5df}.song-quiz-check:hover,.song-quiz-next:hover{transform:translateY(-2px);filter:brightness(1.04)}.song-quiz-feedback{min-height:42px;margin:14px 0 0;color:#66536d;font:600 13px/1.5 var(--sans)}.song-quiz-feedback.correct{color:#24734c}.song-quiz-feedback.wrong{color:#a33d50}
 @media(max-width:700px){.song-quiz-heading{align-items:flex-start}.song-quiz-mark{width:48px;height:48px;font-size:32px;border-radius:15px}.song-quiz-card{grid-template-columns:1fr;gap:12px}.song-quiz-photo{min-height:0;aspect-ratio:16/9}.song-quiz-controls{padding:8px 3px 4px}.song-quiz-actions>*{flex:1 1 100%}}
 
+
+/* All participants directory */
+.participants-directory{margin:0 0 28px;padding:clamp(18px,2.5vw,28px);border:1px solid #ffffff80;border-radius:24px 24px 24px 8px;background:linear-gradient(125deg,rgba(255,250,242,.97),rgba(245,235,249,.96) 58%,rgba(233,247,242,.96));box-shadow:0 18px 42px #100b2a38;color:#432747}
+.participants-directory-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px}
+.participants-directory-kicker{color:#a15a8b;font:800 10px var(--sans);letter-spacing:.18em;text-transform:uppercase}
+.participants-directory-head h2{margin:5px 0 7px;font:700 clamp(25px,3vw,36px)/1.05 var(--serif);color:#432747}
+.participants-directory-head p{margin:0;color:#76677b;font:14px/1.5 var(--sans)}
+.participants-directory-count{flex:none;padding:9px 13px;border-radius:99px;background:#8d5593;color:#fff;font:700 11px var(--sans);white-space:nowrap}
+.participants-directory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:14px}
+.participant-directory-card{min-width:0;padding:0;overflow:hidden;border:1px solid #e5d5e6;border-radius:15px;background:#fffdf9;color:#432747;text-align:left;cursor:pointer;box-shadow:0 5px 14px #39214a12;transition:transform .2s,box-shadow .2s,border-color .2s}
+.participant-directory-card:hover{transform:translateY(-4px);border-color:#bd8bb9;box-shadow:0 12px 22px #39214a20}
+.participant-directory-photo{display:grid;place-items:center;aspect-ratio:4/3;overflow:hidden;background:linear-gradient(135deg,#e8b2a1,#a58bc0 55%,#81b7ac)}
+.participant-directory-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.participant-directory-placeholder{color:#fff8ed;font:500 38px var(--serif);text-transform:uppercase}
+.participant-directory-name{display:block;padding:11px 12px 13px;font:700 14px/1.3 var(--sans);overflow-wrap:anywhere}
+.participants-directory-empty{grid-column:1/-1;padding:25px;border:1px dashed #cbb5cb;border-radius:12px;color:#76677b;text-align:center;font:15px var(--sans)}
+@media(max-width:600px){.participants-directory{padding:15px;border-radius:18px 18px 18px 7px}.participants-directory-head{align-items:flex-start;flex-direction:column;gap:10px}.participants-directory-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.participant-directory-name{font-size:13px;padding:10px}.participants-directory-count{align-self:flex-start}}
+
 </style>
 </head>
 <body>
 <main class="page" id="archivePage">
-  <header class="topline"><div class="topline-brand"><div class="eyebrow">Ну-ка, все вместе!</div><h1>Стобальные выступления</h1></div><div class="site-menu-wrap"><button class="site-menu-toggle" id="siteMenuToggle" type="button" aria-label="Открыть меню" title="Меню" aria-expanded="false" aria-controls="siteMenu"><span class="menu-lines" aria-hidden="true"><i></i><i></i><i></i></span></button><nav class="site-menu" id="siteMenu" aria-label="Разделы сайта" hidden><a href="#archivePage">Главная</a><a href="#searchInput">Поиск выступлений</a><a href="#seasonDirectory">Архив по сезонам</a><a href="#record-holder">Рекордсмен</a><a href="#statistics">Статистика</a><a href="#songQuiz">Угадай песню и сезон</a></nav></div></header>
+  <header class="topline"><div class="topline-brand"><div class="eyebrow">Ну-ка, все вместе!</div><h1>Стобальные выступления</h1></div><div class="site-menu-wrap"><button class="site-menu-toggle" id="siteMenuToggle" type="button" aria-label="Открыть меню" title="Меню" aria-expanded="false" aria-controls="siteMenu"><span class="menu-lines" aria-hidden="true"><i></i><i></i><i></i></span></button><nav class="site-menu" id="siteMenu" aria-label="Разделы сайта" hidden><a href="#archivePage">Главная</a><a href="#participantsDirectory">Участники</a><a href="#searchInput">Поиск выступлений</a><a href="#seasonDirectory">Архив по сезонам</a><a href="#record-holder">Рекордсмен</a><a href="#statistics">Статистика</a><a href="#songQuiz">Угадай песню и сезон</a></nav></div></header>
+  <section class="participants-directory" id="participantsDirectory" aria-labelledby="participantsDirectoryTitle"><div class="participants-directory-head"><div><div class="participants-directory-kicker">Голоса и лица шоу</div><h2 id="participantsDirectoryTitle">Участники</h2><p>Все участники архива в одном месте. Нажмите на карточку, чтобы открыть профиль.</p></div><span class="participants-directory-count" id="participantsDirectoryCount">0 участников</span></div><div class="participants-directory-grid" id="participantsDirectoryGrid"></div></section>
   <section class="controls" aria-label="Поиск и фильтр выступлений">
     <div class="search-wrap"><input id="searchInput" type="search" autocomplete="off" placeholder="Поиск по участнику или песне..." aria-label="Поиск по участнику или песне" aria-autocomplete="list" aria-controls="searchHints"><div class="search-hints" id="searchHints" role="listbox" hidden></div></div>
     <div class="select-wrap"><select id="seasonFilter" aria-label="Выбрать сезон"><option value="all">Все сезоны</option></select></div>
@@ -494,11 +513,34 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  function matchesSearch(e,q){if(!q)return true;const hay=[e.firstName,e.lastName,e.firstName+' '+e.lastName,e.lastName+' '+e.firstName,e.song,e.season,e.episode].join(' ').toLocaleLowerCase('ru');return hay.includes(q.toLocaleLowerCase('ru'))}
  function filteredEntries(){const season=$('seasonFilter').value,q=$('searchInput').value.trim();return sortEntries(entries.filter(e=>(season==='all'||Number(e.season)===Number(season))&&matchesSearch(e,q)))}
  function renderHints(){const q=$('searchInput').value.trim().toLocaleLowerCase('ru'),box=$('searchHints');if(!q){box.hidden=true;box.innerHTML='';return}const found=sortEntries(entries.filter(e=>matchesSearch(e,q))).slice(0,7);box.innerHTML=found.map(e=>'<button type="button" class="search-hint" role="option" data-hint="'+escapeHTML(e.id)+'">'+escapeHTML(e.firstName+' '+e.lastName)+'<small>«'+escapeHTML(e.song)+'» · '+escapeHTML(e.season)+' сезон</small></button>').join('');box.hidden=!found.length}
+
+ function renderParticipantsDirectory(){
+  const groups=new Map();
+  entries.forEach(e=>{
+   const name=String((e.firstName||'')+' '+(e.lastName||'')).trim();
+   if(!name)return;
+   const key=name.toLocaleLowerCase('ru');
+   if(!groups.has(key))groups.set(key,{name,photos:[],first:e});
+   const person=groups.get(key);
+   const photos=[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''].filter(Boolean);
+   photos.forEach(src=>{if(!person.photos.includes(src))person.photos.push(src)});
+   if(!person.first.photo&&e.photo)person.first=e;
+  });
+  const people=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+  $('participantsDirectoryCount').textContent=people.length+' '+(people.length%10===1&&people.length%100!==11?'участник':people.length%10>=2&&people.length%10<=4&&(people.length%100<12||people.length%100>14)?'участника':'участников');
+  $('participantsDirectoryGrid').innerHTML=people.length?people.map(person=>{
+   const photo=person.photos[0]||'';
+   const initials=person.name.split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('');
+   return '<button type="button" class="participant-directory-card" data-profile="'+escapeHTML(person.name)+'" aria-label="Открыть профиль: '+escapeHTML(person.name)+'"><span class="participant-directory-photo">'+(photo?'<img src="'+photo+'" alt="Фото: '+escapeHTML(person.name)+'" loading="lazy">':'<span class="participant-directory-placeholder">'+escapeHTML(initials)+'</span>')+'</span><span class="participant-directory-name">'+escapeHTML(person.name)+'</span></button>';
+  }).join(''):'<div class="participants-directory-empty">Участники появятся здесь после добавления выступлений в архив.</div>';
+ }
+
  function render(){
   const filter=$('seasonFilter').value;
   const seasons=[...new Set(entries.map(e=>Number(e.season)))].sort((a,b)=>a-b);
   const old=filter;
   $('seasonFilter').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('');
+  renderParticipantsDirectory();
   $('seasonDirectoryGrid').innerHTML=seasons.map(s=>{const list=entries.filter(e=>Number(e.season)===s),people=new Set(list.map(e=>(e.firstName+' '+e.lastName).trim().toLocaleLowerCase('ru')));return '<button class="season-tile" type="button" data-season="'+s+'"><strong>'+s+' сезон</strong><small>'+list.length+' выступлений · '+people.size+' участников</small></button>'}).join('');
   const seasonCounts=seasons.map(s=>({season:s,count:entries.filter(e=>Number(e.season)===s).length}));
   const maxSeasonCount=Math.max(1,...seasonCounts.map(x=>x.count));
