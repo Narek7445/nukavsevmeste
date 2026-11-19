@@ -489,6 +489,19 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .feedback-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden}
 @media(max-width:600px){.feedback-head{display:block}.feedback-form{grid-template-columns:1fr}.feedback-form .feedback-message,.feedback-form .feedback-submit{grid-column:auto}}
 
+
+/* Unified full-bleed participant photo cards */
+.participants-directory-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px}
+.participant-directory-card{position:relative;display:block;aspect-ratio:4/5;padding:0;border:0;border-radius:15px;overflow:hidden;background:#30243b;box-shadow:0 7px 20px rgba(24,12,35,.2)}
+.participant-directory-card:hover{transform:translateY(-5px);box-shadow:0 15px 30px rgba(24,12,35,.32)}
+.participant-directory-photo{position:absolute;inset:0;display:block;width:100%;height:100%;aspect-ratio:auto;overflow:hidden;background:linear-gradient(135deg,#e8b2a1,#a58bc0 55%,#81b7ac)}
+.participant-directory-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;transition:transform .45s ease}
+.participant-directory-card:hover .participant-directory-photo img{transform:scale(1.045)}
+.participant-directory-photo:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(180deg,transparent 0%,rgba(12,8,20,.18) 28%,rgba(12,8,20,.82) 100%);pointer-events:none}
+.participant-directory-name{position:absolute;z-index:1;left:0;right:0;bottom:0;display:block;padding:34px 13px 14px;color:#fff;text-align:left;font:800 15px/1.25 var(--sans);letter-spacing:.01em;text-shadow:0 2px 8px rgba(0,0,0,.65);overflow-wrap:anywhere;background:none}
+.participant-directory-placeholder{position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(38px,5vw,58px)}
+@media(max-width:600px){.participants-directory-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.participant-directory-card{aspect-ratio:4/5}.participant-directory-name{padding:30px 10px 12px;font-size:13px}}
+
 </style>
 </head>
 <body>
@@ -672,7 +685,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   $('participantsDirectoryGrid').innerHTML=people.length?people.map(person=>{
    const photo=person.photos[0]||'';
    const initials=person.name.split(/\s+/).slice(0,2).map(x=>x[0]||'').join('');
-   return '<button type="button" class="participant-directory-card" data-profile="'+escapeHTML(person.name)+'" aria-label="Открыть профиль: '+escapeHTML(person.name)+'"><span class="participant-directory-photo">'+(photo?'<img src="'+photo+'" alt="Фото: '+escapeHTML(person.name)+'" loading="lazy">':'<span class="participant-directory-placeholder">'+escapeHTML(initials)+'</span>')+'</span><span class="participant-directory-name">'+escapeHTML(person.name)+'</span></button>';
+   return '<button type="button" class="participant-directory-card" data-profile="'+escapeHTML(person.name)+'" aria-label="Открыть профиль: '+escapeHTML(person.name)+'"><span class="participant-directory-photo">'+(photo?'<img src="'+photo+'" alt="Фото: '+escapeHTML(person.name)+'" loading="lazy">':'<span class="participant-directory-placeholder">'+escapeHTML(initials)+'</span>')+'<span class="participant-directory-name">'+escapeHTML(person.name)+'</span></span></button>';
   }).join(''):'<div class="participants-directory-empty">Участники появятся здесь после добавления выступлений в архив.</div>';
  }
 
