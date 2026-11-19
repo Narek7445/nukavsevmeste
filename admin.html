@@ -98,7 +98,7 @@ input,textarea{width:100%;border:1px solid #d9ccc3;border-radius:5px;background:
     </div>
     <div class="section-label" style="margin-top:25px">02 · Выступление</div><div class="grid">
      <div class="field"><label for="season">Сезон</label><input id="season" type="text" maxlength="30" required placeholder="Например, 7 или Битва сезонов"></div>
-     <div class="field"><label for="episode">Выпуск</label><input id="episode" maxlength="30" list="episodeOptions" placeholder="5, 1 полуфинал, 2 полуфинал, Полуфинал, Финал"><datalist id="episodeOptions"><option value="1 полуфинал"><option value="2 полуфинал"><option value="Полуфинал"><option value="Финал"></datalist></div>
+     <div class="field"><label for="episode">Выпуск</label><input id="episode" maxlength="30" list="episodeOptions" placeholder="5, Первый полуфинал, Второй полуфинал, Полуфинал, Финал"><datalist id="episodeOptions"><option value="Первый полуфинал"><option value="Второй полуфинал"><option value="Полуфинал"><option value="Финал"></datalist></div>
      <div class="field full"><label for="song">Песня</label><input id="song" maxlength="120" required placeholder="Название песни"></div>
      <div class="field full"><label for="score">Баллы жюри</label><div class="score-row"><input id="score" type="number" min="1" max="100" value="100" required><div class="presets"><button type="button" data-score="100" class="active">100</button><button type="button" data-score="99">99</button><button type="button" data-score="98">98</button></div></div><span class="help">Выступления со 100 баллами автоматически попадут в главную подборку.</span></div>
      <div class="field full"><label for="comment">Комментарий <span class="help">необязательно</span></label><textarea id="comment" maxlength="500" placeholder="Краткое примечание..."></textarea></div>
@@ -128,7 +128,7 @@ function render(){
  $('hundredCount').textContent=entries.filter(e=>Number(e.score)===100).length.toLocaleString('ru-RU');
  const q=$('search').value.trim().toLocaleLowerCase('ru'),filterSeason=select.value;
  const seasonOrder=(a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')};
- const episodeOrder=(a,b)=>{const na=Number(a),nb=Number(b);if(Number.isFinite(na)&&Number.isFinite(nb))return na-nb;if(Number.isFinite(na))return -1;if(Number.isFinite(nb))return 1;const rank=x=>/^1\s*полуфинал$/i.test(x)?9000:/^2\s*полуфинал$/i.test(x)?9100:/^полуфинал$/i.test(x)?9200:/^финал$/i.test(x)?10000:5000;return rank(a)-rank(b)||a.localeCompare(b,'ru')};
+ const episodeOrder=(a,b)=>{const na=Number(a),nb=Number(b);if(Number.isFinite(na)&&Number.isFinite(nb))return na-nb;if(Number.isFinite(na))return -1;if(Number.isFinite(nb))return 1;const rank=x=>/^(1\s*полуфинал|первый полуфинал)$/i.test(x)?9000:/^(2\s*полуфинал|второй полуфинал)$/i.test(x)?9100:/^полуфинал$/i.test(x)?9200:/^финал$/i.test(x)?10000:5000;return rank(a)-rank(b)||a.localeCompare(b,'ru')};
  const sections=[...groups.entries()].filter(([season])=>!filterSeason||season===filterSeason).sort((a,b)=>seasonOrder(a[0],b[0])).map(([season,episodes])=>{
   const blocks=[...episodes.entries()].map(([episode,items])=>[episode,items.filter(e=>(e._name+' '+[e.song,e.season,e.episode].join(' ')).toLocaleLowerCase('ru').includes(q))]).filter(([,items])=>items.length).sort((a,b)=>episodeOrder(a[0],b[0]));
   if(!blocks.length)return '';
