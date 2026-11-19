@@ -113,8 +113,45 @@ async function readPolls(env, ids) {
   return polls;
 }
 
+
+async function ensureCommunityTables(env) {
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_visits (id INTEGER PRIMARY KEY AUTOINCREMENT, visitor_id TEXT NOT NULL, country TEXT NOT NULL, page TEXT NOT NULL, created_at TEXT NOT NULL)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL DEFAULT '', message TEXT NOT NULL, created_at TEXT NOT NULL)").run();
+}
+
 async function handleApi(request, env, url) {
   const path = url.pathname;
+
+
+  if (request.method === "POST" && path === "/api/analytics/view") {
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "Некорректный JSON." }, 400); }
+    const visitorId = String(body?.visitorId || "");
+    const page = String(body?.page || "/").slice(0, 120);
+    if (!/^[a-zA-Z0-9._-]{16,100}$/.test(visitorId) || !/^\/[a-zA-Z0-9._/-]*$/.test(page)) return json({ error: "Некорректные данные посещения." }, 400);
+    try {
+      await ensureCommunityTables(env);
+      const country = String(request.cf?.country || "XX").toUpperCase().slice(0, 2);
+      await env.DB.prepare("INSERT INTO site_visits (visitor_id, country, page, created_at) VALUES (?, ?, ?, ?)")
+        .bind(visitorId, country, page, new Date().toISOString()).run();
+      return json({ ok: true }, 200, { "cache-control": "no-store" });
+    } catch (error) { return json({ error: "Не удалось записать посещение.", detail: error.message }, 500); }
+  }
+
+  if (request.method === "POST" && path === "/api/feedback") {
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "Некорректный JSON." }, 400); }
+    const name = String(body?.name || "").trim().slice(0, 80);
+    const message = String(body?.message || "").trim();
+    if (String(body?.website || "").trim()) return json({ ok: true });
+    if (message.length < 5 || message.length > 2000) return json({ error: "Отзыв должен содержать от 5 до 2000 символов." }, 400);
+    try {
+      await ensureCommunityTables(env);
+      await env.DB.prepare("INSERT INTO site_feedback (name, message, created_at) VALUES (?, ?, ?)")
+        .bind(name, message, new Date().toISOString()).run();
+      return json({ ok: true });
+    } catch (error) { return json({ error: "Не удалось отправить отзыв.", detail: error.message }, 500); }
+  }
 
   if (request.method === "GET" && path === "/api/participants") {
     try {
@@ -161,6 +198,28 @@ async function handleApi(request, env, url) {
 
   if (path.startsWith("/api/admin/")) {
     if (!(await isAdmin(request, env))) return json({ error: "Требуется авторизация администратора." }, 401);
+
+
+    if (request.method === "GET" && path === "/api/admin/analytics") {
+      try {
+        await ensureCommunityTables(env);
+        const [summary, countries, pages, recent] = await Promise.all([
+          env.DB.prepare("SELECT COUNT(*) AS views, COUNT(DISTINCT visitor_id) AS visitors FROM site_visits").first(),
+          env.DB.prepare("SELECT country, COUNT(*) AS views, COUNT(DISTINCT visitor_id) AS visitors FROM site_visits GROUP BY country ORDER BY views DESC LIMIT 30").all(),
+          env.DB.prepare("SELECT page, COUNT(*) AS views FROM site_visits GROUP BY page ORDER BY views DESC LIMIT 10").all(),
+          env.DB.prepare("SELECT COUNT(*) AS views FROM site_visits WHERE created_at >= ?").bind(new Date(Date.now()-30*86400000).toISOString()).first()
+        ]);
+        return json({ summary, countries: countries.results || [], pages: pages.results || [], last30Days: Number(recent?.views || 0) }, 200, { "cache-control": "no-store" });
+      } catch (error) { return json({ error: "Не удалось загрузить аналитику.", detail: error.message }, 500); }
+    }
+
+    if (request.method === "GET" && path === "/api/admin/feedback") {
+      try {
+        await ensureCommunityTables(env);
+        const result = await env.DB.prepare("SELECT id, name, message, created_at FROM site_feedback ORDER BY id DESC LIMIT 300").all();
+        return json({ feedback: result.results || [] }, 200, { "cache-control": "no-store" });
+      } catch (error) { return json({ error: "Не удалось загрузить отзывы.", detail: error.message }, 500); }
+    }
 
     if (request.method === "GET" && path === "/api/admin/participants") {
       try { return json({ participants: await readArchive(env) }, 200, { "cache-control": "no-store" }); }
