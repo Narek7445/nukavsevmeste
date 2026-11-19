@@ -253,13 +253,14 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  async function save(){const snapshot=JSON.stringify(entries);try{const db=await openDB();await new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(JSON.parse(snapshot),KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Сохранение отменено'))});db.close();return}catch(err){console.error('IndexedDB save failed',err);try{localStorage.setItem(KEY,snapshot)}catch(storageError){throw new Error('Не удалось сохранить архив даже после сжатия фото. Освободите место в браузере или удалите старые записи.') }}}
  function escapeHTML(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
  let activeIndex=0;
+ function sortEntries(list){return list.slice().sort((a,b)=>Number(b.season)-Number(a.season)||String(a.lastName||'').localeCompare(String(b.lastName||''),'ru')||String(a.firstName||'').localeCompare(String(b.firstName||''),'ru')||String(a.id||'').localeCompare(String(b.id||'')));}
  function render(){
   const filter=$('seasonFilter').value;
   const seasons=[...new Set(entries.map(e=>Number(e.season)))].sort((a,b)=>a-b);
   const old=filter;
   $('seasonFilter').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('');
   $('seasonFilter').value=old==='all'||seasons.includes(Number(old))?old:'all';
-  const shown=entries.filter(e=>$('seasonFilter').value==='all'||Number(e.season)===Number($('seasonFilter').value)).sort((a,b)=>Number(b.season)-Number(a.season)||a.lastName.localeCompare(b.lastName,'ru'));
+  const shown=sortEntries(entries.filter(e=>$('seasonFilter').value==='all'||Number(e.season)===Number($('seasonFilter').value)));
   if(activeIndex>=shown.length)activeIndex=0;
   $('count').textContent=shown.length+' '+(shown.length===1?'участник':shown.length>=2&&shown.length<=4?'участника':'участников');
   $('entries').innerHTML=shown.length?(()=>{const e=shown[activeIndex];return '<article class="entry"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(e.firstName+' '+e.lastName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(e.firstName)+' '+escapeHTML(e.lastName)+'</h2><p class="meta">'+escapeHTML(e.season)+' сезон</p><p class="song">'+'«'+escapeHTML(e.song.replace(/^«\s*|\s*»$/g,''))+'»</p>'+(e.comment?'<p class="participant-comment">'+escapeHTML(e.comment).replace(/\n/g,'<br>')+'</p>':'')+'</div></article>'})():'<div class="empty">Пока нет добавленных выступлений</div>';
@@ -277,7 +278,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  function reset(){ $('entryForm').reset();$('editId').value='';photoData='';$('saveButton').textContent='Добавить выступление';$('formError').textContent=''}
  function notify(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',2300)}
  $('seasonFilter').addEventListener('change',()=>{activeIndex=0;render()});
- function moveSlide(direction){const shown=entries.filter(e=>$('seasonFilter').value==='all'||Number(e.season)===Number($('seasonFilter').value)).sort((a,b)=>Number(b.season)-Number(a.season)||a.lastName.localeCompare(b.lastName,'ru'));if(!shown.length)return;activeIndex=(activeIndex+direction+shown.length)%shown.length;render()}
+ function moveSlide(direction){const shown=sortEntries(entries.filter(e=>$('seasonFilter').value==='all'||Number(e.season)===Number($('seasonFilter').value)));if(!shown.length)return;activeIndex=(activeIndex+direction+shown.length)%shown.length;render()}
  $('prevEntry').addEventListener('click',()=>moveSlide(-1));
  $('nextEntry').addEventListener('click',()=>moveSlide(1));
  $('carouselDots').addEventListener('click',e=>{const dot=e.target.closest('[data-slide]');if(dot){activeIndex=Number(dot.dataset.slide);render()}});
@@ -291,7 +292,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>close(b.dataset.close)));
  document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)close(o.id)}));
  document.addEventListener('keydown',e=>{if(e.code==='Numpad8'&&!e.repeat){e.preventDefault();if($('adminOverlay').classList.contains('open'))return;open('loginOverlay');setTimeout(()=>$('password').focus(),30)}if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(o=>close(o.id))});
- load().then(data=>{entries=Array.isArray(data)?data:[];render()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить архив')});
+ load().then(data=>{entries=Array.isArray(data)?data:[];activeIndex=0;render()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить архив')});
 })();
 </script>
 </body></html>
