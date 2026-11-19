@@ -535,7 +535,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  let entries=[], photoData=[], toastTimer, dashboardRendered=false, searchRenderTimer;
  const DB_NAME='nuka-vse-vmeste-db-v1', DB_STORE='archive';
  function openDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(new Error('IndexedDB недоступен'));return}const request=indexedDB.open(DB_NAME,1);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains(DB_STORE))request.result.createObjectStore(DB_STORE)};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error||new Error('Не удалось открыть базу данных'))})}
- async function load(){const response=await fetch('./participants.json',{cache:'default'});if(!response.ok)throw new Error('Не удалось загрузить общий файл participants.json');const data=await response.json();if(!Array.isArray(data))throw new Error('Файл participants.json должен содержать массив участников');return data}
+ async function load(){const response=await fetch('./participants.json',{cache:'default',priority:'high'});if(!response.ok)throw new Error('Не удалось загрузить общий файл participants.json');const data=await response.json();if(!Array.isArray(data))throw new Error('Файл participants.json должен содержать массив участников');return data}
  let hasUnsavedChanges=false;
  async function save(){hasUnsavedChanges=true}
  async function readLegacyArchive(){let old=[];try{const db=await openDB();old=await new Promise((resolve,reject)=>{const request=db.transaction(DB_STORE,'readonly').objectStore(DB_STORE).get(KEY);request.onsuccess=()=>resolve(request.result||[]);request.onerror=()=>reject(request.error)});db.close()}catch(err){console.warn('Legacy IndexedDB archive unavailable',err)}if(!Array.isArray(old)||!old.length){try{const parsed=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(parsed))old=parsed}catch{}}return Array.isArray(old)?old:[]}
@@ -554,10 +554,10 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
    const name=String((e.firstName||'')+' '+(e.lastName||'')).trim();
    if(!name)return;
    const key=name.toLocaleLowerCase('ru');
-   if(!groups.has(key))groups.set(key,{name,photos:[],first:e});
+   if(!groups.has(key))groups.set(key,{name,photos:[],photoSet:new Set(),first:e});
    const person=groups.get(key);
-   const photos=[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''].filter(Boolean);
-   photos.forEach(src=>{if(!person.photos.includes(src))person.photos.push(src)});
+   const photos=[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''];
+   photos.forEach(src=>{if(src&&!person.photoSet.has(src)){person.photoSet.add(src);person.photos.push(src)}});
    if(!person.first.photo&&e.photo)person.first=e;
   });
   const people=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru'));
@@ -572,13 +572,24 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  function render(){
   const filter=$('seasonFilter').value;
   if(!dashboardRendered){
-  const hundredEntries=entries.filter(e=>(Number(e.score)||100)===100);
-  const seasons=[...new Set(hundredEntries.map(e=>Number(e.season)))].sort((a,b)=>a-b);
+  const hundredEntries=[];
+  const seasonCountsMap=new Map();
+  const seasonPeopleMap=new Map();
+  entries.forEach(e=>{
+   if((Number(e.score)||100)!==100)return;
+   hundredEntries.push(e);
+   const season=Number(e.season);
+   if(!Number.isFinite(season))return;
+   seasonCountsMap.set(season,(seasonCountsMap.get(season)||0)+1);
+   if(!seasonPeopleMap.has(season))seasonPeopleMap.set(season,new Set());
+   seasonPeopleMap.get(season).add((e.firstName+' '+e.lastName).trim().toLocaleLowerCase('ru'));
+  });
+  const seasons=[...seasonCountsMap.keys()].sort((a,b)=>a-b);
   const old=filter;
   $('seasonFilter').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('');
   renderParticipantsDirectory();
-  $('seasonDirectoryGrid').innerHTML=seasons.map(s=>{const list=hundredEntries.filter(e=>Number(e.season)===s),people=new Set(list.map(e=>(e.firstName+' '+e.lastName).trim().toLocaleLowerCase('ru')));return '<button class="season-tile" type="button" data-season="'+s+'"><strong>'+s+' сезон</strong><small>'+list.length+' выступлений · '+people.size+' участников</small></button>'}).join('');
-  const seasonCounts=seasons.map(s=>({season:s,count:hundredEntries.filter(e=>Number(e.season)===s).length}));
+  $('seasonDirectoryGrid').innerHTML=seasons.map(s=>'<button class="season-tile" type="button" data-season="'+s+'"><strong>'+s+' сезон</strong><small>'+seasonCountsMap.get(s)+' выступлений · '+seasonPeopleMap.get(s).size+' участников</small></button>').join('');
+  const seasonCounts=seasons.map(s=>({season:s,count:seasonCountsMap.get(s)}));
   const maxSeasonCount=Math.max(1,...seasonCounts.map(x=>x.count));
   $('statisticsTotal').textContent=hundredEntries.length.toLocaleString('ru-RU');
   $('hundredPointsChart').style.setProperty('--season-count',Math.max(1,seasonCounts.length));
