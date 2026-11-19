@@ -194,6 +194,16 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .entry:hover{box-shadow:0 25px 42px rgba(20,12,35,.32),0 7px 0 rgba(69,43,83,.2)!important}
 @media(max-width:760px){.photo{height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:16/9}.photo:after{inset:7px!important}}
 
+
+/* Keep long participant names inside the information panel */
+.entry-info{min-width:0;width:100%;max-width:100%;overflow:hidden}
+.person{display:block;max-width:100%;min-width:0;font-size:clamp(24px,2.8vw,40px);line-height:1.12;white-space:normal;overflow-wrap:anywhere;word-break:normal;hyphens:auto}
+.song,.participant-comment{max-width:100%;overflow-wrap:anywhere;word-break:normal}
+@media(max-width:760px){
+ .entry-info{padding-left:12px;padding-right:12px}
+ .person{font-size:clamp(25px,7vw,36px);line-height:1.12}
+}
+
 </style>
 </head>
 <body>
