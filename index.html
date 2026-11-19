@@ -301,6 +301,12 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  .select-wrap{grid-column:1;grid-row:2}
  .count{grid-column:1;grid-row:3;justify-self:start}
 }
+
+/* Keep search suggestions above the carousel and its participant card */
+.controls{position:relative;z-index:40}
+.search-wrap{position:relative;z-index:41}
+.search-hints{position:absolute;z-index:42}
+.carousel-shell{position:relative;z-index:1}
 </style>
 </head>
 <body>
