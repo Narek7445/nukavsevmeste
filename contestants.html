@@ -56,6 +56,32 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 @media(max-width:800px){.hero{grid-template-columns:1fr}.hero-stamp{display:none}.grid{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}}
 @media(max-width:480px){.page{padding-top:17px}.nav{padding-bottom:15px}.brand{font-size:13px}.brand-mark{width:34px;height:34px}.nav-link{font-size:11px;padding:9px 11px}.hero{padding-top:42px}.stats{gap:7px}.stat{padding:13px 11px;min-height:83px;border-radius:13px}.stat span{font-size:9px;letter-spacing:.04em}.toolbar{grid-template-columns:1fr;padding:9px}.toolbar input{grid-column:auto}.card{grid-template-columns:112px minmax(0,1fr);gap:12px;padding:9px;border-radius:16px}.photo,.initials{min-height:160px}.name{font-size:18px}.song{font-size:14px}.tag{font-size:9px;padding:5px 7px}.comment{font-size:11px}.footer{flex-direction:column}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+.profile-view{padding:10px 0 25px}
+.profile-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 25px}
+.profile-back,.profile-share{border:1px solid #b8cbc3;border-radius:99px;padding:11px 16px;background:#fffefa;color:var(--teal);font:700 12px 'DM Sans',sans-serif;cursor:pointer}
+.profile-share{background:var(--teal);color:#fff;border-color:var(--teal)}
+.profile-hero{display:grid;grid-template-columns:minmax(220px,.72fr) minmax(0,1.28fr);gap:clamp(22px,5vw,60px);align-items:center;padding:clamp(16px,3vw,30px);border-radius:24px;background:linear-gradient(120deg,#fffefa,#e8f0e9);border:1px solid var(--line);box-shadow:0 12px 32px #183d3410}
+.profile-main-photo{width:100%;aspect-ratio:4/5;max-height:480px;border-radius:18px;overflow:hidden;background:linear-gradient(145deg,#c8ddd2,#f0c9a8);display:grid;place-items:center;color:#fff;font:800 64px 'Manrope',sans-serif}
+.profile-main-photo img{width:100%;height:100%;object-fit:cover}
+.profile-kicker{color:var(--teal);font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.profile-name{font:800 clamp(34px,6vw,66px)/1 'Manrope',sans-serif;letter-spacing:-.07em;margin:13px 0 18px;overflow-wrap:anywhere}
+.profile-stats{display:flex;gap:9px;flex-wrap:wrap}
+.profile-stat{padding:9px 13px;border-radius:99px;background:#dcebe3;color:var(--teal);font-size:12px;font-weight:800}
+.profile-comment{margin:20px 0 0;color:#617274;line-height:1.65}
+.profile-detail{margin-top:24px;padding:22px;border:1px solid var(--line);border-radius:18px;background:#fffefa}
+.profile-detail h2,.profile-gallery-title,.profile-performances-title{margin:0 0 14px;font:800 22px 'Manrope',sans-serif;letter-spacing:-.04em}
+.profile-detail ul{margin:0;padding-left:20px;color:#5c6d6d;line-height:1.8}
+.profile-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px;margin-top:14px}
+.profile-gallery img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;background:#e4ece5}
+.profile-performances{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px}
+.profile-performance{padding:18px;border-radius:16px;background:#fffefa;border:1px solid var(--line)}
+.profile-performance-top{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.profile-performance .tag{display:inline-block}
+.profile-performance .song{font-size:18px}
+.profile-performance .episode{margin-top:9px}
+.profile-performance .comment{margin-bottom:0}
+@media(max-width:720px){.profile-hero{grid-template-columns:1fr}.profile-main-photo{aspect-ratio:4/3;max-height:360px}.profile-performances{grid-template-columns:1fr}.profile-nav{align-items:stretch}.profile-back,.profile-share{font-size:11px;padding:10px 12px}}
 </style>
 </head>
 <body>
@@ -66,6 +92,10 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
  <section class="toolbar" aria-label="Фильтры"><input id="search" type="search" placeholder="Имя конкурсанта или название песни..." aria-label="Поиск"><select id="season"><option value="all">Все сезоны</option></select><select id="score"><option value="all">Любое количество баллов</option><option value="100">100 баллов</option><option value="other">Меньше 100 баллов</option></select></section>
  <div class="result-line"><span id="resultCount">Загружаем архив…</span><span>АРХИВ ШОУ</span></div>
  <section class="grid" id="grid" aria-live="polite"></section>
+ <section id="profileView" class="profile-view" hidden>
+  <div class="profile-nav"><button class="profile-back" id="profileBack" type="button">← Ко всем конкурсантам</button><button class="profile-share" id="profileShare" type="button">Поделиться профилем ↗</button></div>
+  <div id="profileContent"></div>
+ </section>
  <footer class="footer"><span>Ну-ка, все вместе! · Архив конкурсантов</span><span>Каждый сезон · Каждое выступление</span></footer>
 </main>
 <script>
@@ -79,10 +109,26 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
   const q=$('search').value.trim().toLocaleLowerCase('ru'),season=$('season').value,scoreFilter=$('score').value;
   const list=entries.filter(e=>(season==='all'||Number(e.season)===Number(season))&&(scoreFilter==='all'||(scoreFilter==='100'?score(e)===100:score(e)<100))&&(!q||(name(e)+' '+String(e.song||'')+' '+String(e.season||'')+' '+String(e.episode||'')).toLocaleLowerCase('ru').includes(q))).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a)||name(a).localeCompare(name(b),'ru'));
   $('resultCount').innerHTML='<strong>'+list.length+'</strong> '+(list.length%10===1&&list.length%100!==11?'выступление':list.length%10>=2&&list.length%10<=4&&(list.length%100<12||list.length%100>14)?'выступления':'выступлений');
-  $('grid').innerHTML=list.length?list.map(e=>{const n=name(e),p=photoFor(e),ep=e.episode?(/^(полуфинал|финал)$/i.test(String(e.episode))?safe(e.episode):'Выпуск '+safe(e.episode)):'Выпуск не указан';return '<article class="card"><div class="photo">'+(p?'<img src="'+p+'" alt="Фото: '+safe(n)+'" loading="lazy">':'<div class="initials">'+safe(n.split(/\s+/).slice(0,2).map(x=>x[0]||'').join(''))+'</div>')+'</div><div class="card-body"><div class="card-top"><span class="tag">'+safe(e.season)+' сезон</span><span class="tag score">'+score(e)+' баллов</span></div><h2 class="name">'+safe(n)+'</h2><p class="song">«'+safe(e.song||'Песня не указана')+'»</p><div class="episode">'+ep+'</div>'+(e.comment?'<p class="comment">'+safe(e.comment)+'</p>':'')+'</div></article>'}).join(''):'<div class="empty">По вашему запросу ничего не найдено. Попробуйте изменить фильтры.</div>';
+  $('grid').innerHTML=list.length?list.map(e=>{const n=name(e),p=photoFor(e),ep=e.episode?(/^(полуфинал|финал)$/i.test(String(e.episode))?safe(e.episode):'Выпуск '+safe(e.episode)):'Выпуск не указан';return '<article class="card" role="link" tabindex="0" data-profile="'+safe(n)+'" aria-label="Открыть профиль '+safe(n)+'"><div class="photo">'+(p?'<img src="'+p+'" alt="Фото: '+safe(n)+'" loading="lazy">':'<div class="initials">'+safe(n.split(/\s+/).slice(0,2).map(x=>x[0]||'').join(''))+'</div>')+'</div><div class="card-body"><div class="card-top"><span class="tag">'+safe(e.season)+' сезон</span><span class="tag score">'+score(e)+' баллов</span></div><h2 class="name">'+safe(n)+'</h2><p class="song">«'+safe(e.song||'Песня не указана')+'»</p><div class="episode">'+ep+'</div>'+(e.comment?'<p class="comment">'+safe(e.comment)+'</p>':'')+'</div></article>'}).join(''):'<div class="empty">По вашему запросу ничего не найдено. Попробуйте изменить фильтры.</div>';
  }
- async function init(){try{const r=await fetch('./participants.json?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(!Array.isArray(d))throw new Error('Некорректный формат архива');entries=d;const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));const seasons=[...new Set(entries.map(e=>Number(e.season)).filter(Number.isFinite))].sort((a,b)=>a-b);$('performanceCount').textContent=entries.length.toLocaleString('ru-RU');$('peopleCount').textContent=people.size.toLocaleString('ru-RU');$('seasonCount').textContent=seasons.length;$('season').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('');render()}catch(err){console.error(err);$('resultCount').textContent='Не удалось загрузить общий архив';$('grid').innerHTML='<div class="empty">Не удалось загрузить participants.json. Обновите страницу позже.</div>'}}
- ['search','season','score'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));init();
+ 
+ function renderProfile(personName){
+  const key=String(personName||'').trim().toLocaleLowerCase('ru');
+  const list=entries.filter(e=>name(e).toLocaleLowerCase('ru')===key).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a));
+  if(!list.length)return false;
+  const first=list.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||list[0];
+  const photos=[...new Set(list.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||'']).filter(Boolean))];
+  const records=list.find(e=>Array.isArray(e.records)&&e.records.length)?.records||[];
+  const facts=list.find(e=>Array.isArray(e.facts)&&e.facts.length)?.facts||[];
+  const seasons=[...new Set(list.map(e=>Number(e.season)).filter(Number.isFinite))];
+  const countWord=list.length%10===1&&list.length%100!==11?'выступление':list.length%10>=2&&list.length%10<=4&&(list.length%100<12||list.length%100>14)?'выступления':'выступлений';
+  $('profileContent').innerHTML='<section class="profile-hero"><div class="profile-main-photo">'+(photos.length?'<img src="'+photos[0]+'" alt="Фото: '+safe(name(first))+'">':safe(name(first).split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('')) )+'</div><div><div class="profile-kicker">Участник шоу · Ну-ка, все вместе!</div><h1 class="profile-name">'+safe(name(first))+'</h1><div class="profile-stats"><span class="profile-stat">'+list.length+' '+countWord+'</span><span class="profile-stat">'+seasons.length+' '+(seasons.length===1?'сезон':'сезона')+'</span><span class="profile-stat">'+list.filter(e=>score(e)===100).length+' стобалльных</span></div>'+(list.find(e=>e.comment)?.comment?'<p class="profile-comment">'+safe(list.find(e=>e.comment).comment)+'</p>':'')+(records.length?'<section class="profile-detail"><h2>Рекорды</h2><ul>'+records.map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'')+(facts.length?'<section class="profile-detail"><h2>Интересные факты</h2><ul>'+facts.map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'')+'</div></section>'+(photos.length>1?'<section class="profile-detail"><h2 class="profile-gallery-title">Фотогалерея</h2><div class="profile-gallery">'+photos.map((src,i)=>'<img src="'+src+'" alt="Фотография '+(i+1)+'" loading="lazy">').join('')+'</div></section>':'')+'<section class="profile-detail"><h2 class="profile-performances-title">Выступления участника</h2><div class="profile-performances">'+list.map(e=>'<article class="profile-performance"><div class="profile-performance-top"><span class="tag">'+safe(e.season)+' сезон</span><span class="tag score">'+score(e)+' баллов</span></div><p class="song">«'+safe(String(e.song||'Песня не указана').replace(/^«\\s*|\\s*»$/g,''))+'»</p><div class="episode">'+(e.episode?(/^(полуфинал|финал)$/i.test(String(e.episode))?safe(e.episode):'Выпуск '+safe(e.episode)):'Выпуск не указан')+'</div>'+(e.comment?'<p class="comment">'+safe(e.comment)+'</p>':'')+'</article>').join('')+'</div></section>';
+  document.title=name(first)+' — Все конкурсанты';
+  return true;
+ }
+ function openProfile(personName){location.href='contestants.html?profile='+encodeURIComponent(personName)}
+async function init(){try{const r=await fetch('./participants.json?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(!Array.isArray(d))throw new Error('Некорректный формат архива');entries=d;const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));const seasons=[...new Set(entries.map(e=>Number(e.season)).filter(Number.isFinite))].sort((a,b)=>a-b);$('performanceCount').textContent=entries.length.toLocaleString('ru-RU');$('peopleCount').textContent=people.size.toLocaleString('ru-RU');$('seasonCount').textContent=seasons.length;$('season').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('');render();const requested=new URLSearchParams(location.search).get('profile');if(requested&&renderProfile(requested)){$('hero').hidden=true;$('performanceCount').closest('.stats').hidden=true;$('search').closest('.toolbar').hidden=true;$('resultCount').hidden=true;$('grid').hidden=true;$('profileView').hidden=false;$('profileBack').addEventListener('click',()=>location.href='contestants.html');$('profileShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href)}catch{}$('profileShare').textContent='Ссылка скопирована'})}}catch(err){console.error(err);$('resultCount').textContent='Не удалось загрузить общий архив';$('grid').innerHTML='<div class="empty">Не удалось загрузить participants.json. Обновите страницу позже.</div>'}}
+ ['search','season','score'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('grid').addEventListener('click',e=>{const card=e.target.closest('[data-profile]');if(card)openProfile(card.dataset.profile)});$('grid').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-profile]')){e.preventDefault();openProfile(e.target.dataset.profile)}});init();
 })();
 </script>
 </body>
