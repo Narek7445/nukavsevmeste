@@ -792,7 +792,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>close(b.dataset.close)));
  document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)close(o.id)}));
  document.addEventListener('keydown',e=>{if(e.code==='Numpad8'&&!e.repeat){e.preventDefault();location.href='admin.html'}if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(o=>close(o.id))});
- load().then(async data=>{entries=Array.isArray(data)?data:[];activeIndex=0;await loadPolls();render();startSongQuiz();renderParticipantPage()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить данные из Cloudflare D1')});
+ load().then(async data=>{entries=Array.isArray(data)?data.filter(item=>!item.hidden):[];activeIndex=0;await loadPolls();render();startSongQuiz();renderParticipantPage()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить данные из Cloudflare D1')});
 })();
 </script>
 
