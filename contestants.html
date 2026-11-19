@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f2f3ec">
+<title>Все конкурсанты — Ну-ка, все вместе!</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+:root{--ink:#182e32;--muted:#718184;--paper:#f2f3ec;--card:#fffefa;--teal:#176b68;--orange:#f08a4b;--line:#dce4dc;--lime:#dce8a6}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(circle at 90% 5%,#d4e4d4 0,transparent 30%),radial-gradient(circle at 0 65%,#f4dfc9 0,transparent 28%)}
+a{color:inherit}
+.page{width:min(1320px,100%);margin:auto;padding:25px clamp(16px,4vw,58px) 70px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:5px 0 22px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:800;letter-spacing:-.04em}
+.brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--teal);color:#fff;font-size:20px}
+.nav-link{font-size:13px;font-weight:700;text-decoration:none;color:var(--teal);padding:10px 15px;border:1px solid #b8cbc3;border-radius:99px;transition:.2s}
+.nav-link:hover{background:var(--teal);color:#fff}
+.hero{padding:clamp(42px,8vw,92px) 0 36px;display:grid;grid-template-columns:1.2fr .8fr;align-items:end;gap:30px}
+.kicker{display:flex;align-items:center;gap:9px;color:var(--teal);font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.kicker:before{content:"";width:26px;height:3px;background:var(--orange);border-radius:9px}
+h1{max-width:800px;margin:17px 0 15px;font:800 clamp(42px,7vw,88px)/.98 'Manrope',sans-serif;letter-spacing:-.075em}
+.hero p{max-width:620px;margin:0;color:#667779;font-size:clamp(14px,1.6vw,17px);line-height:1.65}
+.hero-stamp{justify-self:end;align-self:center;width:min(210px,100%);aspect-ratio:1;border:1px solid #b8cbc3;border-radius:50%;display:grid;place-items:center;text-align:center;transform:rotate(8deg);color:var(--teal);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;position:relative}
+.hero-stamp:before{content:"♪";position:absolute;inset:13px;border:1px dashed #a7c0b5;border-radius:50%;display:grid;place-items:center;font:90px Georgia,serif;color:#e78a50;opacity:.85}
+.hero-stamp span{position:relative;background:var(--paper);padding:7px 10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:5px 0 30px}
+.stat{padding:18px 20px;border-radius:16px;background:var(--teal);color:white;min-height:95px;position:relative;overflow:hidden}
+.stat:nth-child(2){background:#e9a16f;color:#392b24}.stat:nth-child(3){background:#dce8a6;color:#263a33}
+.stat strong{display:block;font:800 clamp(25px,4vw,38px)/1 'Manrope',sans-serif;letter-spacing:-.05em}
+.stat span{display:block;margin-top:8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
+.toolbar{display:grid;grid-template-columns:minmax(180px,1fr) 190px 190px;gap:10px;padding:13px;border:1px solid var(--line);border-radius:18px;background:#ffffffb8;backdrop-filter:blur(10px);margin-bottom:18px}
+input,select{width:100%;min-width:0;border:1px solid #d8e1d9;border-radius:12px;background:#fffefa;padding:14px 15px;color:var(--ink);font:600 14px 'DM Sans',sans-serif;outline:none}
+input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b}
+.result-line{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 2px 16px;color:var(--muted);font-size:12px;font-weight:700}
+.result-line strong{color:var(--teal)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.card{min-width:0;display:grid;grid-template-columns: minmax(125px,.72fr) minmax(0,1.28fr);gap:17px;padding:12px;border:1px solid #dce4dc;border-radius:20px;background:var(--card);box-shadow:0 8px 22px #183d3410;transition:transform .22s,box-shadow .22s}
+.card:hover{transform:translateY(-3px);box-shadow:0 14px 28px #183d341b}
+.photo{min-height:190px;overflow:hidden;border-radius:13px;background:linear-gradient(145deg,#c8ddd2,#f0c9a8);position:relative}
+.photo img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover}
+.initials{height:100%;min-height:190px;display:grid;place-items:center;color:#fff;font:800 44px 'Manrope',sans-serif}
+.card-body{min-width:0;padding:8px 5px 8px 0;display:flex;flex-direction:column;align-items:flex-start}
+.card-top{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.tag{padding:6px 9px;border-radius:99px;background:#e8f0e9;color:var(--teal);font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.tag.score{background:#fff0e4;color:#a94f22}
+.name{margin:0 0 9px;font:800 clamp(19px,2vw,25px)/1.08 'Manrope',sans-serif;letter-spacing:-.045em;overflow-wrap:anywhere}
+.song{margin:0;color:#5c6d6d;font:600 16px/1.35 Georgia,serif;overflow-wrap:anywhere}
+.episode{margin-top:8px;color:#889493;font-size:11px;font-weight:700}
+.comment{margin-top:auto;padding-top:12px;color:#718184;font-size:12px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.empty{grid-column:1/-1;padding:60px 20px;text-align:center;border:1px dashed #b8cbc3;border-radius:18px;color:var(--muted);background:#fff9}
+.footer{display:flex;justify-content:space-between;gap:15px;margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:#8a9692;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+@media(max-width:800px){.hero{grid-template-columns:1fr}.hero-stamp{display:none}.grid{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}}
+@media(max-width:480px){.page{padding-top:17px}.nav{padding-bottom:15px}.brand{font-size:13px}.brand-mark{width:34px;height:34px}.nav-link{font-size:11px;padding:9px 11px}.hero{padding-top:42px}.stats{gap:7px}.stat{padding:13px 11px;min-height:83px;border-radius:13px}.stat span{font-size:9px;letter-spacing:.04em}.toolbar{grid-template-columns:1fr;padding:9px}.toolbar input{grid-column:auto}.card{grid-template-columns:112px minmax(0,1fr);gap:12px;padding:9px;border-radius:16px}.photo,.initials{min-height:160px}.name{font-size:18px}.song{font-size:14px}.tag{font-size:9px;padding:5px 7px}.comment{font-size:11px}.footer{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="page">
+ <nav class="nav"><a class="brand" href="index.html"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><a class="nav-link" href="index.html">← Стобалльные выступления</a></nav>
+ <header class="hero"><div><div class="kicker">Большая сцена · Большие голоса</div><h1>Все<br>конкурсанты.</h1><p>Отдельный архив выступлений и участников шоу. Здесь собраны все записи из общей базы — не только номера со ста баллами.</p></div><div class="hero-stamp"><span>Каждый голос<br>имеет значение</span></div></header>
+ <section class="stats" aria-label="Статистика архива"><div class="stat"><strong id="performanceCount">—</strong><span>выступлений</span></div><div class="stat"><strong id="peopleCount">—</strong><span>конкурсантов</span></div><div class="stat"><strong id="seasonCount">—</strong><span>сезонов</span></div></section>
+ <section class="toolbar" aria-label="Фильтры"><input id="search" type="search" placeholder="Имя конкурсанта или название песни..." aria-label="Поиск"><select id="season"><option value="all">Все сезоны</option></select><select id="score"><option value="all">Любое количество баллов</option><option value="100">100 баллов</option><option value="other">Меньше 100 баллов</option></select></section>
+ <div class="result-line"><span id="resultCount">Загружаем архив…</span><span>АРХИВ ШОУ</span></div>
+ <section class="grid" id="grid" aria-live="polite"></section>
+ <footer class="footer"><span>Ну-ка, все вместе! · Архив конкурсантов</span><span>Каждый сезон · Каждое выступление</span></footer>
+</main>
+<script>
+(()=>{
+ const $=id=>document.getElementById(id);let entries=[];
+ const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
+ const score=e=>Number(e.score)||100;
+ const photoFor=e=>{if(e.photo)return e.photo;if(Array.isArray(e.photos)&&e.photos.length)return e.photos[0];const key=name(e).toLocaleLowerCase('ru');const found=entries.find(x=>name(x).toLocaleLowerCase('ru')===key&&(x.photo||(Array.isArray(x.photos)&&x.photos.length)));return found?(found.photo||(found.photos||[])[0]):''};
+ function render(){
+  const q=$('search').value.trim().toLocaleLowerCase('ru'),season=$('season').value,scoreFilter=$('score').value;
+  const list=entries.filter(e=>(season==='all'||Number(e.season)===Number(season))&&(scoreFilter==='all'||(scoreFilter==='100'?score(e)===100:score(e)<100))&&(!q||(name(e)+' '+String(e.song||'')+' '+String(e.season||'')+' '+String(e.episode||'')).toLocaleLowerCase('ru').includes(q))).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a)||name(a).localeCompare(name(b),'ru'));
+  $('resultCount').innerHTML='<strong>'+list.length+'</strong> '+(list.length%10===1&&list.length%100!==11?'выступление':list.length%10>=2&&list.length%10<=4&&(list.length%100<12||list.length%100>14)?'выступления':'выступлений');
+  $('grid').innerHTML=list.length?list.map(e=>{const n=name(e),p=photoFor(e),ep=e.episode?(/^(полуфинал|финал)$/i.test(String(e.episode))?safe(e.episode):'Выпуск '+safe(e.episode)):'Выпуск не указан';return '<article class="card"><div class="photo">'+(p?'<img src="'+p+'" alt="Фото: '+safe(n)+'" loading="lazy">':'<div class="initials">'+safe(n.split(/\s+/).slice(0,2).map(x=>x[0]||'').join(''))+'</div>')+'</div><div class="card-body"><div class="card-top"><span class="tag">'+safe(e.season)+' сезон</span><span class="tag score">'+score(e)+' баллов</span></div><h2 class="name">'+safe(n)+'</h2><p class="song">«'+safe(e.song||'Песня не указана')+'»</p><div class="episode">'+ep+'</div>'+(e.comment?'<p class="comment">'+safe(e.comment)+'</p>':'')+'</div></article>'}).join(''):'<div class="empty">По вашему запросу ничего не найдено. Попробуйте изменить фильтры.</div>';
+ }
+ async function init(){try{const r=await fetch('./participants.json?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(!Array.isArray(d))throw new Error('Некорректный формат архива');entries=d;const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));const seasons=[...new Set(entries.map(e=>Number(e.season)).filter(Number.isFinite))].sort((a,b)=>a-b);$('performanceCount').textContent=entries.length.toLocaleString('ru-RU');$('peopleCount').textContent=people.size.toLocaleString('ru-RU');$('seasonCount').textContent=seasons.length;$('season').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('');render()}catch(err){console.error(err);$('resultCount').textContent='Не удалось загрузить общий архив';$('grid').innerHTML='<div class="empty">Не удалось загрузить participants.json. Обновите страницу позже.</div>'}}
+ ['search','season','score'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));init();
+})();
+</script>
+</body>
+</html>
