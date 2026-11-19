@@ -97,6 +97,7 @@ function validateArchive(value) {
       return "В архиве обнаружено повторное выступление: один участник не может иметь одинаковую песню в том же сезоне и выпуске.";
     }
     seenPerformances.add(duplicateKey);
+    if (item.videoUrl) { try { const videoUrl = new URL(String(item.videoUrl)); if (videoUrl.protocol !== "https:" || !["youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be", "www.youtube-nocookie.com"].includes(videoUrl.hostname) || String(item.videoUrl).length > 500) return "Ссылка на выступление должна вести на YouTube и использовать HTTPS."; } catch { return "Укажите корректную ссылку на видео выступления."; } }
     if (typeof item.photo === "string" && item.photo.startsWith("data:")) return "Фотографии нужно загрузить в хранилище R2, а не сохранять в JSON.";
     if (Array.isArray(item.photos) && item.photos.some(photo => typeof photo === "string" && photo.startsWith("data:"))) {
       return "Фотографии нужно загрузить в хранилище R2, а не сохранять в JSON.";
