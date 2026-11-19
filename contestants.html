@@ -104,6 +104,27 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 .audience-poll-track{height:7px;border-radius:99px;background:#e0e8e1;overflow:hidden}
 .audience-poll-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#e9a16a,#25847b)}
 .audience-poll-total{margin-top:8px;color:#718184;font-size:10px}
+
+/* Профиль: просмотр фотографий и акцент на результатах */
+.profile-main-photo{cursor:zoom-in;position:relative}
+.profile-main-photo:after{content:"↗";position:absolute;right:13px;bottom:13px;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:#102f2dbb;color:#fff;font:700 18px 'DM Sans',sans-serif;opacity:0;transition:opacity .2s}
+.profile-main-photo:hover:after{opacity:1}
+.profile-gallery img{cursor:zoom-in;transition:transform .2s,box-shadow .2s}
+.profile-gallery img:hover{transform:translateY(-3px);box-shadow:0 9px 22px #183d3426}
+.profile-performance-top{align-items:center;gap:10px;margin-bottom:16px}
+.profile-performance .tag{padding:9px 13px;font-size:13px;letter-spacing:.04em}
+.profile-performance .tag:first-child{background:#e7efe7;color:#176b68;font-size:15px}
+.profile-performance .tag.score{width:66px;height:66px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex-direction:column;border-radius:50%;border:3px solid #d9a36f;background:radial-gradient(circle,#fffaf0 0%,#f5dfc7 100%);color:#8f4b25;font:800 22px 'Manrope',sans-serif;letter-spacing:-.06em;box-shadow:0 3px 10px #8f4b2518}
+.profile-performance .tag.score:after{content:"БАЛЛОВ";font:800 7px 'DM Sans',sans-serif;letter-spacing:.08em;margin-top:1px}
+.photo-lightbox{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:28px;background:rgba(8,20,21,.94);backdrop-filter:blur(10px)}
+.photo-lightbox.open{display:flex}
+.photo-lightbox img{max-width:min(88vw,1100px);max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 70px #0008}
+.lightbox-close,.lightbox-arrow{position:absolute;display:grid;place-items:center;border:1px solid #ffffff55;background:#ffffff18;color:#fff;border-radius:50%;cursor:pointer;backdrop-filter:blur(8px)}
+.lightbox-close{top:20px;right:22px;width:44px;height:44px;font-size:26px}
+.lightbox-arrow{top:50%;transform:translateY(-50%);width:50px;height:50px;font-size:30px}
+.lightbox-prev{left:22px}.lightbox-next{right:22px}
+.lightbox-count{position:absolute;bottom:19px;left:50%;transform:translateX(-50%);color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em}
+@media(max-width:600px){.photo-lightbox{padding:15px}.photo-lightbox img{max-width:90vw;max-height:75vh}.lightbox-prev{left:9px}.lightbox-next{right:9px}.lightbox-arrow{width:40px;height:40px}.profile-performance .tag.score{width:60px;height:60px}}
 </style>
 </head>
 <body>
@@ -164,16 +185,33 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
   const list=entries.filter(e=>name(e).toLocaleLowerCase('ru')===key).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a));
   if(!list.length)return false;
   const first=list.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||list[0];
-  const photos=[...new Set(list.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||'']).filter(Boolean))];
+  const photos=[...new Set(list.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||'']).filter(Boolean))];lightboxPhotos=photos;
   const records=list.find(e=>Array.isArray(e.records)&&e.records.length)?.records||[];
   const facts=list.find(e=>Array.isArray(e.facts)&&e.facts.length)?.facts||[];
   const seasons=[...new Set(list.map(e=>String(e.season||'').trim()).filter(Boolean))];
   const countWord=list.length%10===1&&list.length%100!==11?'выступление':list.length%10>=2&&list.length%10<=4&&(list.length%100<12||list.length%100>14)?'выступления':'выступлений';
-  $('profileContent').innerHTML='<section class="profile-hero"><div class="profile-main-photo">'+(photos.length?'<img src="'+photos[0]+'" alt="Фото: '+safe(name(first))+'" fetchpriority="high" decoding="async">':safe(name(first).split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('')) )+'</div><div><div class="profile-kicker">Участник шоу · Ну-ка, все вместе!</div><h1 class="profile-name">'+safe(name(first))+'</h1><div class="profile-stats"><span class="profile-stat">'+list.length+' '+countWord+'</span><span class="profile-stat">'+seasons.length+' '+(seasons.length===1?'сезон':'сезона')+'</span><span class="profile-stat">'+list.filter(e=>score(e)===100).length+' стобалльных</span></div>'+(list.find(e=>e.comment)?.comment?'<p class="profile-comment">'+safe(list.find(e=>e.comment).comment)+'</p>':'')+(records.length?'<section class="profile-detail"><h2>Рекорды</h2><ul>'+records.map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'')+(facts.length?'<section class="profile-detail"><h2>Интересные факты</h2><ul>'+facts.map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'')+'</div></section>'+(photos.length>1?'<section class="profile-detail"><h2 class="profile-gallery-title">Фотогалерея</h2><div class="profile-gallery">'+photos.map((src,i)=>'<img src="'+src+'" alt="Фотография '+(i+1)+'" loading="lazy" decoding="async">').join('')+'</div></section>':'')+'<section class="profile-detail"><h2 class="profile-performances-title">Выступления участника</h2><div class="profile-performances">'+list.map(e=>'<article class="profile-performance"><div class="profile-performance-top"><span class="tag">'+safe(e.season)+(Number.isFinite(Number(e.season))?' сезон':'')+'</span><span class="tag score">'+score(e)+' баллов</span></div><p class="song">«'+safe(String(e.song||'Песня не указана').replace(/^«\\s*|\\s*»$/g,''))+'»</p><div class="episode">'+(e.episode?(/^(полуфинал|финал)$/i.test(String(e.episode))?safe(e.episode):'Выпуск '+safe(e.episode)):'Выпуск не указан')+'</div>'+(e.comment?'<p class="comment">'+safe(e.comment)+'</p>':'')+pollMarkup(e)+'</article>').join('')+'</div></section>';
+  $('profileContent').innerHTML='<section class="profile-hero"><div class="profile-main-photo">'+(photos.length?'<img data-photo-index="0" src="'+photos[0]+'" alt="Фото: '+safe(name(first))+'" fetchpriority="high" decoding="async">':safe(name(first).split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('')) )+'</div><div><div class="profile-kicker">Участник шоу · Ну-ка, все вместе!</div><h1 class="profile-name">'+safe(name(first))+'</h1><div class="profile-stats"><span class="profile-stat">'+list.length+' '+countWord+'</span><span class="profile-stat">'+seasons.length+' '+(seasons.length===1?'сезон':'сезона')+'</span><span class="profile-stat">'+list.filter(e=>score(e)===100).length+' стобалльных</span></div>'+(list.find(e=>e.comment)?.comment?'<p class="profile-comment">'+safe(list.find(e=>e.comment).comment)+'</p>':'')+(records.length?'<section class="profile-detail"><h2>Рекорды</h2><ul>'+records.map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'')+(facts.length?'<section class="profile-detail"><h2>Интересные факты</h2><ul>'+facts.map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'')+'</div></section>'+(photos.length>1?'<section class="profile-detail"><h2 class="profile-gallery-title">Фотогалерея</h2><div class="profile-gallery">'+photos.map((src,i)=>'<img data-photo-index="'+i+'" src="'+src+'" alt="Фотография '+(i+1)+'" loading="lazy" decoding="async">').join('')+'</div></section>':'')+'<section class="profile-detail"><h2 class="profile-performances-title">Выступления участника</h2><div class="profile-performances">'+list.map(e=>'<article class="profile-performance"><div class="profile-performance-top"><span class="tag">'+safe(e.season)+(Number.isFinite(Number(e.season))?' сезон':'')+'</span><span class="tag score">'+score(e)+' баллов</span></div><p class="song">«'+safe(String(e.song||'Песня не указана').replace(/^«\\s*|\\s*»$/g,''))+'»</p><div class="episode">'+(e.episode?(/^(полуфинал|финал)$/i.test(String(e.episode))?safe(e.episode):'Выпуск '+safe(e.episode)):'Выпуск не указан')+'</div>'+(e.comment?'<p class="comment">'+safe(e.comment)+'</p>':'')+pollMarkup(e)+'</article>').join('')+'</div></section>';
   document.title=name(first)+' — Все конкурсанты';
   return true;
  }
- function openProfile(personName){const target=new URL('contestants.html',location.href);target.searchParams.set('profile',personName);location.assign(target.href)}
+ 
+ let lightboxPhotos=[],lightboxIndex=0;
+ function showLightbox(index){
+  if(!lightboxPhotos.length)return;
+  lightboxIndex=(index+lightboxPhotos.length)%lightboxPhotos.length;
+  const box=document.getElementById('photoLightbox');
+  box.querySelector('img').src=lightboxPhotos[lightboxIndex];
+  box.querySelector('.lightbox-count').textContent=(lightboxIndex+1)+' / '+lightboxPhotos.length;
+  box.classList.add('open');box.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+ }
+ function closeLightbox(){const box=document.getElementById('photoLightbox');box.classList.remove('open');box.setAttribute('aria-hidden','true');document.body.style.overflow=''}
+ function moveLightbox(delta){showLightbox(lightboxIndex+delta)}
+ const lightbox=document.createElement('div');lightbox.id='photoLightbox';lightbox.className='photo-lightbox';lightbox.setAttribute('aria-hidden','true');
+ lightbox.innerHTML='<button class="lightbox-close" type="button" aria-label="Закрыть">×</button><button class="lightbox-arrow lightbox-prev" type="button" aria-label="Предыдущее фото">‹</button><img alt="Увеличенная фотография"><button class="lightbox-arrow lightbox-next" type="button" aria-label="Следующее фото">›</button><div class="lightbox-count"></div>';
+ document.body.appendChild(lightbox);
+ lightbox.addEventListener('click',e=>{if(e.target===lightbox||e.target.closest('.lightbox-close'))closeLightbox();else if(e.target.closest('.lightbox-prev'))moveLightbox(-1);else if(e.target.closest('.lightbox-next'))moveLightbox(1)});
+ document.addEventListener('keydown',e=>{if(!lightbox.classList.contains('open'))return;if(e.key==='Escape')closeLightbox();if(e.key==='ArrowLeft')moveLightbox(-1);if(e.key==='ArrowRight')moveLightbox(1)});
+function openProfile(personName){const target=new URL('contestants.html',location.href);target.searchParams.set('profile',personName);location.assign(target.href)}
 async function init(){
   try{
    const API_BASE='https://nukavsevmeste-api.nukavsevmeste.workers.dev';
@@ -199,7 +237,7 @@ async function init(){
      document.querySelector('.result-line').style.display='none';
      $('grid').style.display='none';
      $('profileView').removeAttribute('hidden');
-     $('profileContent').addEventListener('click',e=>{const vote=e.target.closest('[data-vote]');if(vote){e.stopPropagation();submitPollVote(vote)}});$('profileBack').addEventListener('click',()=>{location.href='contestants.html'});
+     $('profileContent').addEventListener('click',e=>{const photo=e.target.closest('[data-photo-index]');if(photo){showLightbox(Number(photo.dataset.photoIndex));return}const vote=e.target.closest('[data-vote]');if(vote){e.stopPropagation();submitPollVote(vote)}});$('profileBack').addEventListener('click',()=>{location.href='contestants.html'});
      $('profileShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href)}catch{}$('profileShare').textContent='Ссылка скопирована'});
     }else{
      $('resultCount').textContent='Профиль не найден';
