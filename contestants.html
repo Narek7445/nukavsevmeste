@@ -289,7 +289,7 @@ async function init(){
    const apiData=await apiResponse.json();
    if(!Array.isArray(apiData.participants))throw new Error('Некорректный формат архива');
    const d=apiData.participants;
-   entries=d;await loadPolls();
+   entries=d.filter(item=>!item.hidden);await loadPolls();
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
    const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
    $('performanceCount').textContent=entries.length.toLocaleString('ru-RU');
