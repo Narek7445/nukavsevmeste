@@ -12,7 +12,7 @@ function corsHeaders(request, env) {
   const origin = request.headers.get("Origin");
   const allowed = env.ALLOWED_ORIGIN || "*";
   const headers = {
-    "access-control-allow-methods": "GET,POST,PUT,OPTIONS",
+    "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
     "access-control-allow-headers": "Content-Type,Authorization",
     "access-control-max-age": "86400",
     "vary": "Origin"
@@ -211,6 +211,17 @@ async function handleApi(request, env, url) {
         ]);
         return json({ summary, countries: countries.results || [], pages: pages.results || [], last30Days: Number(recent?.views || 0) }, 200, { "cache-control": "no-store" });
       } catch (error) { return json({ error: "Не удалось загрузить аналитику.", detail: error.message }, 500); }
+    }
+
+    if (request.method === "DELETE" && path.startsWith("/api/admin/feedback/")) {
+      const idText = path.slice("/api/admin/feedback/".length);
+      if (!/^\d{1,12}$/.test(idText) || Number(idText) < 1) return json({ error: "Некорректный ID отзыва." }, 400);
+      try {
+        await ensureCommunityTables(env);
+        const result = await env.DB.prepare("DELETE FROM site_feedback WHERE id = ?").bind(Number(idText)).run();
+        if (!(result.meta?.changes > 0)) return json({ error: "Отзыв уже удалён или не найден." }, 404);
+        return json({ ok: true, deletedId: Number(idText) }, 200, { "cache-control": "no-store" });
+      } catch (error) { return json({ error: "Не удалось удалить отзыв.", detail: error.message }, 500); }
     }
 
     if (request.method === "GET" && path === "/api/admin/feedback") {
