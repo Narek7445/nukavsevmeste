@@ -664,10 +664,10 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   const image=quizPhotoFor(next);
   photo.innerHTML=image?'<img src="'+escapeHTML(image)+'" alt="Фотография участника — угадай выступление">':'<div class="song-quiz-placeholder">♪</div>';
   const seasons=[...new Set(pool.map(e=>Number(e.season)))].sort((a,b)=>a-b);
-  const songs=[...new Set(pool.map(e=>String(e.song).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ru'));
   seasonSelect.innerHTML='<option value="">Выбери сезон</option>'+seasons.map(x=>'<option value="'+x+'">'+x+' сезон</option>').join('');
-  songSelect.innerHTML='<option value="">Выбери песню</option>'+songs.map(x=>'<option value="'+escapeHTML(x)+'">«'+escapeHTML(x)+'»</option>').join('');
-  seasonSelect.value='';songSelect.value='';feedback.className='song-quiz-feedback';feedback.textContent='Выбери сезон и песню, затем проверь себя.';$('songQuizCheck').disabled=false;
+  songSelect.innerHTML='<option value="">Сначала выбери сезон</option>';
+  songSelect.disabled=true;
+  seasonSelect.value='';songSelect.value='';feedback.className='song-quiz-feedback';feedback.textContent='Сначала выбери сезон — затем появятся песни только из него.';$('songQuizCheck').disabled=false;
  }
  function checkSongQuiz(){
   if(!currentQuizEntry)return;
@@ -691,6 +691,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  $('profileBack').addEventListener('click',()=>{location.hash=''});$('recordHolderBack').addEventListener('click',()=>{location.hash=''});$('recordHolderContent').addEventListener('click',e=>{const b=e.target.closest('[data-holder-profile]');if(b)openParticipant(b.dataset.holderProfile)});$('participantPage').addEventListener('click',e=>{const vote=e.target.closest('[data-vote]');if(vote){e.stopPropagation();submitPollVote(vote);return}const b=e.target.closest('[data-season]');if(b)location.hash='season='+b.dataset.season});$('participantPage').addEventListener('click',e=>{const tile=e.target.closest('[data-gallery-photo]');if(!tile)return;const img=tile.querySelector('img');if(!img)return;$('galleryLightboxImage').src=img.src;open('galleryLightbox')});$('seasonBack').addEventListener('click',()=>{location.hash=''});$('seasonShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);notify('Ссылка на сезон скопирована')}catch{notify('Скопируйте ссылку из адресной строки браузера')}});$('seasonPage').addEventListener('click',e=>{const p=e.target.closest('[data-profile]');if(p)openParticipant(p.dataset.profile)});$('seasonDirectoryGrid').addEventListener('click',e=>{const b=e.target.closest('[data-season]');if(b)location.hash='season='+b.dataset.season});
  $('profileShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);notify('Ссылка на профиль скопирована')}catch{notify('Скопируйте ссылку из адресной строки браузера')}});
  window.addEventListener('hashchange',renderParticipantPage);
+ $('songQuizSeason').addEventListener('change',()=>{const selectedSeason=$('songQuizSeason').value,songSelect=$('songQuizSong');songSelect.value='';if(!selectedSeason){songSelect.innerHTML='<option value="">Сначала выбери сезон</option>';songSelect.disabled=true;return}const seasonSongs=[...new Set(entries.filter(e=>e&&String(e.season)===String(selectedSeason)&&e.song).map(e=>String(e.song).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ru'));songSelect.innerHTML='<option value="">Выбери песню</option>'+seasonSongs.map(x=>'<option value="'+escapeHTML(x)+'">«'+escapeHTML(x)+'»</option>').join('');songSelect.disabled=seasonSongs.length===0;if(!seasonSongs.length)songSelect.innerHTML='<option value="">В этом сезоне нет песен</option>'});
  $('prevEntry').addEventListener('click',()=>moveSlide(-1));
  $('nextEntry').addEventListener('click',()=>moveSlide(1));
  $('carouselDots').addEventListener('click',e=>{const dot=e.target.closest('[data-slide]');if(dot){activeIndex=Number(dot.dataset.slide);render()}});
