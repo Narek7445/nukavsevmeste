@@ -179,14 +179,14 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 
 
 /* Single-card infinite carousel */
-.carousel-shell{position:relative;padding:0 58px 50px}
+.carousel-shell{position:relative;width:100%;padding:0 0 50px}
 .entries{display:block;min-height:clamp(320px,38vw,490px)}
 .entry{animation:slideIn .42s cubic-bezier(.2,.75,.25,1) both;min-height:clamp(320px,38vw,490px)}
 .carousel-arrow{position:absolute;z-index:4;top:calc(50% - 25px);width:48px;height:48px;display:grid;place-items:center;border:1px solid #ffffffb8;border-radius:50%;background:linear-gradient(135deg,#fff8ed,#f3e5f3);color:#603b70;font:400 35px/1 Georgia,serif;cursor:pointer;box-shadow:0 8px 24px #160c2c45;transition:transform .2s,box-shadow .2s,background .2s}
 .carousel-arrow:hover{transform:scale(1.1);background:linear-gradient(135deg,#ffe2a6,#efb5ce);box-shadow:0 12px 30px #160c2c65}
 .carousel-arrow:active{transform:scale(.94)}
-.carousel-arrow.prev{left:0}.carousel-arrow.next{right:0}
-.carousel-bottom{position:absolute;left:58px;right:58px;bottom:10px;display:flex;align-items:center;justify-content:center;gap:18px}
+.carousel-arrow.prev{left:-24px}.carousel-arrow.next{right:-24px}
+.carousel-bottom{position:absolute;left:0;right:0;bottom:10px;display:flex;align-items:center;justify-content:center;gap:18px}
 .carousel-dots{display:flex;align-items:center;justify-content:center;gap:9px;max-width:min(70%,600px);overflow:hidden}
 .carousel-dot{width:8px;height:8px;padding:0;border:0;border-radius:99px;background:#ffffff70;cursor:pointer;transition:width .25s,background .25s,transform .25s}
 .carousel-dot:hover{background:#ffe0a0;transform:scale(1.2)}
