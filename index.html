@@ -547,7 +547,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   $('seasonDirectoryGrid').innerHTML=seasons.map(s=>{const list=hundredEntries.filter(e=>Number(e.season)===s),people=new Set(list.map(e=>(e.firstName+' '+e.lastName).trim().toLocaleLowerCase('ru')));return '<button class="season-tile" type="button" data-season="'+s+'"><strong>'+s+' сезон</strong><small>'+list.length+' выступлений · '+people.size+' участников</small></button>'}).join('');
   const seasonCounts=seasons.map(s=>({season:s,count:hundredEntries.filter(e=>Number(e.season)===s).length}));
   const maxSeasonCount=Math.max(1,...seasonCounts.map(x=>x.count));
-  $('statisticsTotal').textContent=entries.length.toLocaleString('ru-RU');
+  $('statisticsTotal').textContent=hundredEntries.length.toLocaleString('ru-RU');
   $('hundredPointsChart').style.setProperty('--season-count',Math.max(1,seasonCounts.length));
   $('hundredPointsChart').innerHTML=seasonCounts.map(x=>'<div class="chart-column" title="'+x.season+' сезон: '+x.count+' выступлений"><span class="chart-value">'+x.count+'</span><div class="chart-bar-track"><div class="chart-bar" style="height:'+Math.max(2,x.count/maxSeasonCount*100)+'%" aria-hidden="true"></div></div><span class="chart-season">'+x.season+' сезон</span></div>').join('');
   $('seasonFilter').value=old==='all'||seasons.includes(Number(old))?old:'all';
