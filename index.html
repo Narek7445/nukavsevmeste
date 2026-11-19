@@ -152,6 +152,37 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 }
 @media(prefers-reduced-motion:reduce){.entry:hover{transform:none}}
 
+
+/* Single-card infinite carousel */
+.carousel-shell{position:relative;padding:0 58px 50px}
+.entries{display:block;min-height:clamp(320px,38vw,490px)}
+.entry{animation:slideIn .42s cubic-bezier(.2,.75,.25,1) both;min-height:clamp(320px,38vw,490px)}
+.carousel-arrow{position:absolute;z-index:4;top:calc(50% - 25px);width:48px;height:48px;display:grid;place-items:center;border:1px solid #ffffffb8;border-radius:50%;background:linear-gradient(135deg,#fff8ed,#f3e5f3);color:#603b70;font:400 35px/1 Georgia,serif;cursor:pointer;box-shadow:0 8px 24px #160c2c45;transition:transform .2s,box-shadow .2s,background .2s}
+.carousel-arrow:hover{transform:scale(1.1);background:linear-gradient(135deg,#ffe2a6,#efb5ce);box-shadow:0 12px 30px #160c2c65}
+.carousel-arrow:active{transform:scale(.94)}
+.carousel-arrow.prev{left:0}.carousel-arrow.next{right:0}
+.carousel-bottom{position:absolute;left:58px;right:58px;bottom:10px;display:flex;align-items:center;justify-content:center;gap:18px}
+.carousel-dots{display:flex;align-items:center;justify-content:center;gap:9px;max-width:min(70%,600px);overflow:hidden}
+.carousel-dot{width:8px;height:8px;padding:0;border:0;border-radius:99px;background:#ffffff70;cursor:pointer;transition:width .25s,background .25s,transform .25s}
+.carousel-dot:hover{background:#ffe0a0;transform:scale(1.2)}
+.carousel-dot.active{width:25px;background:linear-gradient(90deg,#ffc76d,#ed91ad)}
+.slide-position{color:#fff5e9;font:700 10px var(--sans);letter-spacing:.15em;white-space:nowrap}
+.empty{margin:0}
+@keyframes slideIn{from{opacity:0;transform:translateX(24px) scale(.99)}to{opacity:1;transform:translateX(0) scale(1)}}
+@media(max-width:760px){
+ .carousel-shell{padding:0 0 54px}
+ .entries,.entry{min-height:0}
+ .carousel-arrow{top:auto;bottom:0;width:42px;height:42px;font-size:31px}
+ .carousel-arrow.prev{left:calc(50% - 58px)}
+ .carousel-arrow.next{right:calc(50% - 58px)}
+ .carousel-bottom{left:0;right:0;bottom:14px;gap:10px}
+ .carousel-dots{max-width:45%;gap:6px}
+ .carousel-dot{width:6px;height:6px}
+ .carousel-dot.active{width:18px}
+ .slide-position{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){.entry{animation:none}}
+
 </style>
 </head>
 <body>
@@ -161,7 +192,12 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
     <div class="select-wrap"><select id="seasonFilter" aria-label="Выбрать сезон"><option value="all">Все сезоны</option></select></div>
     <div class="count" id="count">0 выступлений</div>
   </section>
+  <div class="carousel-shell">
+  <button class="carousel-arrow prev" id="prevEntry" type="button" aria-label="Предыдущее выступление">‹</button>
   <section class="entries" id="entries" aria-live="polite"></section>
+  <button class="carousel-arrow next" id="nextEntry" type="button" aria-label="Следующее выступление">›</button>
+  <div class="carousel-bottom"><div class="carousel-dots" id="carouselDots" aria-label="Выбрать выступление"></div><span class="slide-position" id="slidePosition"></span></div>
+ </div>
   <footer class="footer"><span>Архив стобальных выступлений</span></footer>
 </main>
 
@@ -202,6 +238,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return []}}
  function save(){localStorage.setItem(KEY,JSON.stringify(entries))}
  function escapeHTML(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+ let activeIndex=0;
  function render(){
   const filter=$('seasonFilter').value;
   const seasons=[...new Set(entries.map(e=>Number(e.season)))].sort((a,b)=>a-b);
@@ -209,8 +246,13 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   $('seasonFilter').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('');
   $('seasonFilter').value=old==='all'||seasons.includes(Number(old))?old:'all';
   const shown=entries.filter(e=>$('seasonFilter').value==='all'||Number(e.season)===Number($('seasonFilter').value)).sort((a,b)=>Number(b.season)-Number(a.season)||a.lastName.localeCompare(b.lastName,'ru'));
+  if(activeIndex>=shown.length)activeIndex=0;
   $('count').textContent=shown.length+' '+(shown.length===1?'выступление':shown.length>=2&&shown.length<=4?'выступления':'выступлений');
-  $('entries').innerHTML=shown.length?shown.map(e=>'<article class="entry"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(e.firstName+' '+e.lastName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(e.firstName)+' '+escapeHTML(e.lastName)+'</h2><p class="meta">'+escapeHTML(e.season)+' сезон</p><p class="song">'+escapeHTML(e.song)+'</p></div></article>').join(''):'<div class="empty">Пока нет добавленных выступлений</div>';
+  $('entries').innerHTML=shown.length?(()=>{const e=shown[activeIndex];return '<article class="entry"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(e.firstName+' '+e.lastName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(e.firstName)+' '+escapeHTML(e.lastName)+'</h2><p class="meta">'+escapeHTML(e.season)+' сезон</p><p class="song">'+escapeHTML(e.song)+'</p></div></article>'})():'<div class="empty">Пока нет добавленных выступлений</div>';
+  $('prevEntry').disabled=shown.length<2;$('nextEntry').disabled=shown.length<2;
+  $('prevEntry').style.display=$('nextEntry').style.display=shown.length>1?'grid':'none';
+  $('carouselDots').innerHTML=shown.map((e,i)=>'<button type="button" class="carousel-dot '+(i===activeIndex?'active':'')+'" data-slide="'+i+'" aria-label="Выступление '+(i+1)+'"></button>').join('');
+  $('slidePosition').textContent=shown.length?String(activeIndex+1).padStart(2,'0')+' / '+String(shown.length).padStart(2,'0'):'';
   renderRecords();
  }
  function renderRecords(){
@@ -220,7 +262,12 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  function close(id){$(id).classList.remove('open')}
  function reset(){ $('entryForm').reset();$('editId').value='';photoData='';$('saveButton').textContent='Добавить выступление';$('formError').textContent=''}
  function notify(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',2300)}
- $('seasonFilter').addEventListener('change',render);
+ $('seasonFilter').addEventListener('change',()=>{activeIndex=0;render()});
+ function moveSlide(direction){const shown=entries.filter(e=>$('seasonFilter').value==='all'||Number(e.season)===Number($('seasonFilter').value)).sort((a,b)=>Number(b.season)-Number(a.season)||a.lastName.localeCompare(b.lastName,'ru'));if(!shown.length)return;activeIndex=(activeIndex+direction+shown.length)%shown.length;render()}
+ $('prevEntry').addEventListener('click',()=>moveSlide(-1));
+ $('nextEntry').addEventListener('click',()=>moveSlide(1));
+ $('carouselDots').addEventListener('click',e=>{const dot=e.target.closest('[data-slide]');if(dot){activeIndex=Number(dot.dataset.slide);render()}});
+ document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea,select'))return;if(e.key==='ArrowLeft')moveSlide(-1);if(e.key==='ArrowRight')moveSlide(1)});
  $('loginForm').addEventListener('submit',e=>{e.preventDefault();if($('password').value===ADMIN_PASSWORD){$('password').value='';$('loginError').textContent='';close('loginOverlay');open('adminOverlay');renderRecords()}else{$('loginError').textContent='Неверный пароль. Попробуйте ещё раз.';$('password').select()}});
  $('entryForm').addEventListener('submit',e=>{e.preventDefault();const firstName=$('firstName').value.trim(),lastName=$('lastName').value.trim(),season=Number($('season').value),song=$('song').value.trim();if(!firstName||!lastName||!song||!Number.isInteger(season)||season<1){$('formError').textContent='Заполните все поля корректно.';return}const id=$('editId').value;const existing=entries.find(x=>x.id===id);const item={id:id||String(Date.now())+'-'+Math.random().toString(16).slice(2),firstName,lastName,season,song,photo:photoData||existing?.photo||''};if(existing)entries=entries.map(x=>x.id===id?item:x);else entries.push(item);save();reset();render();notify(existing?'Изменения сохранены':'Участник добавлен')});
  $('photoFile').addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){$('formError').textContent='Выберите файл изображения.';return}if(file.size>4*1024*1024){$('formError').textContent='Размер изображения должен быть не больше 4 МБ.';e.target.value='';return}const reader=new FileReader();reader.onload=()=>{photoData=reader.result};reader.readAsDataURL(file)});
