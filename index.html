@@ -520,8 +520,8 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
    <div class="actions admin-submit-actions"><button class="btn" type="submit" id="saveButton">Добавить выступление</button><button class="btn secondary" type="button" id="resetForm">Очистить форму</button></div>
    <div class="error" id="formError"></div>
   </form>  <section class="records"><div class="admin-list-heading"><div><h3>Записи архива</h3><p>Редактируйте или удаляйте отдельные выступления</p></div><span class="admin-list-count" id="adminEntryCount">0</span></div><div id="recordList"></div>
-   <div class="actions"><button class="btn" type="button" id="exportData">Скачать participants.json</button><button class="btn secondary" type="button" id="importDataButton">Загрузить JSON</button><input id="importDataFile" type="file" accept="application/json,.json" hidden></div>
-   <p style="font-size:12px;line-height:1.6;color:#77677d">Изменения автоматически сохраняются на сервере и становятся доступны всем посетителям сайта. Кнопка скачивания создаёт резервную копию JSON.</p>
+   <div class="actions"><button class="btn" type="button" id="exportData">Скачать резервную копию JSON</button></div>
+   <p style="font-size:12px;line-height:1.6;color:#77677d">Данные сайта загружаются только из Cloudflare D1. Новые фотографии сохраняются отдельно в Cloudflare R2. JSON используется только для скачивания резервной копии.</p>
   </section>
   <div class="actions"><button class="btn secondary" id="logout">Выйти из панели</button></div>
  </div>
@@ -538,7 +538,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  async function load(){const result=await apiRequest('/api/participants',{cache:'no-store'});if(!Array.isArray(result.participants))throw new Error('Сервер вернул некорректный формат архива');return result.participants}
  let hasUnsavedChanges=false;
  async function save(){if(!adminToken){hasUnsavedChanges=true;throw new Error('Сессия администратора завершилась. Войдите в панель заново.')}await apiRequest('/api/admin/participants',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({participants:entries})});hasUnsavedChanges=false}
- function downloadArchive(){const blob=new Blob([JSON.stringify(entries,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='participants.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);hasUnsavedChanges=false;notify('Файл participants.json скачан. Замените им файл в GitHub.')}
+ function downloadArchive(){const blob=new Blob([JSON.stringify(entries,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='participants.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);hasUnsavedChanges=false;notify('Резервная копия JSON скачана. Сайт продолжает использовать данные из D1.')}
 
  function escapeHTML(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
  let activeIndex=0;
@@ -680,14 +680,12 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  $('score').addEventListener('input',()=>{document.querySelectorAll('[data-score-preset]').forEach(b=>b.classList.toggle('active',Number($('score').value)===Number(b.dataset.scorePreset)))});
  $('resetForm').addEventListener('click',reset);
  $('exportData').addEventListener('click',downloadArchive);
- $('importDataButton').addEventListener('click',()=>$('importDataFile').click());
- $('importDataFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data)||data.some(x=>!x||typeof x!=='object'||!x.firstName||!x.lastName||!x.song)){throw new Error('JSON должен содержать массив участников с именем, фамилией и песней.')}const previous=entries;entries=data;activeIndex=0;dashboardRendered=false;try{await save();render();notify('Архив импортирован и сохранён на сервере')}catch(err){entries=previous;throw err}}catch(err){notify(err.message||'Не удалось прочитать JSON')}finally{e.target.value=''}});
  $('recordList').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');if(edit){const item=entries.find(x=>x.id===edit.dataset.edit);if(!item)return;$('editId').value=item.id;$('firstName').value=item.firstName;$('lastName').value=item.lastName;$('season').value=item.season;$('song').value=item.song;$('episode').value=item.episode||'';$('score').value=Number(item.score)||100;;document.querySelectorAll('[data-score-preset]').forEach(b=>b.classList.toggle('active',Number(b.dataset.scorePreset)===Number($('score').value)));$('comment').value=item.comment||'';$('participantRecords').value=(item.records||[]).join('\n');$('participantFacts').value=(item.facts||[]).join('\n');photoData=[];$('saveButton').textContent='Сохранить изменения';$('formError').textContent='';$('entryForm').scrollIntoView({behavior:'smooth',block:'start'})}if(del){const item=entries.find(x=>x.id===del.dataset.delete);if(item&&confirm('Удалить выступление '+item.firstName+' '+item.lastName+'?')){const previous=entries;entries=entries.filter(x=>x.id!==item.id);dashboardRendered=false;try{await save();render();notify('Выступление удалено на сервере')}catch(err){entries=previous;dashboardRendered=false;render();notify(err.message||'Ошибка сохранения')}}}});
  $('logout').addEventListener('click',()=>{adminToken='';sessionStorage.removeItem('nuka-admin-token');close('adminOverlay')});
  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>close(b.dataset.close)));
  document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)close(o.id)}));
  document.addEventListener('keydown',e=>{if(e.code==='Numpad8'&&!e.repeat){e.preventDefault();if($('adminOverlay').classList.contains('open'))return;open('loginOverlay');setTimeout(()=>$('password').focus(),30)}if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(o=>close(o.id))});
- load().then(data=>{entries=Array.isArray(data)?data:[];activeIndex=0;render();startSongQuiz();renderParticipantPage()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить общий архив participants.json')});
+ load().then(data=>{entries=Array.isArray(data)?data:[];activeIndex=0;render();startSongQuiz();renderParticipantPage()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить данные из Cloudflare D1')});
 })();
 </script>
 </body></html>
