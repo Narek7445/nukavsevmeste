@@ -69,6 +69,46 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 
 .load-more{display:block;margin:22px auto 0;padding:13px 22px;border:1px solid var(--teal);border-radius:99px;background:var(--teal);color:#fff;font:700 13px 'DM Sans',sans-serif;cursor:pointer;transition:transform .18s,background .18s}.load-more:hover{background:#105653;transform:translateY(-2px)}
 .profile-view{padding:10px 0 25px}
+/* Непрерывное мягкое движение градиентов на странице профиля */
+@keyframes profileGradientFlow{
+  0%,100%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+}
+@keyframes profileGlowDrift{
+  0%,100%{transform:translate3d(-3%,0,0) scale(1);opacity:.22}
+  50%{transform:translate3d(3%,2%,0) scale(1.08);opacity:.38}
+}
+.profile-view .profile-hero{
+  background-size:220% 220%;
+  animation:profileGradientFlow 18s ease-in-out infinite;
+}
+.profile-view .profile-hero:before{
+  content:"";
+  position:absolute;
+  inset:-35%;
+  z-index:-1;
+  pointer-events:none;
+  background:radial-gradient(ellipse at 25% 35%,rgba(255,255,255,.58),transparent 43%),radial-gradient(ellipse at 78% 72%,rgba(126,184,157,.16),transparent 42%);
+  animation:profileGlowDrift 13s ease-in-out infinite;
+}
+.profile-view .profile-highlight{
+  background-size:200% 200%;
+  animation:profileGradientFlow 22s ease-in-out infinite;
+}
+.profile-view .profile-highlight.records{background-image:linear-gradient(125deg,#fffdf6 0%,#f8f0df 48%,#fff8e9 100%)}
+.profile-view .profile-highlight.facts{background-image:linear-gradient(125deg,#f8fcf8 0%,#eaf3ed 48%,#f4fbf5 100%)}
+.profile-view .audience-poll{background-size:220% 220%;animation:profileGradientFlow 16s ease-in-out infinite}
+.profile-view.audience-favorite .profile-hero{
+  background-size:240% 240%;
+  animation:profileGradientFlow 12s ease-in-out infinite;
+}
+.profile-view.audience-favorite .profile-hero:before{
+  background:radial-gradient(ellipse at 25% 35%,rgba(255,255,255,.62),transparent 43%),radial-gradient(ellipse at 80% 70%,rgba(224,177,86,.24),transparent 44%);
+}
+@media(prefers-reduced-motion:reduce){
+  .profile-view .profile-hero,.profile-view .profile-highlight,.profile-view .audience-poll,.profile-view .profile-hero:before{animation:none!important}
+}
+
 .profile-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 25px}
 .profile-back,.profile-share{border:1px solid #b8cbc3;border-radius:99px;padding:11px 16px;background:#fffefa;color:var(--teal);font:700 12px 'DM Sans',sans-serif;cursor:pointer}
 .profile-share{background:var(--teal);color:#fff;border-color:var(--teal)}
