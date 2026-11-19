@@ -140,7 +140,44 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
   return true;
  }
  function openProfile(personName){const target=new URL('contestants.html',location.href);target.searchParams.set('profile',personName);location.assign(target.href)}
-async function init(){try{const r=await fetch('./participants.json',{cache:'default',priority:'high'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(!Array.isArray(d))throw new Error('Некорректный формат архива');entries=d;const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));const seasons=[...new Set(entries.map(e=>Number(e.season)).filter(Number.isFinite))].sort((a,b)=>a-b);$('performanceCount').textContent=entries.length.toLocaleString('ru-RU');$('peopleCount').textContent=people.size.toLocaleString('ru-RU');$('seasonCount').textContent=seasons.length;$('season').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('');const params=new URLSearchParams(window.location.search);const requested=params.get('profile')||params.get('name')||'';if(requested){const profileFound=renderProfile(requested);if(profileFound){$('hero').style.display='none';document.querySelector('.stats').style.display='none';document.querySelector('.toolbar').style.display='none';document.querySelector('.result-line').style.display='none';$('grid').style.display='none';$('profileView').removeAttribute('hidden');$('profileBack').addEventListener('click',()=>{location.href='contestants.html'});$('profileShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href)}catch{}$('profileShare').textContent='Ссылка скопирована'})}else{render()}}catch(err){console.error(err);$('resultCount').textContent='Не удалось загрузить общий архив';$('grid').innerHTML='<div class="empty">Не удалось загрузить participants.json. Обновите страницу позже.</div>'}}
+async function init(){
+  try{
+   const r=await fetch('./participants.json',{cache:'default',priority:'high'});
+   if(!r.ok)throw new Error('HTTP '+r.status);
+   const d=await r.json();
+   if(!Array.isArray(d))throw new Error('Некорректный формат архива');
+   entries=d;
+   const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
+   const seasons=[...new Set(entries.map(e=>Number(e.season)).filter(Number.isFinite))].sort((a,b)=>a-b);
+   $('performanceCount').textContent=entries.length.toLocaleString('ru-RU');
+   $('peopleCount').textContent=people.size.toLocaleString('ru-RU');
+   $('seasonCount').textContent=seasons.length;
+   $('season').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+s+'">'+s+' сезон</option>').join('');
+   const params=new URLSearchParams(window.location.search);
+   const requested=params.get('profile')||params.get('name')||'';
+   if(requested){
+    if(renderProfile(requested)){
+     $('hero').style.display='none';
+     document.querySelector('.stats').style.display='none';
+     document.querySelector('.toolbar').style.display='none';
+     document.querySelector('.result-line').style.display='none';
+     $('grid').style.display='none';
+     $('profileView').removeAttribute('hidden');
+     $('profileBack').addEventListener('click',()=>{location.href='contestants.html'});
+     $('profileShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href)}catch{}$('profileShare').textContent='Ссылка скопирована'});
+    }else{
+     $('resultCount').textContent='Профиль не найден';
+     $('grid').innerHTML='<div class="empty">Не удалось найти участника «'+safe(requested)+'» в общем архиве.</div>';
+    }
+   }else{
+    render();
+   }
+  }catch(err){
+   console.error(err);
+   $('resultCount').textContent='Не удалось загрузить общий архив';
+   $('grid').innerHTML='<div class="empty">Не удалось загрузить participants.json. Обновите страницу позже.</div>';
+  }
+ }
  ['search','season','score'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('grid').addEventListener('click',e=>{const card=e.target.closest('[data-profile]');if(card)openProfile(card.dataset.profile)});$('grid').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-profile]')){e.preventDefault();openProfile(e.target.dataset.profile)}});init();
 })();
 </script>
