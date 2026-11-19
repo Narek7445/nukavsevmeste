@@ -627,13 +627,10 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 
  let currentQuizEntry=null,quizAnswered=false;
  function quizPhotoFor(entry){
-  const own=Array.isArray(entry.photos)?entry.photos.find(Boolean):'';
-  if(own||entry.photo)return own||entry.photo;
-  const key=String(entry.firstName+' '+entry.lastName).trim().toLocaleLowerCase('ru');
-  const related=entries.find(x=>String(x.firstName+' '+x.lastName).trim().toLocaleLowerCase('ru')===key&&(x.photo||(Array.isArray(x.photos)&&x.photos.length)));
-  return related?(related.photo||(related.photos||[]).find(Boolean)||''):'';
- }
- function startSongQuiz(){
+   const own=Array.isArray(entry.photos)?entry.photos.find(Boolean):'';
+   return own||entry.photo||'';
+  }
+  function startSongQuiz(){
   const pool=entries.filter(e=>e&&e.firstName&&e.lastName&&e.song&&Number(e.season)>0);
   const photo=$('songQuizPhoto'),seasonSelect=$('songQuizSeason'),songSelect=$('songQuizSong'),feedback=$('songQuizFeedback');
   if(!pool.length){photo.innerHTML='<div class="song-quiz-placeholder">♪</div>';seasonSelect.innerHTML='<option value="">Нет данных</option>';songSelect.innerHTML='<option value="">Нет данных</option>';feedback.textContent='В архиве пока недостаточно данных для игры.';return}
