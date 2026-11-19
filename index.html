@@ -532,10 +532,10 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  const KEY='nuka-vse-vmeste-contestants-v1';
  const ADMIN_PASSWORD='nukaadmin';
  const $=id=>document.getElementById(id);
- let entries=[], photoData=[], toastTimer;
+ let entries=[], photoData=[], toastTimer, dashboardRendered=false, searchRenderTimer;
  const DB_NAME='nuka-vse-vmeste-db-v1', DB_STORE='archive';
  function openDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(new Error('IndexedDB недоступен'));return}const request=indexedDB.open(DB_NAME,1);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains(DB_STORE))request.result.createObjectStore(DB_STORE)};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error||new Error('Не удалось открыть базу данных'))})}
- async function load(){const response=await fetch('./participants.json?v='+Date.now(),{cache:'no-store'});if(!response.ok)throw new Error('Не удалось загрузить общий файл participants.json');const data=await response.json();if(!Array.isArray(data))throw new Error('Файл participants.json должен содержать массив участников');return data}
+ async function load(){const response=await fetch('./participants.json',{cache:'default'});if(!response.ok)throw new Error('Не удалось загрузить общий файл participants.json');const data=await response.json();if(!Array.isArray(data))throw new Error('Файл participants.json должен содержать массив участников');return data}
  let hasUnsavedChanges=false;
  async function save(){hasUnsavedChanges=true}
  async function readLegacyArchive(){let old=[];try{const db=await openDB();old=await new Promise((resolve,reject)=>{const request=db.transaction(DB_STORE,'readonly').objectStore(DB_STORE).get(KEY);request.onsuccess=()=>resolve(request.result||[]);request.onerror=()=>reject(request.error)});db.close()}catch(err){console.warn('Legacy IndexedDB archive unavailable',err)}if(!Array.isArray(old)||!old.length){try{const parsed=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(parsed))old=parsed}catch{}}return Array.isArray(old)?old:[]}
@@ -571,6 +571,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 
  function render(){
   const filter=$('seasonFilter').value;
+  if(!dashboardRendered){
   const hundredEntries=entries.filter(e=>(Number(e.score)||100)===100);
   const seasons=[...new Set(hundredEntries.map(e=>Number(e.season)))].sort((a,b)=>a-b);
   const old=filter;
@@ -583,15 +584,16 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   $('hundredPointsChart').style.setProperty('--season-count',Math.max(1,seasonCounts.length));
   $('hundredPointsChart').innerHTML=seasonCounts.map(x=>'<div class="chart-column" title="'+x.season+' сезон: '+x.count+' выступлений"><span class="chart-value">'+x.count+'</span><div class="chart-bar-track"><div class="chart-bar" style="height:'+Math.max(2,x.count/maxSeasonCount*100)+'%" aria-hidden="true"></div></div><span class="chart-season">'+x.season+' сезон</span></div>').join('');
   $('seasonFilter').value=old==='all'||seasons.includes(Number(old))?old:'all';
+  dashboardRendered=true;
+  }
   const shown=filteredEntries();
   if(activeIndex>=shown.length)activeIndex=0;
   $('count').textContent=shown.length+' '+(shown.length%10===1&&shown.length%100!==11?'выступление':shown.length%10>=2&&shown.length%10<=4&&(shown.length%100<12||shown.length%100>14)?'выступления':'выступлений');
-  $('entries').innerHTML=shown.length?(()=>{const e=shown[activeIndex],personName=e.firstName+' '+e.lastName;return '<article class="entry" data-open-profile="'+escapeHTML(personName)+'"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(personName)+'">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(personName)+'</h2><div class="meta-indicators"><button type="button" class="meta season-indicator season-link" data-season="'+escapeHTML(e.season)+'">'+escapeHTML(e.season)+' сезон</button>'+(e.episode?'<span class="meta episode-indicator">'+(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'Выпуск '+escapeHTML(e.episode))+'</span>':'')+'</div><p class="song">'+'«'+escapeHTML(e.song.replace(/^«\s*|\s*»$/g,''))+'»</p>'+(e.comment?'<p class="participant-comment">'+escapeHTML(e.comment).replace(/\n/g,'<br>')+'</p>':'')+'<button class="profile-open-btn" type="button" data-profile="'+escapeHTML(personName)+'">Страница участника →</button></div></article>'})():'<div class="empty">'+(entries.length?'По вашему запросу ничего не найдено':'Пока нет добавленных выступлений')+'</div>';
+  $('entries').innerHTML=shown.length?(()=>{const e=shown[activeIndex],personName=e.firstName+' '+e.lastName;return '<article class="entry" data-open-profile="'+escapeHTML(personName)+'"><div class="photo">'+(e.photo?'<img src="'+e.photo+'" alt="Фото: '+escapeHTML(personName)+'" loading="lazy" decoding="async">':'<div class="photo-placeholder">Фото</div>')+'</div><div class="entry-info"><h2 class="person">'+escapeHTML(personName)+'</h2><div class="meta-indicators"><button type="button" class="meta season-indicator season-link" data-season="'+escapeHTML(e.season)+'">'+escapeHTML(e.season)+' сезон</button>'+(e.episode?'<span class="meta episode-indicator">'+(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'Выпуск '+escapeHTML(e.episode))+'</span>':'')+'</div><p class="song">'+'«'+escapeHTML(e.song.replace(/^«\s*|\s*»$/g,''))+'»</p>'+(e.comment?'<p class="participant-comment">'+escapeHTML(e.comment).replace(/\n/g,'<br>')+'</p>':'')+'<button class="profile-open-btn" type="button" data-profile="'+escapeHTML(personName)+'">Страница участника →</button></div></article>'})():'<div class="empty">'+(entries.length?'По вашему запросу ничего не найдено':'Пока нет добавленных выступлений')+'</div>';
   $('prevEntry').disabled=shown.length<2;$('nextEntry').disabled=shown.length<2;
   $('prevEntry').style.display=$('nextEntry').style.display=shown.length>1?'grid':'none';
   $('carouselDots').innerHTML=shown.map((e,i)=>'<button type="button" class="carousel-dot '+(i===activeIndex?'active':'')+'" data-slide="'+i+'" aria-label="Выступление '+(i+1)+'"></button>').join('');
   $('slidePosition').textContent=shown.length?String(activeIndex+1).padStart(2,'0')+' / '+String(shown.length).padStart(2,'0'):'';
-  renderRecords();
  }
  function renderRecords(){
   $('adminEntryCount').textContent=entries.length;
@@ -605,7 +607,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  $('seasonFilter').addEventListener('change',()=>{activeIndex=0;render()});
  $('songQuizCheck').addEventListener('click',checkSongQuiz);
  $('songQuizNext').addEventListener('click',startSongQuiz);
- $('searchInput').addEventListener('input',()=>{activeIndex=0;renderHints();render()});
+ $('searchInput').addEventListener('input',()=>{activeIndex=0;renderHints();clearTimeout(searchRenderTimer);searchRenderTimer=setTimeout(render,90)});
  $('searchHints').addEventListener('click',e=>{const hint=e.target.closest('[data-hint]');if(!hint)return;const item=entries.find(x=>String(x.id)===hint.dataset.hint);if(!item)return;$('searchInput').value=item.firstName+' '+item.lastName;$('seasonFilter').value=String(item.season);$('searchHints').hidden=true;activeIndex=0;render()});
  $('searchInput').addEventListener('keydown',e=>{if(e.key==='Escape')$('searchHints').hidden=true;if(e.key==='Enter'){const first=$('searchHints').querySelector('[data-hint]');if(first&&!$('searchHints').hidden){e.preventDefault();first.click()}}});
  document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))$('searchHints').hidden=true});
