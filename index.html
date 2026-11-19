@@ -549,7 +549,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 
  function renderParticipantsDirectory(){
   const groups=new Map();
-  entries.forEach(e=>{
+  entries.filter(e=>(Number(e.score)||100)===100).forEach(e=>{
    const name=String((e.firstName||'')+' '+(e.lastName||'')).trim();
    if(!name)return;
    const key=name.toLocaleLowerCase('ru');
