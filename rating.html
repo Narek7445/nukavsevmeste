@@ -127,7 +127,7 @@ async function init(){
  try{
   const [ar,pr]=await Promise.all([fetch(API+'/api/participants',{cache:'no-store'}),fetch(API+'/api/polls',{cache:'no-store'})]);
   if(!ar.ok||!pr.ok)throw new Error('Не удалось загрузить данные.');
-  const a=await ar.json(),p=await pr.json();entries=Array.isArray(a.participants)?a.participants:[];polls=p.polls||{};
+  const a=await ar.json(),p=await pr.json();entries=Array.isArray(a.participants)?a.participants.filter(item=>!item.hidden):[];polls=p.polls||{};
   const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
   $('season').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+safe(s)+'">'+safe(seasonLabel(s))+'</option>').join('');
   const requested=new URLSearchParams(location.search).get('profile')||'';
