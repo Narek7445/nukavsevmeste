@@ -82,11 +82,21 @@ async function readArchive(env) {
 function validateArchive(value) {
   if (!Array.isArray(value)) return "Ожидается массив выступлений.";
   if (value.length > 5000) return "В архиве слишком много записей (максимум 5000).";
+  const seenPerformances = new Set();
+  const normalizePart = value => String(value ?? "").normalize("NFKC").trim().replace(/\\s+/g, " ").toLocaleLowerCase("ru");
   for (const item of value) {
     if (!item || typeof item !== "object" || Array.isArray(item)) return "Каждая запись должна быть объектом.";
-    if (!String(item.firstName || "").trim() || !String(item.lastName || "").trim() || !String(item.song || "").trim()) {
-      return "У каждой записи должны быть имя, фамилия и название песни.";
+    if (!String(item.firstName || "").trim() || !String(item.song || "").trim()) {
+      return "У каждой записи должны быть имя и название песни.";
     }
+    const duplicateKey = JSON.stringify([
+      normalizePart(item.firstName), normalizePart(item.lastName),
+      normalizePart(item.season), normalizePart(item.episode), normalizePart(item.song)
+    ]);
+    if (seenPerformances.has(duplicateKey)) {
+      return "В архиве обнаружено повторное выступление: один участник не может иметь одинаковую песню в том же сезоне и выпуске.";
+    }
+    seenPerformances.add(duplicateKey);
     if (typeof item.photo === "string" && item.photo.startsWith("data:")) return "Фотографии нужно загрузить в хранилище R2, а не сохранять в JSON.";
     if (Array.isArray(item.photos) && item.photos.some(photo => typeof photo === "string" && photo.startsWith("data:"))) {
       return "Фотографии нужно загрузить в хранилище R2, а не сохранять в JSON.";
