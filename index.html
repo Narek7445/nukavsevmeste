@@ -373,11 +373,20 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .gallery-lightbox-inner .close{position:absolute;right:0;top:0;z-index:2;background:#fff;color:#42264e}
 .gallery-lightbox-inner img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;box-shadow:0 20px 70px #0008}
 @media(max-width:600px){.profile-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.profile-gallery-section{padding:14px}.gallery-lightbox{padding:12px}}
+
+/* Guess the song and season game */
+.song-quiz-section{margin:30px 0 38px;padding:clamp(18px,3vw,32px);border:1px solid #ffffff70;border-radius:26px 26px 26px 9px;background:linear-gradient(130deg,rgba(35,23,54,.96),rgba(91,43,91,.92) 58%,rgba(35,73,77,.94));box-shadow:0 20px 55px #08051566;scroll-margin-top:20px}
+.song-quiz-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.song-quiz-kicker{color:#ffd98c;font:800 10px var(--sans);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}.song-quiz-heading h2{margin:0;color:#fff8ef;font:700 clamp(27px,4vw,39px)/1.08 var(--serif)}.song-quiz-heading p{max-width:680px;margin:9px 0 0;color:#e1d3e7;font:13px/1.55 var(--sans)}.song-quiz-mark{display:grid;place-items:center;flex:none;width:62px;height:62px;border:1px solid #ffffff55;border-radius:20px 20px 20px 5px;color:#ffdb91;font:42px var(--serif);background:#ffffff12}
+.song-quiz-card{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(260px,.95fr);gap:clamp(18px,3vw,32px);padding:clamp(12px,2vw,20px);border:1px solid #ffffff55;border-radius:20px 20px 20px 7px;background:linear-gradient(115deg,#fffaf3,#f4eafa 62%,#eaf5f0);box-shadow:0 12px 35px #08051535}
+.song-quiz-photo{display:grid;place-items:center;min-height:270px;aspect-ratio:16/10;overflow:hidden;border-radius:13px 13px 13px 5px;background:linear-gradient(135deg,#f1b66d,#d77d94,#7767a8);box-shadow:0 8px 24px #39234430}.song-quiz-photo img{width:100%;height:100%;max-height:420px;object-fit:contain;display:block}.song-quiz-placeholder{color:white;font:700 clamp(70px,12vw,120px) var(--serif);text-shadow:0 5px 24px #39234470}
+.song-quiz-controls{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:clamp(4px,1.5vw,16px)}.song-quiz-prompt{margin-bottom:16px;color:#593d68;font:700 19px var(--serif)}.song-quiz-controls label{margin:10px 0 6px;color:#725a79}.song-quiz-controls select{width:100%;border:1px solid #d8c5dd;border-radius:11px;background:#fff;color:#422b50;padding:13px 42px 13px 14px;font:600 14px var(--sans)}.song-quiz-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.song-quiz-check,.song-quiz-next{border:0;border-radius:99px;padding:12px 16px;font:800 10px var(--sans);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:transform .2s,filter .2s}.song-quiz-check{background:linear-gradient(100deg,#8c4d91,#bd5b80);color:white;box-shadow:0 5px 15px #8c4d9138}.song-quiz-next{background:#fff;color:#684276;border:1px solid #d9c5df}.song-quiz-check:hover,.song-quiz-next:hover{transform:translateY(-2px);filter:brightness(1.04)}.song-quiz-feedback{min-height:42px;margin:14px 0 0;color:#66536d;font:600 13px/1.5 var(--sans)}.song-quiz-feedback.correct{color:#24734c}.song-quiz-feedback.wrong{color:#a33d50}
+@media(max-width:700px){.song-quiz-heading{align-items:flex-start}.song-quiz-mark{width:48px;height:48px;font-size:32px;border-radius:15px}.song-quiz-card{grid-template-columns:1fr;gap:12px}.song-quiz-photo{min-height:0;aspect-ratio:16/9}.song-quiz-controls{padding:8px 3px 4px}.song-quiz-actions>*{flex:1 1 100%}}
+
 </style>
 </head>
 <body>
 <main class="page" id="archivePage">
-  <header class="topline"><div class="topline-brand"><div class="eyebrow">Ну-ка, все вместе!</div><h1>Стобальные выступления</h1></div><div class="site-menu-wrap"><button class="site-menu-toggle" id="siteMenuToggle" type="button" aria-label="Открыть меню" title="Меню" aria-expanded="false" aria-controls="siteMenu"><span class="menu-lines" aria-hidden="true"><i></i><i></i><i></i></span></button><nav class="site-menu" id="siteMenu" aria-label="Разделы сайта" hidden><a href="#archivePage">Главная</a><a href="#searchInput">Поиск выступлений</a><a href="#seasonDirectory">Архив по сезонам</a><a href="#record-holder">Рекордсмен</a><a href="#statistics">Статистика</a></nav></div></header>
+  <header class="topline"><div class="topline-brand"><div class="eyebrow">Ну-ка, все вместе!</div><h1>Стобальные выступления</h1></div><div class="site-menu-wrap"><button class="site-menu-toggle" id="siteMenuToggle" type="button" aria-label="Открыть меню" title="Меню" aria-expanded="false" aria-controls="siteMenu"><span class="menu-lines" aria-hidden="true"><i></i><i></i><i></i></span></button><nav class="site-menu" id="siteMenu" aria-label="Разделы сайта" hidden><a href="#archivePage">Главная</a><a href="#searchInput">Поиск выступлений</a><a href="#seasonDirectory">Архив по сезонам</a><a href="#record-holder">Рекордсмен</a><a href="#statistics">Статистика</a><a href="#songQuiz">Угадай песню и сезон</a></nav></div></header>
   <section class="controls" aria-label="Поиск и фильтр выступлений">
     <div class="search-wrap"><input id="searchInput" type="search" autocomplete="off" placeholder="Поиск по участнику или песне..." aria-label="Поиск по участнику или песне" aria-autocomplete="list" aria-controls="searchHints"><div class="search-hints" id="searchHints" role="listbox" hidden></div></div>
     <div class="select-wrap"><select id="seasonFilter" aria-label="Выбрать сезон"><option value="all">Все сезоны</option></select></div>
@@ -389,6 +398,21 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   <button class="carousel-arrow next" id="nextEntry" type="button" aria-label="Следующее выступление">›</button>
   <div class="carousel-bottom"><div class="carousel-dots" id="carouselDots" aria-label="Выбрать выступление"></div><span class="slide-position" id="slidePosition"></span></div>
  </div>
+  <section class="song-quiz-section" id="songQuiz" aria-labelledby="songQuizTitle">
+    <div class="song-quiz-heading"><div><div class="song-quiz-kicker">Интерактивная игра</div><h2 id="songQuizTitle">Угадай песню и сезон</h2><p>Посмотри на фотографию участника и попробуй вспомнить, в каком сезоне и с какой песней он выступал.</p></div><div class="song-quiz-mark" aria-hidden="true">♪</div></div>
+    <div class="song-quiz-card">
+      <div class="song-quiz-photo" id="songQuizPhoto"><div class="song-quiz-placeholder">?</div></div>
+      <div class="song-quiz-controls">
+        <div class="song-quiz-prompt">Вспомни это выступление</div>
+        <label for="songQuizSeason">Выбери сезон</label>
+        <select id="songQuizSeason"><option value="">Выбери сезон</option></select>
+        <label for="songQuizSong">Выбери песню</label>
+        <select id="songQuizSong"><option value="">Выбери песню</option></select>
+        <div class="song-quiz-actions"><button class="song-quiz-check" id="songQuizCheck" type="button">Проверить ответ</button><button class="song-quiz-next" id="songQuizNext" type="button">Следующее фото ↗</button></div>
+        <p class="song-quiz-feedback" id="songQuizFeedback" role="status" aria-live="polite">Выбери сезон и песню, затем проверь себя.</p>
+      </div>
+    </div>
+  </section>
   <section class="season-directory" id="seasonDirectory" aria-label="Страницы сезонов"><h2 class="season-directory-title">Архив по сезонам</h2><div class="season-directory-grid" id="seasonDirectoryGrid"></div></section>
   <section class="statistics-section" id="statistics" aria-labelledby="statisticsTitle"><div class="statistics-heading"><div><div class="statistics-kicker">Цифры и достижения</div><h2 id="statisticsTitle">Статистика</h2><p>Аналитика стобальных выступлений по сезонам.</p></div><div class="statistics-total"><strong id="statisticsTotal">0</strong><span>100-бальных выступлений</span></div></div><article class="chart-card"><div class="chart-title-row"><div><h3>100-бальные выступления по сезонам</h3><p>Количество выступлений в каждом сезоне</p></div><span class="chart-unit">Выступления</span></div><div class="season-chart" id="hundredPointsChart" role="img" aria-label="Количество стобальных выступлений по сезонам"></div></article></section>
   <footer class="footer"><span>Архив стобальных выступлений</span></footer>
@@ -501,10 +525,49 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  function notify(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',2300)}
  const menuToggle=$('siteMenuToggle'),siteMenu=$('siteMenu');menuToggle.addEventListener('click',()=>{const expanded=menuToggle.getAttribute('aria-expanded')==='true';menuToggle.setAttribute('aria-expanded',String(!expanded));siteMenu.hidden=expanded});siteMenu.addEventListener('click',e=>{if(e.target.closest('a')){siteMenu.hidden=true;menuToggle.setAttribute('aria-expanded','false')}});document.addEventListener('click',e=>{if(!e.target.closest('.site-menu-wrap')){siteMenu.hidden=true;menuToggle.setAttribute('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key==='Escape'){siteMenu.hidden=true;menuToggle.setAttribute('aria-expanded','false')}});
  $('seasonFilter').addEventListener('change',()=>{activeIndex=0;render()});
+ $('songQuizCheck').addEventListener('click',checkSongQuiz);
+ $('songQuizNext').addEventListener('click',startSongQuiz);
  $('searchInput').addEventListener('input',()=>{activeIndex=0;renderHints();render()});
  $('searchHints').addEventListener('click',e=>{const hint=e.target.closest('[data-hint]');if(!hint)return;const item=entries.find(x=>String(x.id)===hint.dataset.hint);if(!item)return;$('searchInput').value=item.firstName+' '+item.lastName;$('seasonFilter').value=String(item.season);$('searchHints').hidden=true;activeIndex=0;render()});
  $('searchInput').addEventListener('keydown',e=>{if(e.key==='Escape')$('searchHints').hidden=true;if(e.key==='Enter'){const first=$('searchHints').querySelector('[data-hint]');if(first&&!$('searchHints').hidden){e.preventDefault();first.click()}}});
  document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))$('searchHints').hidden=true});
+
+
+ let currentQuizEntry=null,quizAnswered=false;
+ function quizPhotoFor(entry){
+  const own=Array.isArray(entry.photos)?entry.photos.find(Boolean):'';
+  if(own||entry.photo)return own||entry.photo;
+  const key=String(entry.firstName+' '+entry.lastName).trim().toLocaleLowerCase('ru');
+  const related=entries.find(x=>String(x.firstName+' '+x.lastName).trim().toLocaleLowerCase('ru')===key&&(x.photo||(Array.isArray(x.photos)&&x.photos.length)));
+  return related?(related.photo||(related.photos||[]).find(Boolean)||''):'';
+ }
+ function startSongQuiz(){
+  const pool=entries.filter(e=>e&&e.firstName&&e.lastName&&e.song&&Number(e.season)>0);
+  const photo=$('songQuizPhoto'),seasonSelect=$('songQuizSeason'),songSelect=$('songQuizSong'),feedback=$('songQuizFeedback');
+  if(!pool.length){photo.innerHTML='<div class="song-quiz-placeholder">♪</div>';seasonSelect.innerHTML='<option value="">Нет данных</option>';songSelect.innerHTML='<option value="">Нет данных</option>';feedback.textContent='В архиве пока недостаточно данных для игры.';return}
+  let next=pool[Math.floor(Math.random()*pool.length)];
+  if(pool.length>1&&currentQuizEntry){let attempts=0;while(next.id===currentQuizEntry.id&&attempts++<12)next=pool[Math.floor(Math.random()*pool.length)]}
+  currentQuizEntry=next;quizAnswered=false;
+  const image=quizPhotoFor(next);
+  photo.innerHTML=image?'<img src="'+escapeHTML(image)+'" alt="Фотография участника — угадай выступление">':'<div class="song-quiz-placeholder">♪</div>';
+  const seasons=[...new Set(pool.map(e=>Number(e.season)))].sort((a,b)=>a-b);
+  const songs=[...new Set(pool.map(e=>String(e.song).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ru'));
+  seasonSelect.innerHTML='<option value="">Выбери сезон</option>'+seasons.map(x=>'<option value="'+x+'">'+x+' сезон</option>').join('');
+  songSelect.innerHTML='<option value="">Выбери песню</option>'+songs.map(x=>'<option value="'+escapeHTML(x)+'">«'+escapeHTML(x)+'»</option>').join('');
+  seasonSelect.value='';songSelect.value='';feedback.className='song-quiz-feedback';feedback.textContent='Выбери сезон и песню, затем проверь себя.';$('songQuizCheck').disabled=false;
+ }
+ function checkSongQuiz(){
+  if(!currentQuizEntry)return;
+  const season=$('songQuizSeason').value,song=$('songQuizSong').value,feedback=$('songQuizFeedback');
+  if(!season||!song){feedback.className='song-quiz-feedback wrong';feedback.textContent='Сначала выбери и сезон, и песню.';return}
+  if(quizAnswered)return;
+  quizAnswered=true;
+  const seasonCorrect=Number(season)===Number(currentQuizEntry.season),songCorrect=song.trim().toLocaleLowerCase('ru')===String(currentQuizEntry.song).trim().toLocaleLowerCase('ru');
+  const name=currentQuizEntry.firstName+' '+currentQuizEntry.lastName;
+  if(seasonCorrect&&songCorrect){feedback.className='song-quiz-feedback correct';feedback.textContent='Верно! '+name+' — «'+currentQuizEntry.song+'», '+currentQuizEntry.season+' сезон. Отличная память!'}
+  else{feedback.className='song-quiz-feedback wrong';let missed=[];if(!seasonCorrect)missed.push('сезон: '+currentQuizEntry.season);if(!songCorrect)missed.push('песня: «'+currentQuizEntry.song+'»');feedback.textContent='Почти! Это '+name+'. Правильный ответ: '+missed.join('; ')+'.'}
+  $('songQuizCheck').disabled=true;
+ }
 
  function personEntries(name){const key=String(name).trim().toLocaleLowerCase('ru');return sortEntries(entries.filter(e=>(String(e.firstName+' '+e.lastName).trim().toLocaleLowerCase('ru')===key)))}
  function openParticipant(name){const list=personEntries(name);if(!list.length)return;location.hash='participant='+encodeURIComponent(list[0].firstName+' '+list[0].lastName)}
@@ -531,7 +594,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>close(b.dataset.close)));
  document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)close(o.id)}));
  document.addEventListener('keydown',e=>{if(e.code==='Numpad8'&&!e.repeat){e.preventDefault();if($('adminOverlay').classList.contains('open'))return;open('loginOverlay');setTimeout(()=>$('password').focus(),30)}if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(o=>close(o.id))});
- load().then(data=>{entries=Array.isArray(data)?data:[];activeIndex=0;render();renderParticipantPage()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить общий архив participants.json')});
+ load().then(data=>{entries=Array.isArray(data)?data:[];activeIndex=0;render();startSongQuiz();renderParticipantPage()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить общий архив participants.json')});
 })();
 </script>
 </body></html>
