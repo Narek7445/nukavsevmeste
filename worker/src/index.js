@@ -322,8 +322,11 @@ async function handleApi(request, env, url) {
         if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id) || ids.has(id)) return json({ error: "У каждого эксперта должен быть уникальный корректный ID." }, 400);
         if (!name || name.length > 120) return json({ error: "Имя эксперта обязательно и не должно превышать 120 символов." }, 400);
         if (!/^https:\/\//i.test(photo) || photo.length > 2048) return json({ error: "Добавьте фотографию эксперта через загрузку изображения." }, 400);
+        if (typeof expert.bio !== "undefined" && (typeof expert.bio !== "string" || expert.bio.length > 3000)) return json({ error: "Комментарий эксперта не должен превышать 3000 символов." }, 400);
+        if (typeof expert.leader !== "undefined" && typeof expert.leader !== "boolean") return json({ error: "Некорректная отметка лидера." }, 400);
         ids.add(id);
       }
+      if (experts.filter(expert => expert.leader === true).length > 1) return json({ error: "Лидером сотни может быть отмечен только один эксперт." }, 400);
       const serialized = JSON.stringify(experts);
       if (new TextEncoder().encode(serialized).length > 150_000) return json({ error: "Список экспертов слишком большой." }, 413);
       const updatedAt = new Date().toISOString();
