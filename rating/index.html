@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<base href="/">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f0e9">
+<title>Любимцы зрителей — Ну-ка, все вместе!</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+:root{--ink:#251d25;--muted:#82777d;--paper:#f4f0e9;--card:#fffdf9;--wine:#71334b;--gold:#c49a58;--line:#e2d8ce;--green:#367568}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0%,#ead9d0 0,transparent 35%),var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif}
+.page{width:min(1120px,100%);margin:auto;padding:24px clamp(16px,4vw,54px) 70px}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;letter-spacing:-.04em;color:var(--ink)}.brand-mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--wine);color:white;font-size:20px}
+.nav-link{padding:10px 14px;border:1px solid #cbb9b4;border-radius:99px;color:var(--wine);text-decoration:none;font-size:12px;font-weight:800}
+.hero{padding:64px 0 32px}.eyebrow{color:var(--wine);font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}.hero h1{margin:14px 0 13px;font:800 clamp(40px,7vw,76px)/.98 'Manrope',sans-serif;letter-spacing:-.075em;max-width:850px}.hero p{margin:0;max-width:680px;color:#71676c;font-size:15px;line-height:1.7}
+.controls{display:grid;grid-template-columns:1fr 230px;gap:12px;padding:12px;background:#ffffffb8;border:1px solid var(--line);border-radius:16px;margin-bottom:22px}
+input,select{width:100%;min-width:0;border:1px solid #d9cec5;border-radius:11px;background:#fffdf9;padding:13px 14px;font:600 14px 'DM Sans',sans-serif;color:var(--ink);outline:none}input:focus,select:focus{border-color:var(--wine);box-shadow:0 0 0 3px #71334b16}
+.section-label{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:30px 0 13px}.section-label h2{margin:0;font:700 22px 'Manrope',sans-serif;letter-spacing:-.04em}.section-label span{color:var(--muted);font-size:11px;font-weight:700}
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;align-items:end}
+.podium-card{position:relative;overflow:hidden;min-width:0;padding:22px 16px 18px;text-align:center;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#fffdf9,#f4e9e2);box-shadow:0 10px 26px #3c20200c}
+.podium-card.first{background:linear-gradient(145deg,#fff8e8,#eed9b5);border-color:#d9b979;min-height:230px;padding-top:30px}
+.podium-card.second{min-height:202px}.podium-card.third{min-height:184px}
+.medal{width:46px;height:46px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:#fff9;color:#8c632a;font:800 22px Georgia,serif;border:1px solid #d5b779}
+.first .medal{width:58px;height:58px;font-size:28px;background:#fff9e8}
+.podium-name{font:800 clamp(15px,2vw,20px)/1.15 'Manrope',sans-serif;overflow-wrap:anywhere;margin:0 0 9px}
+.podium-votes{font:800 27px 'Manrope',sans-serif;color:var(--wine);letter-spacing:-.06em}.podium-caption{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.podium-support{display:inline-block;margin-top:12px;padding:6px 9px;border-radius:99px;background:#fff9;color:var(--green);font-size:10px;font-weight:800}
+.list{display:grid;gap:9px}.rank-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:14px;padding:15px 17px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 15px #39212708}
+.rank-number{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#f1e8e4;color:var(--wine);font:800 13px 'Manrope',sans-serif}
+.rank-name{font:800 15px 'Manrope',sans-serif;overflow-wrap:anywhere}.rank-meta{margin-top:4px;color:var(--muted);font-size:11px}
+.rank-data{text-align:right;min-width:105px}.rank-total{font:800 20px 'Manrope',sans-serif;color:var(--wine);font-variant-numeric:tabular-nums}.rank-split{margin-top:3px;color:var(--muted);font-size:10px}.rank-bar{height:5px;margin-top:8px;border-radius:99px;background:#eee5df;overflow:hidden}.rank-bar span{display:block;height:100%;background:linear-gradient(90deg,#c49a58,#71334b);border-radius:99px}
+.empty{padding:45px 20px;text-align:center;border:1px dashed #cbb9b4;border-radius:16px;color:var(--muted);background:#fff9;line-height:1.6}
+.note{margin-top:22px;padding:14px 16px;border-left:3px solid var(--gold);background:#fffaf2;color:#766b69;font-size:11px;line-height:1.6}
+.footer{display:flex;justify-content:space-between;gap:12px;margin-top:46px;padding-top:17px;border-top:1px solid var(--line);color:#93878b;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+@media(max-width:650px){.hero{padding-top:43px}.controls{grid-template-columns:1fr}.podium{gap:7px}.podium-card{padding:15px 8px 13px;border-radius:13px}.podium-card.first{min-height:205px}.podium-card.second{min-height:184px}.podium-card.third{min-height:168px}.medal{width:36px;height:36px;font-size:17px}.first .medal{width:46px;height:46px}.podium-name{font-size:13px}.podium-votes{font-size:22px}.podium-caption{font-size:8px}.rank-row{grid-template-columns:34px minmax(0,1fr) auto;gap:9px;padding:12px 10px}.rank-number{width:30px;height:30px}.rank-name{font-size:13px}.rank-data{min-width:85px}.rank-total{font-size:17px}.rank-split{font-size:9px}.footer{font-size:8px}}
+
+/* Индивидуальная страница любимца зрителей */
+.fan-profile{padding:18px 0 24px}
+.fan-profile-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:8px 0 22px}
+.fan-back,.fan-share{border:1px solid #cbb9b4;border-radius:99px;padding:11px 16px;background:#fffdf9;color:var(--wine);font:800 12px 'DM Sans',sans-serif;cursor:pointer}
+.fan-share{background:var(--wine);border-color:var(--wine);color:white}
+.fan-hero{position:relative;display:grid;grid-template-columns:minmax(190px,.72fr) minmax(0,1.28fr);gap:clamp(22px,5vw,54px);align-items:center;overflow:hidden;padding:clamp(17px,3vw,32px);border:1px solid #d9c5a3;border-radius:26px;background:radial-gradient(circle at 88% 8%,#f0d9aa 0,transparent 34%),linear-gradient(120deg,#fff9eb,#f0e0c9 58%,#ead4d0);box-shadow:0 18px 45px #542b3517}
+.fan-hero:after{content:"★";position:absolute;right:3%;top:-35px;color:#b98a4b17;font:220px Georgia,serif;pointer-events:none}
+.fan-photo{position:relative;z-index:1;width:100%;aspect-ratio:4/5;max-height:430px;overflow:hidden;display:grid;place-items:center;border:5px solid #fff9e9;border-radius:19px;background:linear-gradient(145deg,#c9a66e,#8b5360);color:white;font:800 58px 'Manrope',sans-serif;box-shadow:0 14px 30px #4b2b3025}
+.fan-photo img{width:100%;height:100%;object-fit:cover}
+.fan-overline{position:relative;z-index:1;color:#916b36;font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}
+.fan-name{position:relative;z-index:1;margin:13px 0 10px;color:#3b2630;font:800 clamp(34px,6vw,68px)/.98 'Manrope',sans-serif;letter-spacing:-.075em;overflow-wrap:anywhere}
+.fan-subtitle{position:relative;z-index:1;margin:0;color:#79666a;font-size:14px;line-height:1.65}
+.fan-crown{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:9px 13px;border:1px solid #d5b779;border-radius:99px;background:#fff9e8;color:#875f28;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.fan-stats{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:20px}
+.fan-stat{padding:13px 12px;border:1px solid #e3d0b2;border-radius:14px;background:#fffaf0c9}
+.fan-stat strong{display:block;color:#71334b;font:800 clamp(22px,3vw,31px) 'Manrope',sans-serif;letter-spacing:-.06em;font-variant-numeric:tabular-nums}
+.fan-stat span{display:block;margin-top:4px;color:#897b73;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.fan-section{margin-top:27px}
+.fan-section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:13px}
+.fan-section-title h2{margin:0;color:#382832;font:800 22px 'Manrope',sans-serif;letter-spacing:-.045em}
+.fan-section-title span{color:var(--muted);font-size:10px;font-weight:800}
+.fan-performances{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fan-performance{padding:17px;border:1px solid #e2d8ce;border-radius:17px;background:#fffdf9;box-shadow:0 7px 20px #39212708}
+.fan-performance-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.fan-season{padding:6px 9px;border-radius:99px;background:#f2e8e2;color:#71334b;font-size:10px;font-weight:900}
+.fan-song{margin:0;color:#392832;font:700 20px/1.25 Georgia,serif;overflow-wrap:anywhere}
+.fan-episode{margin-top:7px;color:#91858a;font-size:11px;font-weight:700}
+.fan-vote-line{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:17px;color:#766b70;font-size:11px;font-weight:800}
+.fan-vote-line strong{color:#367568;font:800 15px 'Manrope',sans-serif}
+.fan-track{height:8px;margin-top:8px;border-radius:99px;background:#eee5df;overflow:hidden}
+.fan-track span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#c49a58,#71334b)}
+.fan-total{margin-top:7px;color:#a09598;font-size:10px}
+.fan-empty{padding:20px;border:1px dashed #d8c8c1;border-radius:14px;color:var(--muted);font-size:13px}
+[data-fan-profile]{cursor:pointer;transition:transform .18s,box-shadow .18s}
+[data-fan-profile]:hover{transform:translateY(-2px);box-shadow:0 12px 26px #39212714}
+@media(max-width:650px){.fan-hero{grid-template-columns:1fr}.fan-photo{aspect-ratio:4/3;max-height:300px}.fan-performances{grid-template-columns:1fr}.fan-stats{gap:6px}.fan-stat{padding:11px 8px}.fan-stat span{font-size:8px}.fan-nav{align-items:stretch}}
+</style><style id="fan-disclaimer-style">.fan-disclaimer{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 18px;background:linear-gradient(100deg,#30203f,#56304f 52%,#304653);color:#fff8ef;border-bottom:1px solid rgba(255,255,255,.2);font:500 13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;text-align:center;letter-spacing:.01em}.fan-disclaimer strong{color:#ffd58b;font-weight:800}.fan-disclaimer-icon{flex:0 0 auto;color:#ffd58b;font-size:16px}@media(max-width:560px){.fan-disclaimer{padding:9px 13px;font-size:11px;gap:7px}}</style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon.svg">
+</head>
+<body>
+<div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div><main class="page">
+<nav class="nav"><a class="brand" href="/"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a class="nav-link" href="/seasons/">Сезоны</a><a class="nav-link" href="/stats/">Статистика</a><a class="nav-link" href="/winners/">Победители</a><a class="nav-link" href="/experts/">Эксперты сотни</a><a class="nav-link" href="/">← На главную</a></div></nav>
+<header class="hero" id="ratingHero"><div class="eyebrow">Голос зрителей · Народный рейтинг</div><h1>Любимцы зрителей</h1><p>Кто чаще всего получает ваше «Да»? Здесь собраны голоса под выступлениями участников. Выбирайте сезон или смотрите общий рейтинг — результаты обновляются на основе голосования зрителей.</p></header>
+<section class="controls" id="ratingControls"><input id="search" type="search" placeholder="Найти участника…"><select id="season"><option value="all">Все сезоны</option></select></section><section id="fanProfile" class="fan-profile" hidden><div class="fan-profile-nav"><button class="fan-back" id="fanBack" type="button">← К рейтингу</button><button class="fan-share" id="fanShare" type="button">Поделиться профилем ↗</button></div><div id="fanProfileContent"></div></section>
+<section id="podiumSection" hidden><div class="section-label"><h2>Лидеры голосования</h2><span id="periodLabel">Все сезоны</span></div><div class="podium" id="podium"></div></section>
+<section><div class="section-label"><h2>Рейтинг участников</h2><span id="count">Загрузка…</span></div><div class="list" id="ranking"><div class="empty">Загружаем архив и голоса зрителей…</div></div></section>
+<div class="note">Рейтинг строится по сумме голосов «Да» под всеми выступлениями участника в выбранном периоде. При равенстве учитываются доля голосов «Да», затем общее количество голосов. Один браузер может оставить один голос за каждое выступление.</div>
+<footer class="footer"><span>Народный рейтинг</span><span>Ну-ка, все вместе!</span></footer>
+</main>
+<script>
+function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%10,m100=n%100;return m10===1&&m100!==11?'балл':m10>=2&&m10<=4&&(m100<12||m100>14)?'балла':'баллов'}
+
+(()=>{
+const API='https://api.nukavsevmeste.org', $=id=>document.getElementById(id);
+let entries=[],polls={};
+const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const personName=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
+const seasonLabel=s=>/^\d+$/.test(String(s))?String(s)+' сезон':String(s);
+function getRanking(){
+ const season=$('season').value,query=$('search').value.trim().toLocaleLowerCase('ru'),groups=new Map();
+ entries.filter(e=>season==='all'||String(e.season)===season).forEach(e=>{
+  const name=personName(e),key=name.toLocaleLowerCase('ru');if(!key)return;
+  if(query&&!name.toLocaleLowerCase('ru').includes(query))return;
+  if(!groups.has(key))groups.set(key,{name,performances:0,yes:0,no:0,seasons:new Set()});
+  const g=groups.get(key),p=polls[String(e.id)]||{yes:0,no:0};g.performances++;g.yes+=Number(p.yes)||0;g.no+=Number(p.no)||0;g.seasons.add(String(e.season||''));
+ });
+ return [...groups.values()].map(g=>({...g,total:g.yes+g.no,percent:g.yes+g.no?g.yes/(g.yes+g.no):0})).sort((a,b)=>b.yes-a.yes||b.percent-a.percent||b.total-a.total||a.name.localeCompare(b.name,'ru'));
+}
+function medalCard(p,place){return '<article class="podium-card '+(place===1?'first':place===2?'second':'third')+'" role="link" tabindex="0" data-fan-profile="'+safe(p.name)+'"><div class="medal">'+(place===1?'♛':place===2?'Ⅱ':'Ⅲ')+'</div><h3 class="podium-name">'+safe(p.name)+'</h3><div class="podium-votes">'+p.yes.toLocaleString('ru-RU')+'</div><div class="podium-caption">голосов «Да»</div><div class="podium-support">'+Math.round(p.percent*100)+'% поддержки</div></article>'}
+function render(){
+ const list=getRanking(),hasVotes=list.some(p=>p.total>0),leaders=list.filter(p=>p.total>0).slice(0,3),max=Math.max(1,...list.map(p=>p.yes));
+ $('periodLabel').textContent=$('season').value==='all'?'Все сезоны':seasonLabel($('season').value);
+ $('count').textContent=list.length+' '+(list.length===1?'участник':list.length>=2&&list.length<=4?'участника':'участников');
+ $('podiumSection').hidden=!leaders.length;
+ $('podium').innerHTML=leaders.map((p,i)=>medalCard(p,i+1)).join('');
+ $('ranking').innerHTML=list.length?list.map((p,i)=>'<article class="rank-row" role="link" tabindex="0" data-fan-profile="'+safe(p.name)+'"><div class="rank-number">'+(i+1)+'</div><div><div class="rank-name">'+safe(p.name)+'</div><div class="rank-meta">'+p.performances+' '+(p.performances===1?'выступление':p.performances>=2&&p.performances<=4?'выступления':'выступлений')+' · '+p.seasons.size+' '+(p.seasons.size===1?'сезон':p.seasons.size>=2&&p.seasons.size<=4?'сезона':'сезонов')+'</div><div class="rank-bar"><span style="width:'+(p.yes/max*100)+'%"></span></div></div><div class="rank-data"><div class="rank-total">'+p.yes.toLocaleString('ru-RU')+' «Да»</div><div class="rank-split">'+p.no.toLocaleString('ru-RU')+' «Нет» · '+(p.total?Math.round(p.percent*100)+'%':'нет голосов')+'</div></div></article>').join(''):'<div class="empty">Участники не найдены.</div>';
+ if(!hasVotes&&list.length)$('podiumSection').hidden=true;
+}
+
+function renderFanProfile(person){
+ const key=String(person||'').trim().toLocaleLowerCase('ru');
+ const list=entries.filter(e=>personName(e).toLocaleLowerCase('ru')===key);
+ if(!list.length)return false;
+ const stats=list.reduce((a,e)=>{const p=polls[String(e.id)]||{yes:0,no:0};a.yes+=Number(p.yes)||0;a.no+=Number(p.no)||0;a.items.push({e,p});return a},{yes:0,no:0,items:[]});
+ const total=stats.yes+stats.no,percent=total?Math.round(stats.yes/total*100):0;
+ const seasons=new Set(list.map(e=>String(e.season||'').trim()).filter(Boolean));
+ const photoEntry=list.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length));
+ const photo=photoEntry?(Array.isArray(photoEntry.photos)?photoEntry.photos.find(Boolean):'')||photoEntry.photo||'':'';
+ const initials=person.split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('');
+ $('fanProfileContent').innerHTML='<section class="fan-hero"><div class="fan-photo">'+(photo?'<img src="'+photo+'" alt="Фото: '+safe(person)+'">':safe(initials))+'</div><div><div class="fan-overline">Народная любовь · Ну-ка, все вместе!</div><h1 class="fan-name">'+safe(person)+'</h1><p class="fan-subtitle">Голоса зрителей складываются в большую историю поддержки. Здесь — путь участника в народном рейтинге и реакция аудитории на каждое выступление.</p><div class="fan-crown">♛ Любимчик зрителей</div><div class="fan-stats"><div class="fan-stat"><strong>'+stats.yes.toLocaleString('ru-RU')+'</strong><span>Голосов «Да»</span></div><div class="fan-stat"><strong>'+percent+'%</strong><span>Поддержка</span></div><div class="fan-stat"><strong>'+list.length+'</strong><span>Выступлений</span></div></div></div></section><section class="fan-section"><div class="fan-section-title"><h2>Голос зрителей по выступлениям</h2><span>'+seasons.size+' сез. · '+total+' голосов</span></div><div class="fan-performances">'+stats.items.sort((a,b)=>Number(b.e.season)-Number(a.e.season)).map(({e,p})=>{const t=(Number(p.yes)||0)+(Number(p.no)||0),pct=t?Math.round((Number(p.yes)||0)/t*100):0;return '<article class="fan-performance"><div class="fan-performance-head"><span class="fan-season">'+safe(/^\\d+$/.test(String(e.season))?e.season+' сезон':e.season||'Сезон не указан')+'</span><span class="fan-season">'+(Number(e.score)||100)+' '+scoreWord(Number(e.score)||100)+'</span></div><h3 class="fan-song">«'+safe(String(e.song||'Песня не указана').replace(/^«\\s*|\\s*»$/g,''))+'»</h3><div class="fan-episode">'+safe(e.episode?(/^(полуфинал|финал|первый полуфинал|второй полуфинал)$/i.test(String(e.episode))?e.episode:'Выпуск '+e.episode):'Выпуск не указан')+'</div><div class="fan-vote-line"><span>Поддержка зрителей</span><strong>'+pct+'%</strong></div><div class="fan-track"><span style="width:'+pct+'%"></span></div><div class="fan-total">'+(Number(p.yes)||0)+' «Да» · '+(Number(p.no)||0)+' «Нет» · '+t+' голосов</div></article>'}).join('')+'</div></section>';
+ document.title=person+' — Любимчик зрителей';
+ return true;
+}
+function openFanProfile(person){const u=new URL('/rating/',location.href);u.searchParams.set('profile',person);location.assign(u.href)}
+async function init(){
+ try{
+  const [ar,pr]=await Promise.all([fetch(API+'/api/participants',{cache:'no-store'}),fetch(API+'/api/polls',{cache:'no-store'})]);
+  if(!ar.ok||!pr.ok)throw new Error('Не удалось загрузить данные.');
+  const a=await ar.json(),p=await pr.json();entries=Array.isArray(a.participants)?a.participants.filter(item=>!item.hidden):[];polls=p.polls||{};
+  const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
+  $('season').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+safe(s)+'">'+safe(seasonLabel(s))+'</option>').join('');
+  const requested=new URLSearchParams(location.search).get('profile')||'';
+  if(requested&&renderFanProfile(requested)){
+   $('ratingHero').hidden=true;$('ratingControls').hidden=true;$('podiumSection').hidden=true;
+   document.querySelectorAll('main>section:not(#fanProfile)').forEach(s=>{if(s.id!=='fanProfile')s.hidden=true});
+   $('fanProfile').hidden=false;
+   $('fanBack').addEventListener('click',()=>location.href='/rating/');
+   $('fanShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href)}catch{}$('fanShare').textContent='Ссылка скопирована'});
+  }else{render()}
+ }catch(err){$('count').textContent='Ошибка загрузки';$('ranking').innerHTML='<div class="empty">Не удалось получить данные. Попробуйте обновить страницу чуть позже.</div>'}
+}
+$('search').addEventListener('input',render);$('season').addEventListener('change',render);init();
+})();
+</script><script>(()=>{const API='https://api.nukavsevmeste.org';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}})();</script>
+</body></html>
