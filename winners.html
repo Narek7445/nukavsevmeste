@@ -27,7 +27,7 @@
 </main>
 <script>
 (()=>{
- const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev',root=document.getElementById('seasonList');
+ const API='https://api.nukavsevmeste.org',root=document.getElementById('seasonList');
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
  const order=(a,b)=>{const x=Number(a),y=Number(b);return Number.isFinite(x)&&Number.isFinite(y)?x-y:Number.isFinite(x)?-1:Number.isFinite(y)?1:a.localeCompare(b,'ru')};
