@@ -631,6 +631,8 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 
 </style>
 <script>
+function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%10,m100=n%100;return m10===1&&m100!==11?'балл':m10>=2&&m10<=4&&(m100<12||m100>14)?'балла':'баллов'}
+
 (()=>{const form=document.getElementById('visitorFeedbackForm');if(!form)return;const status=document.getElementById('feedbackStatus'),button=document.getElementById('feedbackSubmit');form.addEventListener('submit',async e=>{e.preventDefault();button.disabled=true;button.textContent='Отправка…';status.textContent='';try{const res=await fetch('https://nukavsevmeste-api.nukavsevmeste.workers.dev/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('feedbackName').value,message:document.getElementById('feedbackMessage').value,website:form.elements.website.value})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Не удалось отправить отзыв.');form.reset();status.textContent='Спасибо! Ваш отзыв отправлен.';button.textContent='Отправить ещё';}catch(err){status.textContent=err.message||'Ошибка отправки. Попробуйте ещё раз.';button.textContent='Повторить отправку';}finally{button.disabled=false;}})})();
 </script>
 
@@ -791,7 +793,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  }
  function renderRecords(){
   $('adminEntryCount').textContent=entries.length;
-  $('recordList').innerHTML=entries.length?entries.slice().sort((a,b)=>Number(b.season)-Number(a.season)||String(a.firstName).localeCompare(String(b.firstName),'ru')).map(e=>{const points=Number(e.score)||100;const episode=e.episode?(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'выпуск '+escapeHTML(e.episode)):'выпуск не указан';return '<div class="record"><div class="record-title">'+escapeHTML(e.firstName+' '+e.lastName)+' <span class="admin-record-score '+(points===100?'perfect':'')+'">'+points+' баллов</span><span class="admin-record-meta">'+escapeHTML(e.season)+' сезон · '+episode+' · «'+escapeHTML(e.song||'')+'»</span></div><div class="record-actions"><button class="btn secondary small" data-edit="'+e.id+'">Изменить</button><button class="btn danger small" data-delete="'+e.id+'">Удалить</button></div></div>'}).join(''):'<p style="color:#888;font-size:13px">В архиве пока нет выступлений.</p>';
+  $('recordList').innerHTML=entries.length?entries.slice().sort((a,b)=>Number(b.season)-Number(a.season)||String(a.firstName).localeCompare(String(b.firstName),'ru')).map(e=>{const points=Number(e.score)||100;const episode=e.episode?(/^(полуфинал|финал)$/i.test(String(e.episode))?escapeHTML(e.episode):'выпуск '+escapeHTML(e.episode)):'выпуск не указан';return '<div class="record"><div class="record-title">'+escapeHTML(e.firstName+' '+e.lastName)+' <span class="admin-record-score '+(points===100?'perfect':'')+'">'+points+' '+scoreWord(points)+'</span><span class="admin-record-meta">'+escapeHTML(e.season)+' сезон · '+episode+' · «'+escapeHTML(e.song||'')+'»</span></div><div class="record-actions"><button class="btn secondary small" data-edit="'+e.id+'">Изменить</button><button class="btn danger small" data-delete="'+e.id+'">Удалить</button></div></div>'}).join(''):'<p style="color:#888;font-size:13px">В архиве пока нет выступлений.</p>';
  }
  function open(id){$(id).classList.add('open')}
  function close(id){$(id).classList.remove('open')}
