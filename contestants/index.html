@@ -248,7 +248,7 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%10,m100=n%100;return m10===1&&m100!==11?'балл':m10>=2&&m10<=4&&(m100<12||m100>14)?'балла':'баллов'}
 
 (()=>{
- const $=id=>document.getElementById(id);let entries=[];
+ const $=id=>document.getElementById(id);let entries=[],allEntries=[];
  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
  const score=e=>Number(e.score)||100;
@@ -288,8 +288,8 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   const key=String(personName||'').trim().toLocaleLowerCase('ru');
   const list=entries.filter(e=>name(e).toLocaleLowerCase('ru')===key).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a));
   if(!list.length)return false;
-  const primary=list.find(e=>e.primaryPhoto)?.primaryPhoto||'';const first=list.find(e=>e.primaryPhoto)||list.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||list[0];
-  const photos=[...new Set([primary,...list.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''])].filter(Boolean))];lightboxPhotos=photos;
+  const photoEntries=allEntries.filter(e=>name(e).toLocaleLowerCase('ru')===key);const primary=photoEntries.find(e=>e.primaryPhoto)?.primaryPhoto||'';const first=photoEntries.find(e=>e.primaryPhoto)||photoEntries.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||list[0];
+  const photos=[...new Set([primary,...photoEntries.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''])].filter(Boolean))];lightboxPhotos=photos;
   const records=list.find(e=>Array.isArray(e.records)&&e.records.length)?.records||[];
   const facts=list.find(e=>Array.isArray(e.facts)&&e.facts.length)?.facts||[];
   const seasons=[...new Set(list.map(e=>String(e.season||'').trim()).filter(Boolean))];
@@ -325,6 +325,7 @@ async function init(){
    const apiData=await apiResponse.json();
    if(!Array.isArray(apiData.participants))throw new Error('Некорректный формат архива');
    const d=apiData.participants;
+   allEntries=d;
    entries=d.filter(item=>!item.hidden);await loadPolls();
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
    const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
