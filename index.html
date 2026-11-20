@@ -953,7 +953,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
    const [eventResponse,peopleResponse]=await Promise.all([fetch(API+'/api/events',{cache:'no-store'}),fetch(API+'/api/participants',{cache:'no-store'})]);
    if(!eventResponse.ok)throw new Error('Events unavailable');
    const data=await eventResponse.json(),peopleData=peopleResponse.ok?await peopleResponse.json():{participants:[]},now=Date.now();
-   eventParticipants=Array.isArray(peopleData.participants)?peopleData.participants:[];
+   eventParticipants=Array.isArray(peopleData.participants)?peopleData.participants.filter(person=>person&&!person.hidden):[];
    futureEvents=(Array.isArray(data.events)?data.events:[]).filter(e=>e&&e.title&&Number.isFinite(Date.parse(e.dateTime))&&Date.parse(e.dateTime)>now).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));
    activeEvent=futureEvents[0]||null;
    if(!activeEvent){banner.hidden=true;return}
