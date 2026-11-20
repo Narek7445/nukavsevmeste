@@ -280,6 +280,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
 (()=>{
  const $=id=>document.getElementById(id);let entries=[],allEntries=[];
  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const isHiddenPerformance=item=>item?.hidden===true||item?.hidden===1||String(item?.hidden??'').trim().toLocaleLowerCase('en')==='true'||String(item?.hidden??'').trim()==='1';
  const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
  function profileEventMarkup(personName){const key=String(personName||'').trim().toLocaleLowerCase('ru');const event=profileUpcomingEvents.find(e=>Array.isArray(e.profiles)&&e.profiles.some(p=>String(p||'').trim().toLocaleLowerCase('ru')===key));return event?'<aside class="profile-event-banner"><span class="profile-event-kicker">БЛИЖАЙШЕЕ СОБЫТИЕ</span><strong>Участвует в событии «'+safe(event.title)+'»</strong><a href="/#eventCountdown">Перейти →</a></aside>':'';}
  const score=e=>Number(e.score)||100;
@@ -321,8 +322,8 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   const key=String(personName||'').trim().toLocaleLowerCase('ru');
   const list=entries.filter(e=>name(e).toLocaleLowerCase('ru')===key).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a));
   if(!list.length)return false;
-  const photoEntries=entries.filter(e=>name(e).toLocaleLowerCase('ru')===key);const primary=photoEntries.find(e=>e.primaryPhoto)?.primaryPhoto||'';const first=photoEntries.find(e=>e.primaryPhoto)||photoEntries.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||list[0];
-  const photos=[...new Set([primary,...photoEntries.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''])].filter(Boolean))];lightboxPhotos=photos;
+  const visibleProfileEntries=list.filter(e=>!isHiddenPerformance(e));const primary=visibleProfileEntries.find(e=>e.primaryPhoto)?.primaryPhoto||'';const first=visibleProfileEntries.find(e=>e.primaryPhoto)||visibleProfileEntries.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||visibleProfileEntries[0];
+  const photos=[...new Set([primary,...visibleProfileEntries.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''])].filter(Boolean))];lightboxPhotos=photos;
   const records=list.find(e=>Array.isArray(e.records)&&e.records.length)?.records||[];
   const facts=list.find(e=>Array.isArray(e.facts)&&e.facts.length)?.facts||[];
   const seasons=[...new Set(list.map(e=>String(e.season||'').trim()).filter(Boolean))];
@@ -359,7 +360,7 @@ async function init(){
    if(!Array.isArray(apiData.participants))throw new Error('Некорректный формат архива');
    const d=apiData.participants;
    allEntries=d;
-   entries=d.filter(item=>!item.hidden);try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}await loadPolls();
+   entries=d.filter(item=>!isHiddenPerformance(item));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}await loadPolls();
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
    const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
    $('performanceCount').textContent=entries.length.toLocaleString('ru-RU');
