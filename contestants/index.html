@@ -288,7 +288,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   const key=String(personName||'').trim().toLocaleLowerCase('ru');
   const list=entries.filter(e=>name(e).toLocaleLowerCase('ru')===key).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a));
   if(!list.length)return false;
-  const photoEntries=allEntries.filter(e=>name(e).toLocaleLowerCase('ru')===key);const primary=photoEntries.find(e=>e.primaryPhoto)?.primaryPhoto||'';const first=photoEntries.find(e=>e.primaryPhoto)||photoEntries.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||list[0];
+  const photoEntries=entries.filter(e=>name(e).toLocaleLowerCase('ru')===key);const primary=photoEntries.find(e=>e.primaryPhoto)?.primaryPhoto||'';const first=photoEntries.find(e=>e.primaryPhoto)||photoEntries.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||list[0];
   const photos=[...new Set([primary,...photoEntries.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''])].filter(Boolean))];lightboxPhotos=photos;
   const records=list.find(e=>Array.isArray(e.records)&&e.records.length)?.records||[];
   const facts=list.find(e=>Array.isArray(e.facts)&&e.facts.length)?.facts||[];
