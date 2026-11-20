@@ -71,7 +71,7 @@ select:focus{border-color:var(--wine);box-shadow:0 0 0 4px #71334b16}
 function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%10,m100=n%100;return m10===1&&m100!==11?'балл':m10>=2&&m10<=4&&(m100<12||m100>14)?'балла':'баллов'}
 
 (()=>{
- const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';
+ const API='https://api.nukavsevmeste.org';
  const $=id=>document.getElementById(id);
  let entries=[];
  const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
