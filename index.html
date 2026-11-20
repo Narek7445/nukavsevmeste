@@ -516,6 +516,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
     <div class="countdown-unit"><strong id="countdownSeconds">00</strong><span>секунд</span></div>
    </div>
    <div class="event-countdown-profiles" id="eventCountdownProfiles" hidden><div class="event-countdown-profiles-label">УЧАСТНИКИ СОБЫТИЯ</div><div class="event-countdown-profile-list" id="eventCountdownProfileList"></div></div>
+   <div class="event-more-wrap" id="eventMoreWrap" hidden><div class="event-more-list" id="eventMoreList" hidden></div><button class="event-more-toggle" id="eventMoreToggle" type="button" aria-expanded="false"></button></div>
    <span class="event-countdown-spark" aria-hidden="true">✦</span>
   </section>
 
@@ -612,6 +613,16 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  .event-countdown:after{animation:eventHaloDrift 21s ease-in-out infinite alternate-reverse}
 }
 @keyframes eventHaloDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-18px,12px,0)}}
+.event-more-wrap{position:relative;z-index:1;flex:1 0 100%;display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:4px}
+.event-more-wrap[hidden],.event-more-list[hidden]{display:none!important}
+.event-more-list{width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.event-more-card{min-width:0;padding:17px 19px;border:1px solid rgba(160,210,225,.25);border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.045));box-shadow:inset 0 1px 0 rgba(255,255,255,.08);animation:eventCountdownIn .3s ease both}
+.event-more-card h3{margin:0 0 8px;color:#fff;font:600 19px/1.2 Georgia,serif}
+.event-more-date{margin:0 0 10px;color:rgba(230,239,255,.72);font-size:11px;line-height:1.5}
+.event-more-remaining{display:inline-block;color:#f4d18f;font-size:11px;font-weight:800;letter-spacing:.04em}
+.event-more-toggle{border:1px solid rgba(151,220,225,.48);border-radius:999px;padding:10px 22px;background:rgba(123,197,204,.12);color:#a9e9e8;font:800 10px/1.2 var(--sans);letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .2s,border-color .2s}
+.event-more-toggle:hover{background:rgba(123,197,204,.23);border-color:#a9e9e8;transform:translateY(-2px)}
+@media(max-width:560px){.event-more-list{grid-template-columns:1fr}.event-more-card{padding:15px 16px}}
 </style>
 <script>
 (()=>{const form=document.getElementById('visitorFeedbackForm');if(!form)return;const status=document.getElementById('feedbackStatus'),button=document.getElementById('feedbackSubmit');form.addEventListener('submit',async e=>{e.preventDefault();button.disabled=true;button.textContent='Отправка…';status.textContent='';try{const res=await fetch('https://nukavsevmeste-api.nukavsevmeste.workers.dev/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('feedbackName').value,message:document.getElementById('feedbackMessage').value,website:form.elements.website.value})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Не удалось отправить отзыв.');form.reset();status.textContent='Спасибо! Ваш отзыв отправлен.';button.textContent='Отправить ещё';}catch(err){status.textContent=err.message||'Ошибка отправки. Попробуйте ещё раз.';button.textContent='Повторить отправку';}finally{button.disabled=false;}})})();
@@ -864,26 +875,48 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  const $=id=>document.getElementById(id);
  const banner=$('eventCountdown');
  if(!banner)return;
- let activeEvent=null, tickHandle=null, refreshHandle=null;
+ let activeEvent=null, futureEvents=[], expanded=false, tickHandle=null, refreshHandle=null;
  const pad=n=>String(n).padStart(2,'0');
+ const moscowDate=value=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value))+' · МСК';
+ function remainingLabel(value){
+  const ms=Date.parse(value)-Date.now();if(ms<=0)return 'Начинается сейчас';
+  const total=Math.floor(ms/1000),days=Math.floor(total/86400),hours=Math.floor(total%86400/3600),minutes=Math.floor(total%3600/60);
+  return days?('Через '+days+' дн. '+hours+' ч.'):hours?('Через '+hours+' ч. '+minutes+' мин.'):'Через '+minutes+' мин.';
+ }
  function paint(){
   if(!activeEvent)return;
   const remaining=Date.parse(activeEvent.dateTime)-Date.now();
-  if(remaining<=0){banner.hidden=true;activeEvent=null;loadEvents();return}
+  if(remaining<=0){activeEvent=null;loadEvents();return}
   const total=Math.floor(remaining/1000),days=Math.floor(total/86400),hours=Math.floor(total%86400/3600),minutes=Math.floor(total%3600/60),seconds=total%60;
   $('countdownDays').textContent=pad(days);$('countdownHours').textContent=pad(hours);$('countdownMinutes').textContent=pad(minutes);$('countdownSeconds').textContent=pad(seconds);
+  document.querySelectorAll('[data-event-remaining]').forEach(node=>{const event=futureEvents.find(item=>String(item.id||item.title)===node.dataset.eventRemaining);if(event)node.textContent=remainingLabel(event.dateTime)});
+ }
+ function renderMoreEvents(){
+  const wrap=$('eventMoreWrap'),list=$('eventMoreList'),toggle=$('eventMoreToggle'),rest=futureEvents.slice(1);
+  wrap.hidden=rest.length===0;
+  if(!rest.length){expanded=false;return}
+  list.replaceChildren();
+  rest.forEach(event=>{
+   const card=document.createElement('article');card.className='event-more-card';
+   const title=document.createElement('h3');title.textContent=event.title;
+   const date=document.createElement('p');date.className='event-more-date';date.textContent=moscowDate(event.dateTime);
+   const remaining=document.createElement('span');remaining.className='event-more-remaining';remaining.dataset.eventRemaining=String(event.id||event.title);remaining.textContent=remainingLabel(event.dateTime);
+   card.append(title,date,remaining);list.appendChild(card);
+  });
+  list.hidden=!expanded;toggle.textContent=expanded?'Скрыть':'Ещё '+rest.length+' событий';toggle.setAttribute('aria-expanded',String(expanded));
  }
  async function loadEvents(){
   try{
    const [eventResponse,peopleResponse]=await Promise.all([fetch(API+'/api/events',{cache:'no-store'}),fetch(API+'/api/participants',{cache:'no-store'})]);
    if(!eventResponse.ok)throw new Error('Events unavailable');
    const data=await eventResponse.json(),peopleData=peopleResponse.ok?await peopleResponse.json():{participants:[]},now=Date.now();
-   const next=(Array.isArray(data.events)?data.events:[]).filter(e=>e&&e.title&&Number.isFinite(Date.parse(e.dateTime))&&Date.parse(e.dateTime)>now).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime))[0];
-   activeEvent=next||null;
+   futureEvents=(Array.isArray(data.events)?data.events:[]).filter(e=>e&&e.title&&Number.isFinite(Date.parse(e.dateTime))&&Date.parse(e.dateTime)>now).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));
+   activeEvent=futureEvents[0]||null;
    if(!activeEvent){banner.hidden=true;return}
    $('eventCountdownTitle').textContent=activeEvent.title;
-   $('eventCountdownDate').textContent=new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(activeEvent.dateTime))+' · МСК';
+   $('eventCountdownDate').textContent=moscowDate(activeEvent.dateTime);
    renderEventProfiles(activeEvent.profiles,peopleData.participants);
+   renderMoreEvents();
    banner.hidden=false;paint();
   }catch(error){banner.hidden=true}
  }
@@ -909,6 +942,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   });
   section.hidden=!list.children.length;
  }
+ $('eventMoreToggle').addEventListener('click',()=>{expanded=!expanded;renderMoreEvents()});
  loadEvents();
  tickHandle=setInterval(paint,1000);
  refreshHandle=setInterval(loadEvents,60000);
