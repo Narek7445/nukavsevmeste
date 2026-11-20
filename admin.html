@@ -197,7 +197,7 @@ input,textarea{width:100%;border:1px solid #d9ccc3;border-radius:5px;background:
 function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%10,m100=n%100;return m10===1&&m100!==11?'балл':m10>=2&&m10<=4&&(m100<12||m100>14)?'балла':'баллов'}
 
 (()=>{
-const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev', $=id=>document.getElementById(id);
+const API='https://api.nukavsevmeste.org', $=id=>document.getElementById(id);
 let token=sessionStorage.getItem('nuka-admin-token')||'',entries=[],photoData=[],existingPhotos=[],removedPhotos=[],toastTimer,primaryPhotoChoice='';
 const DRAFT_KEY='nuka-admin-entry-draft-v1';let restoringDraft=false,draftSaveTimer;
 const req=async(path,opts={})=>{const headers=new Headers(opts.headers||{});if(token)headers.set('Authorization','Bearer '+token);const res=await fetch(API+path,{...opts,headers});let data={};try{data=await res.json()}catch{}if(!res.ok)throw new Error(data.error||'Ошибка сервера: '+res.status);return data};
