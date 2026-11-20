@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#241a2a">
+<title>Победители — Ну-ка, все вместе!</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+:root{--ink:#2b2030;--muted:#897c87;--paper:#f5efe9;--card:#fffdf9;--wine:#71334b;--dark:#321d32;--gold:#c8a267;--line:#e6d9cf}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 8% 10%,#ead9d0,transparent 30%),radial-gradient(circle at 95% 45%,#e6d9e5,transparent 32%),var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif}
+.page{width:min(1220px,100%);margin:auto;padding:24px clamp(15px,4vw,52px) 70px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;letter-spacing:-.04em}.mark{display:grid;place-items:center;width:39px;height:39px;border-radius:12px;background:var(--dark);color:#f5d99f;font:25px Georgia,serif}.links{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end}.links a{padding:9px 13px;border:1px solid var(--line);border-radius:99px;color:var(--wine);text-decoration:none;font-size:11px;font-weight:800}.links a:hover,.links a.active{background:var(--wine);border-color:var(--wine);color:#fff}
+.hero{position:relative;overflow:hidden;margin:28px 0 28px;padding:clamp(28px,6vw,66px);border-radius:27px;background:linear-gradient(120deg,#211a2d,#4b293f 62%,#805044);color:white;box-shadow:0 20px 50px #321a2b25}.hero:after{content:'♛';position:absolute;right:5%;top:50%;transform:translateY(-55%) rotate(9deg);font:clamp(150px,26vw,300px)/1 Georgia,serif;color:#fff1;pointer-events:none}.kicker{position:relative;z-index:1;color:#e6c991;font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase}.hero h1{position:relative;z-index:1;margin:13px 0 12px;font:600 clamp(45px,8vw,86px)/.95 Georgia,serif;letter-spacing:-.055em}.hero p{position:relative;z-index:1;max-width:620px;margin:0;color:#f1e5e8;font-size:14px;line-height:1.7}
+.summary{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 2px 17px;color:var(--muted);font-size:12px}.summary strong{color:var(--wine);font-size:16px}
+.seasons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.season{overflow:hidden;border:1px solid var(--line);border-radius:21px;background:var(--card);box-shadow:0 10px 30px #39212a0b}.season-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid #eee5df;background:linear-gradient(110deg,#fffaf3,#f8f0eb)}.season-head h2{margin:0;color:var(--dark);font:600 25px Georgia,serif}.season-head span{padding:6px 10px;border-radius:99px;background:#f0e6d8;color:#805b32;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.winner-list{display:grid;gap:10px;padding:15px}.winner{display:grid;grid-template-columns:74px minmax(0,1fr) auto;align-items:center;gap:13px;padding:11px;border:1px solid #eee5df;border-radius:15px;background:linear-gradient(110deg,#fff,#fcf8f3);text-decoration:none;transition:.2s}.winner:hover{transform:translateY(-2px);border-color:#d9c39b;box-shadow:0 9px 22px #39212a10}.photo{width:74px;height:82px;overflow:hidden;border-radius:11px;background:linear-gradient(145deg,#d8c4b7,#805a70);display:grid;place-items:center;color:white;font:600 27px Georgia,serif}.photo img{width:100%;height:100%;object-fit:cover}.winner-name{color:var(--dark);font:600 18px Georgia,serif;overflow-wrap:anywhere}.winner-caption{display:block;margin-top:5px;color:var(--muted);font-size:10px}.crown{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#f6ecd9;color:#946b30;font-size:19px}
+.unknown{display:flex;align-items:center;gap:14px;padding:17px;border:1px dashed #d7c7bb;border-radius:15px;background:#fcf8f3}.question{display:grid;place-items:center;width:54px;height:54px;border-radius:15px;background:linear-gradient(145deg,#eee5df,#e3d6d2);color:#846e75;font:600 33px Georgia,serif}.unknown strong{display:block;color:#574751;font:600 17px Georgia,serif}.unknown small{display:block;margin-top:4px;color:var(--muted);font-size:10px}
+.empty{grid-column:1/-1;padding:45px 20px;border:1px dashed #d5c4b8;border-radius:18px;text-align:center;color:var(--muted);background:#fff9}.footer{display:flex;justify-content:space-between;gap:12px;margin-top:45px;padding-top:17px;border-top:1px solid var(--line);color:#9a8e89;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+@media(max-width:720px){.seasons{grid-template-columns:1fr}.nav{align-items:flex-start}.brand{font-size:12px}.mark{width:34px;height:34px}.links{gap:5px}.links a{padding:8px 9px;font-size:10px}.hero{margin:18px 0 22px;border-radius:20px}.winner{grid-template-columns:62px minmax(0,1fr) auto;padding:9px}.photo{width:62px;height:70px}.winner-name{font-size:16px}.footer{flex-direction:column}}
+</style>
+</head>
+<body><main class="page">
+<nav class="nav"><a class="brand" href="index.html"><span class="mark">♛</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div class="links"><a href="seasons.html">Сезоны</a><a href="contestants.html">Все конкурсанты</a><a href="stats.html">Статистика</a><a class="active" href="winners.html">Победители</a><a href="index.html">На главную</a></div></nav>
+<header class="hero"><div class="kicker">Золотые голоса · Главные имена</div><h1>Победители.</h1><p>Участники, отмеченные победителями в архиве шоу. Если победитель сезона пока не указан, его место остаётся открытым — вместо имени стоит вопросительный знак.</p></header>
+<div class="summary"><span>Победители по сезонам</span><span id="winnerSummary"><strong>—</strong></span></div>
+<section class="seasons" id="seasonList"><div class="empty">Загружаем список победителей…</div></section>
+<footer class="footer"><span>Ну-ка, все вместе!</span><span>Зал славы</span></footer>
+</main>
+<script>
+(()=>{
+ const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev',root=document.getElementById('seasonList');
+ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
+ const order=(a,b)=>{const x=Number(a),y=Number(b);return Number.isFinite(x)&&Number.isFinite(y)?x-y:Number.isFinite(x)?-1:Number.isFinite(y)?1:a.localeCompare(b,'ru')};
+ async function load(){
+  try{
+   const response=await fetch(API+'/api/participants',{cache:'no-store'});if(!response.ok)throw new Error('Не удалось загрузить архив.');
+   const data=await response.json();if(!Array.isArray(data.participants))throw new Error('Некорректный формат архива.');
+   const entries=data.participants.filter(e=>e&&!e.hidden&&name(e));
+   const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort(order);
+   let marked=0;
+   root.innerHTML=seasons.length?seasons.map(season=>{
+    const list=entries.filter(e=>String(e.season||'').trim()===season);
+    const people=new Map();
+    list.forEach(e=>{const key=name(e).toLocaleLowerCase('ru');const old=people.get(key);const photos=[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''].filter(Boolean);if(!old)people.set(key,{name:name(e),winner:!!e.winner,photo:photos[0]||'',season});else{old.winner=old.winner||!!e.winner;if(!old.photo&&photos.length)old.photo=photos[0]}});
+    const winners=[...people.values()].filter(p=>p.winner).sort((a,b)=>a.name.localeCompare(b.name,'ru'));marked+=winners.length;
+    const content=winners.length?winners.map(p=>'<a class="winner" href="contestants.html?profile='+encodeURIComponent(p.name)+'"><span class="photo">'+(p.photo?'<img src="'+esc(p.photo)+'" alt="Фото '+esc(p.name)+'" loading="lazy">':esc(p.name.split(/\s+/).slice(0,2).map(x=>x[0]||'').join('')) )+'</span><span><strong class="winner-name">'+esc(p.name)+'</strong><small class="winner-caption">Победитель · '+esc(season)+(Number.isFinite(Number(season))?' сезон':'')+'</small></span><span class="crown" aria-hidden="true">♛</span></a>').join(''):'<div class="unknown"><span class="question">?</span><span><strong>Победитель пока не указан</strong><small>Имя можно добавить через панель администратора</small></span></div>';
+    return '<article class="season"><header class="season-head"><h2>'+esc(season)+(Number.isFinite(Number(season))?' сезон':'')+'</h2><span>'+winners.length+' '+(winners.length===1?'победитель':winners.length>=2&&winners.length<=4?'победителя':'победителей')+'</span></header><div class="winner-list">'+content+'</div></article>';
+   }).join(''):'<div class="empty">В архиве пока нет сезонов.</div>';
+   document.getElementById('winnerSummary').innerHTML='<strong>'+marked.toLocaleString('ru-RU')+'</strong> отмечено победителей';
+  }catch(error){root.innerHTML='<div class="empty">'+esc(error.message||'Не удалось загрузить список победителей.')+'</div>'}
+ }
+ load();
+})();
+</script></body></html>
