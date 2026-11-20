@@ -68,6 +68,8 @@ select:focus{border-color:var(--wine);box-shadow:0 0 0 4px #71334b16}
 <footer class="footer"><span>Ну-ка, все вместе!</span><span>Архив выступлений</span></footer>
 </main>
 <script>
+function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%10,m100=n%100;return m10===1&&m100!==11?'балл':m10>=2&&m10<=4&&(m100<12||m100>14)?'балла':'баллов'}
+
 (()=>{
  const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';
  const $=id=>document.getElementById(id);
@@ -80,7 +82,7 @@ select:focus{border-color:var(--wine);box-shadow:0 0 0 4px #71334b16}
  function card(item,index){
   const photo=imageFor(item),name=[normalize(item.firstName),normalize(item.lastName)].filter(Boolean).join(' '),score=Number(item.score),validScore=Number.isFinite(score)&&score>0;
   const initials=(name.split(/\s+/).slice(0,2).map(part=>part[0]||'').join('')||'♫').toLocaleUpperCase('ru');
-  return '<article class="performance-card"><div class="performance-photo">'+(photo?'<img src="'+escapeHTML(photo)+'" alt="Фотография: '+escapeHTML(name)+'" loading="lazy">':'<div class="photo-placeholder"><span>'+escapeHTML(initials)+'</span></div>')+'</div><div class="card-body"><div class="card-overline">Выступление · '+String(index+1).padStart(2,'0')+' '+(item.battle?'<span class="battle-label">Баттл</span>':'')+'</div><h3 class="participant-name">'+escapeHTML(name||'Участник не указан')+'</h3><p class="song-label">Исполненная песня</p><p class="song-title">'+escapeHTML(item.song||'Название не указано')+'</p><div class="card-bottom"><span class="season-chip">'+escapeHTML(item.season)+(item.episode?' · выпуск '+escapeHTML(item.episode):'')+'</span><div class="score-block '+(score===100?'perfect':'')+'"><span class="score-number">'+(validScore?escapeHTML(score):'—')+'</span><span class="score-word">баллов</span></div></div></div></article>';
+  return '<article class="performance-card"><div class="performance-photo">'+(photo?'<img src="'+escapeHTML(photo)+'" alt="Фотография: '+escapeHTML(name)+'" loading="lazy">':'<div class="photo-placeholder"><span>'+escapeHTML(initials)+'</span></div>')+'</div><div class="card-body"><div class="card-overline">Выступление · '+String(index+1).padStart(2,'0')+' '+(item.battle?'<span class="battle-label">Баттл</span>':'')+'</div><h3 class="participant-name">'+escapeHTML(name||'Участник не указан')+'</h3><p class="song-label">Исполненная песня</p><p class="song-title">'+escapeHTML(item.song||'Название не указано')+'</p><div class="card-bottom"><span class="season-chip">'+escapeHTML(item.season)+(item.episode?' · выпуск '+escapeHTML(item.episode):'')+'</span><div class="score-block '+(score===100?'perfect':'')+'"><span class="score-number">'+(validScore?escapeHTML(score):'—')+'</span><span class="score-word">'+(validScore?scoreWord(score):'баллов')+'</span></div></div></div></article>';
  }
  function renderSeason(season){
   const selected=entries.filter(item=>normalize(item.season)===season);
