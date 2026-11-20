@@ -563,7 +563,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  </div>
   <section class="participants-directory" id="participantsDirectory" aria-labelledby="participantsDirectoryTitle"><div class="participants-directory-head"><div><div class="participants-directory-kicker">Голоса и лица шоу</div><h2 id="participantsDirectoryTitle">Участники</h2><p>Все участники архива в одном месте. Нажмите на карточку, чтобы открыть профиль.</p></div><span class="participants-directory-count" id="participantsDirectoryCount">0 участников</span></div><div class="participants-directory-grid" id="participantsDirectoryGrid"></div></section>
   <section class="song-quiz-section" id="songQuiz" aria-labelledby="songQuizTitle">
-    <div class="song-quiz-heading"><div><div class="song-quiz-kicker">Интерактивная игра</div><h2 id="songQuizTitle">Угадай песню и сезон</h2><p>Посмотри на фотографию участника и попробуй вспомнить, в каком сезоне и с какой песней он выступал.</p></div><div class="song-quiz-mark" aria-hidden="true">♪</div></div>
+    <div class="song-quiz-heading"><div><div class="song-quiz-kicker">Интерактивная игра</div><h2 id="songQuizTitle">Угадай песню и сезон</h2><p>Посмотри на фотографию участника и правильно угадай и сезон, и песню. Для победы должны совпасть оба ответа.</p></div><div class="song-quiz-mark" aria-hidden="true">♪</div></div>
     <div class="song-quiz-card">
       <div class="song-quiz-photo" id="songQuizPhoto"><div class="song-quiz-placeholder">?</div></div>
       <div class="song-quiz-controls">
@@ -859,8 +859,14 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   quizAnswered=true;
   const seasonCorrect=Number(season)===Number(currentQuizEntry.season),songCorrect=song.trim().toLocaleLowerCase('ru')===String(currentQuizEntry.song).trim().toLocaleLowerCase('ru');
   const name=currentQuizEntry.firstName+' '+currentQuizEntry.lastName;
-  if(seasonCorrect&&songCorrect){feedback.className='song-quiz-feedback correct';feedback.innerHTML='<span class="song-quiz-success-icon" aria-hidden="true">✓</span><span class="song-quiz-success-copy"><span class="song-quiz-success-kicker">Идеальный ответ · +1 к музыкальной памяти</span><strong class="song-quiz-success-name">'+escapeHTML(name)+'</strong><span class="song-quiz-success-detail">«'+escapeHTML(currentQuizEntry.song)+'» <span aria-hidden="true">·</span> '+escapeHTML(String(currentQuizEntry.season))+' сезон <span aria-hidden="true">·</span> Отличная память!</span></span>'}
-  else{feedback.className='song-quiz-feedback correct';feedback.innerHTML='<span class="song-quiz-success-icon" aria-hidden="true">!</span><span class="song-quiz-success-copy"><span class="song-quiz-success-kicker">Правильный ответ</span><strong class="song-quiz-success-name">'+escapeHTML(name)+'</strong><span class="song-quiz-success-detail">«'+escapeHTML(currentQuizEntry.song)+'» <span aria-hidden="true">·</span> '+escapeHTML(String(currentQuizEntry.season))+' сезон</span></span>'}
+  if(seasonCorrect&&songCorrect){
+   feedback.className='song-quiz-feedback correct';
+   feedback.innerHTML='<span class="song-quiz-success-icon" aria-hidden="true">✓</span><span class="song-quiz-success-copy"><span class="song-quiz-success-kicker">Победа · оба ответа верны!</span><strong class="song-quiz-success-name">'+escapeHTML(name)+'</strong><span class="song-quiz-success-detail">«'+escapeHTML(currentQuizEntry.song)+'» <span aria-hidden="true">·</span> '+escapeHTML(String(currentQuizEntry.season))+' сезон <span aria-hidden="true">·</span> Отличная память!</span></span>';
+  }else{
+   feedback.className='song-quiz-feedback wrong';
+   const wrongParts=[...(!seasonCorrect?['сезон']:[]),...(!songCorrect?['песня']:[])].join(' и ');
+   feedback.innerHTML='<span class="song-quiz-success-icon" aria-hidden="true">×</span><span class="song-quiz-success-copy"><span class="song-quiz-success-kicker">Пока не получилось</span><strong class="song-quiz-success-name">Неверно: '+wrongParts+'</strong><span class="song-quiz-success-detail">Правильный ответ: «'+escapeHTML(currentQuizEntry.song)+'» · '+escapeHTML(String(currentQuizEntry.season))+' сезон.</span></span>';
+  }
   $('songQuizCheck').disabled=true;
  }
 
