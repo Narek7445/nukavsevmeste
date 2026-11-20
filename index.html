@@ -655,7 +655,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 <script>
 function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%10,m100=n%100;return m10===1&&m100!==11?'балл':m10>=2&&m10<=4&&(m100<12||m100>14)?'балла':'баллов'}
 
-(()=>{const form=document.getElementById('visitorFeedbackForm');if(!form)return;const status=document.getElementById('feedbackStatus'),button=document.getElementById('feedbackSubmit');form.addEventListener('submit',async e=>{e.preventDefault();button.disabled=true;button.textContent='Отправка…';status.textContent='';try{const res=await fetch('https://nukavsevmeste-api.nukavsevmeste.workers.dev/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('feedbackName').value,message:document.getElementById('feedbackMessage').value,website:form.elements.website.value})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Не удалось отправить отзыв.');form.reset();status.textContent='Спасибо! Ваш отзыв отправлен.';button.textContent='Отправить ещё';}catch(err){status.textContent=err.message||'Ошибка отправки. Попробуйте ещё раз.';button.textContent='Повторить отправку';}finally{button.disabled=false;}})})();
+(()=>{const form=document.getElementById('visitorFeedbackForm');if(!form)return;const status=document.getElementById('feedbackStatus'),button=document.getElementById('feedbackSubmit');form.addEventListener('submit',async e=>{e.preventDefault();button.disabled=true;button.textContent='Отправка…';status.textContent='';try{const res=await fetch('https://api.nukavsevmeste.org/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('feedbackName').value,message:document.getElementById('feedbackMessage').value,website:form.elements.website.value})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Не удалось отправить отзыв.');form.reset();status.textContent='Спасибо! Ваш отзыв отправлен.';button.textContent='Отправить ещё';}catch(err){status.textContent=err.message||'Ошибка отправки. Попробуйте ещё раз.';button.textContent='Повторить отправку';}finally{button.disabled=false;}})})();
 </script>
 
 
@@ -733,7 +733,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  const KEY='nuka-vse-vmeste-contestants-v1';
  const $=id=>document.getElementById(id);
  let entries=[], photoData=[], toastTimer, dashboardRendered=false, searchRenderTimer;
- const API_BASE='https://nukavsevmeste-api.nukavsevmeste.workers.dev';
+ const API_BASE='https://api.nukavsevmeste.org';
  let adminToken=sessionStorage.getItem('nuka-admin-token')||'';
  async function apiRequest(path,options={}){const headers=new Headers(options.headers||{});if(adminToken)headers.set('Authorization','Bearer '+adminToken);const response=await fetch(API_BASE+path,{...options,headers});let data={};try{data=await response.json()}catch{}if(!response.ok)throw new Error(data.error||'Ошибка API: '+response.status);return data}
  async function load(){const result=await apiRequest('/api/participants',{cache:'no-store'});if(!Array.isArray(result.participants))throw new Error('Сервер вернул некорректный формат архива');return result.participants}
@@ -744,7 +744,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  function escapeHTML(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
  let pollResults={};
- const POLL_API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';
+ const POLL_API='https://api.nukavsevmeste.org';
  function pollVoterId(){let id='';try{id=localStorage.getItem('nuka-poll-voter-id')||'';if(!id){id=crypto.randomUUID();localStorage.setItem('nuka-poll-voter-id',id)}}catch{id=crypto.randomUUID()}return id}
  function hasVoted(id){try{return localStorage.getItem('nuka-poll-voted-'+id)==='1'}catch{return false}}
  function markVoted(id){try{localStorage.setItem('nuka-poll-voted-'+id,'1')}catch{}}
@@ -895,13 +895,13 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
 </script>
 
 <script>
-(()=>{const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}}</script>
+(()=>{const API='https://api.nukavsevmeste.org';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}}</script>
 
 
 
 <script>
 (()=> {
- const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';
+ const API='https://api.nukavsevmeste.org';
  const $=id=>document.getElementById(id);
  const banner=$('eventCountdown');
  if(!banner)return;
