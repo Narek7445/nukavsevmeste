@@ -227,7 +227,7 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 <body>
 <div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div>
 <main class="page">
- <nav class="nav"><a class="brand" href="index.html"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a class="nav-link" href="seasons.html">Сезоны</a><a class="nav-link active" href="stats.html">Статистика</a><a class="nav-link" href="winners.html">Победители</a><a class="nav-link" href="experts.html">Эксперты сотни</a><a class="nav-link" href="rating.html">Любимцы зрителей</a><a class="nav-link" href="index.html">← Стобалльные выступления</a></div></nav>
+ <nav class="nav"><a class="brand" href="/"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a class="nav-link" href="/seasons/">Сезоны</a><a class="nav-link active" href="/stats/">Статистика</a><a class="nav-link" href="/winners/">Победители</a><a class="nav-link" href="/experts/">Эксперты сотни</a><a class="nav-link" href="/rating/">Любимцы зрителей</a><a class="nav-link" href="/">← Стобалльные выступления</a></div></nav>
  <header class="hero" id="hero"><div><div class="kicker">Большая сцена · Большие голоса</div><h1>Все<br>конкурсанты.</h1><p>Отдельный архив выступлений и участников шоу. Здесь собраны все записи из общей базы — не только номера со ста баллами.</p></div><div class="hero-stamp"><span>Каждый голос<br>имеет значение</span></div></header>
  <section class="stats" aria-label="Статистика архива">
   <article class="stat stat-performances"><div class="stat-top"><span class="stat-icon" aria-hidden="true">♫</span><span class="stat-overline">Архив выступлений</span></div><strong id="performanceCount">—</strong><span class="stat-caption">выступлений</span><span class="stat-decoration" aria-hidden="true">01</span></article>
@@ -315,7 +315,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  document.body.appendChild(lightbox);
  lightbox.addEventListener('click',e=>{if(e.target===lightbox||e.target.closest('.lightbox-close'))closeLightbox();else if(e.target.closest('.lightbox-prev'))moveLightbox(-1);else if(e.target.closest('.lightbox-next'))moveLightbox(1)});
  document.addEventListener('keydown',e=>{if(!lightbox.classList.contains('open'))return;if(e.key==='Escape')closeLightbox();if(e.key==='ArrowLeft')moveLightbox(-1);if(e.key==='ArrowRight')moveLightbox(1)});
-function openProfile(personName){const target=new URL('contestants.html',location.href);target.searchParams.set('profile',personName);location.assign(target.href)}
+function openProfile(personName){const target=new URL('/contestants/',location.href);target.searchParams.set('profile',personName);location.assign(target.href)}
 async function init(){
   try{
    const API_BASE='https://api.nukavsevmeste.org';
@@ -341,7 +341,7 @@ async function init(){
      document.querySelector('.result-line').style.display='none';
      $('grid').style.display='none';
      $('profileView').removeAttribute('hidden');
-     $('profileContent').addEventListener('click',e=>{const photo=e.target.closest('[data-photo-index]');if(photo){showLightbox(Number(photo.dataset.photoIndex));return}const vote=e.target.closest('[data-vote]');if(vote){e.stopPropagation();submitPollVote(vote)}});$('profileBack').addEventListener('click',()=>{location.href='contestants.html'});
+     $('profileContent').addEventListener('click',e=>{const photo=e.target.closest('[data-photo-index]');if(photo){showLightbox(Number(photo.dataset.photoIndex));return}const vote=e.target.closest('[data-vote]');if(vote){e.stopPropagation();submitPollVote(vote)}});$('profileBack').addEventListener('click',()=>{location.href='/contestants/'});
      $('profileShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href)}catch{}$('profileShare').textContent='Ссылка скопирована'});
     }else{
      $('resultCount').textContent='Профиль не найден';
