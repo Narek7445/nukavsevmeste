@@ -4,7 +4,7 @@ compatibility_date = "2026-11-19"
 
 [vars]
 # Set this to the exact public GitHub Pages origin, e.g. https://narek7445.github.io
-ALLOWED_ORIGIN = "https://narek7445.github.io"
+ALLOWED_ORIGIN = "https://nukavsevmeste.org"
 
 [[d1_databases]]
 binding = "DB"
