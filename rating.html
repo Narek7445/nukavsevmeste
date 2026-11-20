@@ -84,7 +84,7 @@ input,select{width:100%;min-width:0;border:1px solid #d9cec5;border-radius:11px;
 function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%10,m100=n%100;return m10===1&&m100!==11?'балл':m10>=2&&m10<=4&&(m100<12||m100>14)?'балла':'баллов'}
 
 (()=>{
-const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev', $=id=>document.getElementById(id);
+const API='https://api.nukavsevmeste.org', $=id=>document.getElementById(id);
 let entries=[],polls={};
 const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const personName=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
@@ -144,5 +144,5 @@ async function init(){
 }
 $('search').addEventListener('input',render);$('season').addEventListener('change',render);init();
 })();
-</script><script>(()=>{const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}})();</script>
+</script><script>(()=>{const API='https://api.nukavsevmeste.org';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}})();</script>
 </body></html>
