@@ -322,8 +322,8 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   const key=String(personName||'').trim().toLocaleLowerCase('ru');
   const list=entries.filter(e=>name(e).toLocaleLowerCase('ru')===key).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a));
   if(!list.length)return false;
-  const visibleProfileEntries=list.filter(e=>!isHiddenPerformance(e));const primary=visibleProfileEntries.find(e=>e.primaryPhoto)?.primaryPhoto||'';const first=visibleProfileEntries.find(e=>e.primaryPhoto)||visibleProfileEntries.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||visibleProfileEntries[0];
-  const photos=[...new Set([primary,...visibleProfileEntries.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''])].filter(Boolean))];lightboxPhotos=photos;
+  const visibleProfileEntries=list.filter(e=>!isHiddenPerformance(e));const visiblePhotos=[...new Set(visibleProfileEntries.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||'']).filter(Boolean))];const primary=visibleProfileEntries.find(e=>e.primaryPhoto&&visiblePhotos.includes(e.primaryPhoto))?.primaryPhoto||'';const first=visibleProfileEntries.find(e=>e.primaryPhoto&&visiblePhotos.includes(e.primaryPhoto))||visibleProfileEntries.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||visibleProfileEntries[0];
+  const photos=[...new Set([primary,...visiblePhotos].filter(Boolean))];lightboxPhotos=photos;
   const records=list.find(e=>Array.isArray(e.records)&&e.records.length)?.records||[];
   const facts=list.find(e=>Array.isArray(e.facts)&&e.facts.length)?.facts||[];
   const seasons=[...new Set(list.map(e=>String(e.season||'').trim()).filter(Boolean))];
