@@ -857,7 +857,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   const seasonCorrect=Number(season)===Number(currentQuizEntry.season),songCorrect=song.trim().toLocaleLowerCase('ru')===String(currentQuizEntry.song).trim().toLocaleLowerCase('ru');
   const name=currentQuizEntry.firstName+' '+currentQuizEntry.lastName;
   if(seasonCorrect&&songCorrect){feedback.className='song-quiz-feedback correct';feedback.innerHTML='<span class="song-quiz-success-icon" aria-hidden="true">✓</span><span class="song-quiz-success-copy"><span class="song-quiz-success-kicker">Идеальный ответ · +1 к музыкальной памяти</span><strong class="song-quiz-success-name">'+escapeHTML(name)+'</strong><span class="song-quiz-success-detail">«'+escapeHTML(currentQuizEntry.song)+'» <span aria-hidden="true">·</span> '+escapeHTML(String(currentQuizEntry.season))+' сезон <span aria-hidden="true">·</span> Отличная память!</span></span>'}
-  else{feedback.className='song-quiz-feedback wrong';let missed=[];if(!seasonCorrect)missed.push('сезон: '+currentQuizEntry.season);if(!songCorrect)missed.push('песня: «'+currentQuizEntry.song+'»');feedback.textContent='Почти! Это '+name+'. Правильный ответ: '+missed.join('; ')+'.'}
+  else{feedback.className='song-quiz-feedback correct';feedback.innerHTML='<span class="song-quiz-success-icon" aria-hidden="true">!</span><span class="song-quiz-success-copy"><span class="song-quiz-success-kicker">Правильный ответ</span><strong class="song-quiz-success-name">'+escapeHTML(name)+'</strong><span class="song-quiz-success-detail">«'+escapeHTML(currentQuizEntry.song)+'» <span aria-hidden="true">·</span> '+escapeHTML(String(currentQuizEntry.season))+' сезон</span></span>'}
   $('songQuizCheck').disabled=true;
  }
 
