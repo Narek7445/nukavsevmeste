@@ -959,7 +959,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
    if(!activeEvent){banner.hidden=true;return}
    $('eventCountdownTitle').textContent=activeEvent.title;
    $('eventCountdownDate').textContent=moscowDate(activeEvent.dateTime);
-   renderEventProfiles(activeEvent.profiles,peopleData.participants);
+   renderEventProfiles(activeEvent.profiles,eventParticipants);
    renderMoreEvents();
    banner.hidden=false;paint();
   }catch(error){banner.hidden=true}
