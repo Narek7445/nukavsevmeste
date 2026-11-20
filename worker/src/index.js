@@ -98,6 +98,7 @@ function validateArchive(value) {
     }
     seenPerformances.add(duplicateKey);
     if (item.videoUrl) { try { const videoUrl = new URL(String(item.videoUrl)); if (videoUrl.protocol !== "https:" || !["youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be", "www.youtube-nocookie.com"].includes(videoUrl.hostname) || String(item.videoUrl).length > 500) return "Ссылка на выступление должна вести на YouTube и использовать HTTPS."; } catch { return "Укажите корректную ссылку на видео выступления."; } }
+    if (item.starGuests !== undefined && (!Array.isArray(item.starGuests) || item.starGuests.length > 20 || item.starGuests.some(g => !g || typeof g.name !== "string" || !g.name.trim() || g.name.length > 100 || typeof g.photo !== "string" || !/^https:\/\//.test(g.photo)))) return "Список звёздных гостей некорректен (максимум 20, нужны имя и HTTPS-фото).";
     if (typeof item.photo === "string" && item.photo.startsWith("data:")) return "Фотографии нужно загрузить в хранилище R2, а не сохранять в JSON.";
     if (Array.isArray(item.photos) && item.photos.some(photo => typeof photo === "string" && photo.startsWith("data:"))) {
       return "Фотографии нужно загрузить в хранилище R2, а не сохранять в JSON.";
