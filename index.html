@@ -516,9 +516,9 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
     <div class="countdown-unit"><strong id="countdownSeconds">00</strong><span>секунд</span></div>
    </div>
    <div class="event-countdown-profiles" id="eventCountdownProfiles" hidden><div class="event-countdown-profiles-label">УЧАСТНИКИ СОБЫТИЯ</div><div class="event-countdown-profile-list" id="eventCountdownProfileList"></div></div>
-   <div class="event-more-wrap" id="eventMoreWrap" hidden><div class="event-more-list" id="eventMoreList" hidden></div><button class="event-more-toggle" id="eventMoreToggle" type="button" aria-expanded="false"></button></div>
    <span class="event-countdown-spark" aria-hidden="true">✦</span>
   </section>
+  <div class="event-more-wrap" id="eventMoreWrap" hidden><div class="event-more-list" id="eventMoreList" hidden></div><button class="event-more-toggle" id="eventMoreToggle" type="button" aria-expanded="false"></button></div>
 
   <section class="controls" aria-label="Поиск и фильтр выступлений">
     <div class="search-wrap"><input id="searchInput" type="search" autocomplete="off" placeholder="Поиск по участнику или песне..." aria-label="Поиск по участнику или песне" aria-autocomplete="list" aria-controls="searchHints"><div class="search-hints" id="searchHints" role="listbox" hidden></div></div>
@@ -613,7 +613,21 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  .event-countdown:after{animation:eventHaloDrift 21s ease-in-out infinite alternate-reverse}
 }
 @keyframes eventHaloDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-18px,12px,0)}}
-.event-more-wrap{position:relative;z-index:1;flex:1 0 100%;display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:4px}
+.event-more-wrap{position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;gap:16px;margin:-8px 0 28px}
+.event-more-wrap[hidden],.event-more-list[hidden]{display:none!important}
+.event-more-list{width:100%;display:grid;grid-template-columns:1fr;gap:14px}
+.event-more-card{position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;gap:17px;min-width:0;padding:clamp(19px,3vw,28px);border:1px solid rgba(153,211,222,.38);border-radius:22px 22px 22px 7px;background:radial-gradient(ellipse at 8% 8%,rgba(60,190,198,.22),transparent 36%),linear-gradient(125deg,#101b32,#20203e 58%,#172c3b);color:#fff;box-shadow:0 18px 42px rgba(5,10,28,.27);animation:eventCountdownIn .3s ease both}
+.event-more-card-head{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.event-more-card-copy{min-width:0}
+.event-more-card-kicker{display:block;margin-bottom:8px;color:#8ee0df;font-size:9px;font-weight:900;letter-spacing:.22em}
+.event-more-card h3{margin:0 0 7px;color:#fff;font:600 clamp(22px,3vw,32px)/1.12 Georgia,serif}
+.event-more-date{margin:0 0 8px;color:rgba(230,239,255,.75);font-size:11px;line-height:1.5}
+.event-more-remaining{display:inline-block;color:#f4d18f;font-size:11px;font-weight:800;letter-spacing:.04em}
+.event-more-profiles{width:100%;flex:none;padding-top:15px;border-top:1px solid rgba(175,220,232,.23)}
+.event-more-profiles .event-countdown-profile-list{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.event-more-toggle{border:1px solid rgba(151,220,225,.48);border-radius:999px;padding:11px 25px;background:rgba(123,197,204,.12);color:#a9e9e8;font:800 10px/1.2 var(--sans);letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .2s,border-color .2s}
+.event-more-toggle:hover{background:rgba(123,197,204,.23);border-color:#a9e9e8;transform:translateY(-2px)}
+@media(max-width:560px){.event-more-card-head{align-items:flex-start}.event-more-profiles .event-countdown-profile-list{grid-template-columns:repeat(2,minmax(0,1fr))}.event-more-card{padding:17px 15px}}
 .event-more-wrap[hidden],.event-more-list[hidden]{display:none!important}
 .event-more-list{width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
 .event-more-card{min-width:0;padding:17px 19px;border:1px solid rgba(160,210,225,.25);border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.045));box-shadow:inset 0 1px 0 rgba(255,255,255,.08);animation:eventCountdownIn .3s ease both}
@@ -875,7 +889,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
  const $=id=>document.getElementById(id);
  const banner=$('eventCountdown');
  if(!banner)return;
- let activeEvent=null, futureEvents=[], expanded=false, tickHandle=null, refreshHandle=null;
+ let activeEvent=null, futureEvents=[], eventParticipants=[], expanded=false, tickHandle=null, refreshHandle=null;
  const pad=n=>String(n).padStart(2,'0');
  const moscowDate=value=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value))+' · МСК';
  function remainingLabel(value){
@@ -896,12 +910,20 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   wrap.hidden=rest.length===0;
   if(!rest.length){expanded=false;return}
   list.replaceChildren();
-  rest.forEach(event=>{
+  rest.forEach((event,index)=>{
    const card=document.createElement('article');card.className='event-more-card';
+   const head=document.createElement('div');head.className='event-more-card-head';
+   const copy=document.createElement('div');copy.className='event-more-card-copy';
+   const kicker=document.createElement('span');kicker.className='event-more-card-kicker';kicker.textContent='СЛЕДУЮЩЕЕ СОБЫТИЕ · '+(index+2);
    const title=document.createElement('h3');title.textContent=event.title;
    const date=document.createElement('p');date.className='event-more-date';date.textContent=moscowDate(event.dateTime);
    const remaining=document.createElement('span');remaining.className='event-more-remaining';remaining.dataset.eventRemaining=String(event.id||event.title);remaining.textContent=remainingLabel(event.dateTime);
-   card.append(title,date,remaining);list.appendChild(card);
+   copy.append(kicker,title,date,remaining);head.appendChild(copy);
+   const profileSection=document.createElement('div');profileSection.className='event-countdown-profiles event-more-profiles';profileSection.hidden=true;
+   const profileLabel=document.createElement('div');profileLabel.className='event-countdown-profiles-label';profileLabel.textContent='УЧАСТНИКИ СОБЫТИЯ';
+   const profileList=document.createElement('div');profileList.className='event-countdown-profile-list';
+   profileSection.append(profileLabel,profileList);card.append(head,profileSection);list.appendChild(card);
+   renderEventProfilesInto(profileSection,profileList,event.profiles,eventParticipants);
   });
   list.hidden=!expanded;toggle.textContent=expanded?'Скрыть':'Ещё '+rest.length+' событий';toggle.setAttribute('aria-expanded',String(expanded));
  }
@@ -910,6 +932,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
    const [eventResponse,peopleResponse]=await Promise.all([fetch(API+'/api/events',{cache:'no-store'}),fetch(API+'/api/participants',{cache:'no-store'})]);
    if(!eventResponse.ok)throw new Error('Events unavailable');
    const data=await eventResponse.json(),peopleData=peopleResponse.ok?await peopleResponse.json():{participants:[]},now=Date.now();
+   eventParticipants=Array.isArray(peopleData.participants)?peopleData.participants:[];
    futureEvents=(Array.isArray(data.events)?data.events:[]).filter(e=>e&&e.title&&Number.isFinite(Date.parse(e.dateTime))&&Date.parse(e.dateTime)>now).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));
    activeEvent=futureEvents[0]||null;
    if(!activeEvent){banner.hidden=true;return}
@@ -921,7 +944,9 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   }catch(error){banner.hidden=true}
  }
  function renderEventProfiles(profileKeys,participants){
-  const section=$('eventCountdownProfiles'),list=$('eventCountdownProfileList');
+  renderEventProfilesInto($('eventCountdownProfiles'),$('eventCountdownProfileList'),profileKeys,participants);
+ }
+ function renderEventProfilesInto(section,list,profileKeys,participants){
   list.replaceChildren();
   const groups=new Map();
   (Array.isArray(participants)?participants:[]).filter(e=>!e.hidden).forEach(e=>{
