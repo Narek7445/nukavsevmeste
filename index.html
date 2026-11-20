@@ -628,15 +628,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .event-more-toggle{border:1px solid rgba(151,220,225,.48);border-radius:999px;padding:11px 25px;background:rgba(123,197,204,.12);color:#a9e9e8;font:800 10px/1.2 var(--sans);letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .2s,border-color .2s}
 .event-more-toggle:hover{background:rgba(123,197,204,.23);border-color:#a9e9e8;transform:translateY(-2px)}
 @media(max-width:560px){.event-more-card-head{align-items:flex-start}.event-more-profiles .event-countdown-profile-list{grid-template-columns:repeat(2,minmax(0,1fr))}.event-more-card{padding:17px 15px}}
-.event-more-wrap[hidden],.event-more-list[hidden]{display:none!important}
-.event-more-list{width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
-.event-more-card{min-width:0;padding:17px 19px;border:1px solid rgba(160,210,225,.25);border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.045));box-shadow:inset 0 1px 0 rgba(255,255,255,.08);animation:eventCountdownIn .3s ease both}
-.event-more-card h3{margin:0 0 8px;color:#fff;font:600 19px/1.2 Georgia,serif}
-.event-more-date{margin:0 0 10px;color:rgba(230,239,255,.72);font-size:11px;line-height:1.5}
-.event-more-remaining{display:inline-block;color:#f4d18f;font-size:11px;font-weight:800;letter-spacing:.04em}
-.event-more-toggle{border:1px solid rgba(151,220,225,.48);border-radius:999px;padding:10px 22px;background:rgba(123,197,204,.12);color:#a9e9e8;font:800 10px/1.2 var(--sans);letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .2s,border-color .2s}
-.event-more-toggle:hover{background:rgba(123,197,204,.23);border-color:#a9e9e8;transform:translateY(-2px)}
-@media(max-width:560px){.event-more-list{grid-template-columns:1fr}.event-more-card{padding:15px 16px}}
+
 </style>
 <script>
 (()=>{const form=document.getElementById('visitorFeedbackForm');if(!form)return;const status=document.getElementById('feedbackStatus'),button=document.getElementById('feedbackSubmit');form.addEventListener('submit',async e=>{e.preventDefault();button.disabled=true;button.textContent='Отправка…';status.textContent='';try{const res=await fetch('https://nukavsevmeste-api.nukavsevmeste.workers.dev/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('feedbackName').value,message:document.getElementById('feedbackMessage').value,website:form.elements.website.value})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Не удалось отправить отзыв.');form.reset();status.textContent='Спасибо! Ваш отзыв отправлен.';button.textContent='Отправить ещё';}catch(err){status.textContent=err.message||'Ошибка отправки. Попробуйте ещё раз.';button.textContent='Повторить отправку';}finally{button.disabled=false;}})})();
