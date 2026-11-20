@@ -177,6 +177,15 @@ async function handleApi(request, env, url) {
     } catch (error) { return json({ error: "Не удалось загрузить события.", detail: error.message }, 500); }
   }
 
+  if (request.method === "GET" && path === "/api/experts") {
+    try {
+      const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("experts").first();
+      let experts = [];
+      try { experts = row ? JSON.parse(row.value) : []; } catch { experts = []; }
+      return json({ experts: Array.isArray(experts) ? experts : [] }, 200, { "cache-control": "public, max-age=60, stale-while-revalidate=180" });
+    } catch (error) { return json({ error: "Не удалось загрузить экспертов.", detail: error.message }, 500); }
+  }
+
   if (request.method === "GET" && path === "/api/participants") {
     try {
       const participants = await readArchive(env);
@@ -290,6 +299,39 @@ async function handleApi(request, env, url) {
           .bind("events", serialized, updatedAt).run();
         return json({ ok: true, count: events.length, updatedAt });
       } catch (error) { return json({ error: "Не удалось сохранить события.", detail: error.message }, 500); }
+    }
+
+    if (request.method === "GET" && path === "/api/admin/experts") {
+      try {
+        const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("experts").first();
+        let experts = [];
+        try { experts = row ? JSON.parse(row.value) : []; } catch { experts = []; }
+        return json({ experts: Array.isArray(experts) ? experts : [] }, 200, { "cache-control": "no-store" });
+      } catch (error) { return json({ error: "Не удалось загрузить экспертов.", detail: error.message }, 500); }
+    }
+
+    if (request.method === "PUT" && path === "/api/admin/experts") {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Некорректный JSON." }, 400); }
+      const experts = body?.experts;
+      if (!Array.isArray(experts) || experts.length > 300) return json({ error: "Ожидается список экспертов (максимум 300)." }, 400);
+      const ids = new Set();
+      for (const expert of experts) {
+        if (!expert || typeof expert !== "object" || Array.isArray(expert)) return json({ error: "Некорректная запись эксперта." }, 400);
+        const id = String(expert.id || ""), name = String(expert.name || "").trim(), photo = String(expert.photo || "");
+        if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id) || ids.has(id)) return json({ error: "У каждого эксперта должен быть уникальный корректный ID." }, 400);
+        if (!name || name.length > 120) return json({ error: "Имя эксперта обязательно и не должно превышать 120 символов." }, 400);
+        if (!/^https:\/\//i.test(photo) || photo.length > 2048) return json({ error: "Добавьте фотографию эксперта через загрузку изображения." }, 400);
+        ids.add(id);
+      }
+      const serialized = JSON.stringify(experts);
+      if (new TextEncoder().encode(serialized).length > 150_000) return json({ error: "Список экспертов слишком большой." }, 413);
+      const updatedAt = new Date().toISOString();
+      try {
+        await env.DB.prepare("INSERT INTO app_state (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at")
+          .bind("experts", serialized, updatedAt).run();
+        return json({ ok: true, count: experts.length, updatedAt });
+      } catch (error) { return json({ error: "Не удалось сохранить экспертов.", detail: error.message }, 500); }
     }
 
     if (request.method === "GET" && path === "/api/admin/participants") {
