@@ -164,6 +164,18 @@ async function handleApi(request, env, url) {
     } catch (error) { return json({ error: "Не удалось отправить отзыв.", detail: error.message }, 500); }
   }
 
+  if (request.method === "GET" && path === "/api/events") {
+    try {
+      const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("events").first();
+      let events = [];
+      try { events = row ? JSON.parse(row.value) : []; } catch { events = []; }
+      const now = Date.now();
+      events = (Array.isArray(events) ? events : []).filter(event => event && typeof event.title === "string" && Number.isFinite(Date.parse(event.dateTime)) && Date.parse(event.dateTime) > now)
+        .sort((a, b) => Date.parse(a.dateTime) - Date.parse(b.dateTime));
+      return json({ events }, 200, { "cache-control": "public, max-age=15, stale-while-revalidate=30" });
+    } catch (error) { return json({ error: "Не удалось загрузить события.", detail: error.message }, 500); }
+  }
+
   if (request.method === "GET" && path === "/api/participants") {
     try {
       const participants = await readArchive(env);
@@ -241,6 +253,41 @@ async function handleApi(request, env, url) {
         const result = await env.DB.prepare("SELECT id, name, message, created_at FROM site_feedback ORDER BY id DESC LIMIT 300").all();
         return json({ feedback: result.results || [] }, 200, { "cache-control": "no-store" });
       } catch (error) { return json({ error: "Не удалось загрузить отзывы.", detail: error.message }, 500); }
+    }
+
+    if (request.method === "GET" && path === "/api/admin/events") {
+      try {
+        const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("events").first();
+        let events = [];
+        try { events = row ? JSON.parse(row.value) : []; } catch { events = []; }
+        return json({ events: Array.isArray(events) ? events : [] }, 200, { "cache-control": "no-store" });
+      } catch (error) { return json({ error: "Не удалось загрузить события.", detail: error.message }, 500); }
+    }
+
+    if (request.method === "PUT" && path === "/api/admin/events") {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Некорректный JSON." }, 400); }
+      const events = body?.events;
+      if (!Array.isArray(events) || events.length > 100) return json({ error: "Ожидается список событий (максимум 100)." }, 400);
+      const ids = new Set();
+      for (const event of events) {
+        if (!event || typeof event !== "object" || Array.isArray(event)) return json({ error: "Некорректная запись события." }, 400);
+        const id = String(event.id || "");
+        const title = String(event.title || "").trim();
+        const dateTime = String(event.dateTime || "");
+        if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id) || ids.has(id)) return json({ error: "У каждого события должен быть уникальный корректный ID." }, 400);
+        if (!title || title.length > 120) return json({ error: "Название события обязательно и должно быть не длиннее 120 символов." }, 400);
+        if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00\+04:00$/.test(dateTime) || !Number.isFinite(Date.parse(dateTime))) return json({ error: "Укажите корректные дату и время по Еревану." }, 400);
+        ids.add(id);
+      }
+      const serialized = JSON.stringify(events);
+      if (new TextEncoder().encode(serialized).length > 100_000) return json({ error: "Список событий слишком большой." }, 413);
+      const updatedAt = new Date().toISOString();
+      try {
+        await env.DB.prepare("INSERT INTO app_state (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at")
+          .bind("events", serialized, updatedAt).run();
+        return json({ ok: true, count: events.length, updatedAt });
+      } catch (error) { return json({ error: "Не удалось сохранить события.", detail: error.message }, 500); }
     }
 
     if (request.method === "GET" && path === "/api/admin/participants") {
