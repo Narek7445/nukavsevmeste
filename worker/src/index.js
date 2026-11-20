@@ -337,10 +337,12 @@ async function handleApi(request, env, url) {
         if (!/^https:\/\//i.test(photo) || photo.length > 2048) return json({ error: "Добавьте фотографию эксперта через загрузку изображения." }, 400);
         if (typeof expert.bio !== "undefined" && (typeof expert.bio !== "string" || expert.bio.length > 3000)) return json({ error: "Комментарий эксперта не должен превышать 3000 символов." }, 400);
         if (typeof expert.leader !== "undefined" && typeof expert.leader !== "boolean") return json({ error: "Некорректная отметка лидера." }, 400);
+        if (typeof expert.host !== "undefined" && typeof expert.host !== "boolean") return json({ error: "Некорректная отметка ведущего." }, 400);
         if (typeof expert.tags !== "undefined" && (!Array.isArray(expert.tags) || expert.tags.length > 30 || expert.tags.some(tag => typeof tag !== "string" || !tag.trim() || tag.length > 32))) return json({ error: "Некорректный список тегов эксперта." }, 400);
         ids.add(id);
       }
       if (experts.filter(expert => expert.leader === true).length > 1) return json({ error: "Лидером сотни может быть отмечен только один эксперт." }, 400);
+      if (experts.filter(expert => expert.host === true).length > 1) return json({ error: "Ведущим шоу может быть отмечен только один эксперт." }, 400);
       const serialized = JSON.stringify(experts);
       if (new TextEncoder().encode(serialized).length > 150_000) return json({ error: "Список экспертов слишком большой." }, 413);
       const updatedAt = new Date().toISOString();
