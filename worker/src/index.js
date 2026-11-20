@@ -278,6 +278,7 @@ async function handleApi(request, env, url) {
         if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id) || ids.has(id)) return json({ error: "У каждого события должен быть уникальный корректный ID." }, 400);
         if (!title || title.length > 120) return json({ error: "Название события обязательно и должно быть не длиннее 120 символов." }, 400);
         if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00\+04:00$/.test(dateTime) || !Number.isFinite(Date.parse(dateTime))) return json({ error: "Укажите корректные дату и время по Еревану." }, 400);
+        if (event.profiles !== undefined && (!Array.isArray(event.profiles) || event.profiles.length > 60 || event.profiles.some(profile => typeof profile !== "string" || !profile.trim() || profile.length > 250))) return json({ error: "Список профилей события некорректен (максимум 60)." }, 400);
         ids.add(id);
       }
       const serialized = JSON.stringify(events);
