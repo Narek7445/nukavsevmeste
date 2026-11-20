@@ -216,7 +216,7 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
  const score=e=>Number(e.score)||100;
- const photoFor=e=>{const own=Array.isArray(e.photos)?e.photos.find(Boolean):'';return own||e.photo||''};
+ const photoFor=e=>e.primaryPhoto||(Array.isArray(e.photos)?e.photos.find(Boolean):'')||e.photo||'';
 
  const POLL_API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';let pollResults={};
  function pollVoterId(){let id='';try{id=localStorage.getItem('nuka-poll-voter-id')||'';if(!id){id=crypto.randomUUID();localStorage.setItem('nuka-poll-voter-id',id)}}catch{id=crypto.randomUUID()}return id}
@@ -252,8 +252,8 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
   const key=String(personName||'').trim().toLocaleLowerCase('ru');
   const list=entries.filter(e=>name(e).toLocaleLowerCase('ru')===key).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a));
   if(!list.length)return false;
-  const first=list.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||list[0];
-  const photos=[...new Set(list.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||'']).filter(Boolean))];lightboxPhotos=photos;
+  const primary=list.find(e=>e.primaryPhoto)?.primaryPhoto||'';const first=list.find(e=>e.primaryPhoto)||list.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||list[0];
+  const photos=[...new Set([primary,...list.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''])].filter(Boolean))];lightboxPhotos=photos;
   const records=list.find(e=>Array.isArray(e.records)&&e.records.length)?.records||[];
   const facts=list.find(e=>Array.isArray(e.facts)&&e.facts.length)?.facts||[];
   const seasons=[...new Set(list.map(e=>String(e.season||'').trim()).filter(Boolean))];
