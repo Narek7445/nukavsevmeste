@@ -79,6 +79,31 @@ async function readArchive(env) {
   }
 }
 
+function isHiddenPerformance(item) {
+  return item?.hidden === true || item?.hidden === 1 ||
+    ["true", "1"].includes(String(item?.hidden ?? "").trim().toLowerCase());
+}
+
+function publicArchive(participants) {
+  const hiddenPhotoUrls = new Set();
+  for (const item of participants) {
+    if (!isHiddenPerformance(item)) continue;
+    for (const src of [...(Array.isArray(item.photos) ? item.photos : []), item.photo || ""]) {
+      if (typeof src === "string" && src) hiddenPhotoUrls.add(src);
+    }
+  }
+  return participants.map(item => {
+    if (isHiddenPerformance(item)) return item;
+    const photos = (Array.isArray(item.photos) ? item.photos : []).filter(src =>
+      typeof src === "string" && src && !hiddenPhotoUrls.has(src)
+    );
+    const photo = item.photo && !hiddenPhotoUrls.has(item.photo) ? item.photo : (photos[0] || "");
+    const primaryPhoto = item.primaryPhoto && !hiddenPhotoUrls.has(item.primaryPhoto) &&
+      (photos.includes(item.primaryPhoto) || item.primaryPhoto === photo) ? item.primaryPhoto : "";
+    return { ...item, photos, photo, primaryPhoto };
+  });
+}
+
 function validateArchive(value) {
   if (!Array.isArray(value)) return "Ожидается массив выступлений.";
   if (value.length > 5000) return "В архиве слишком много записей (максимум 5000).";
@@ -193,7 +218,7 @@ async function handleApi(request, env, url) {
 
   if (request.method === "GET" && path === "/api/participants") {
     try {
-      const participants = await readArchive(env);
+      const participants = publicArchive(await readArchive(env));
       return json({ participants, updatedAt: await env.DB.prepare("SELECT updated_at FROM app_state WHERE key = ?").bind("participants").first().then(row => row?.updated_at || null) }, 200, { "cache-control": "public, max-age=30, stale-while-revalidate=120" });
     } catch (error) {
       return json({ error: "Не удалось прочитать архив.", detail: error.message }, 500);
