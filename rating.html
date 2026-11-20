@@ -76,7 +76,7 @@ input,select{width:100%;min-width:0;border:1px solid #d9cec5;border-radius:11px;
 </head>
 <body>
 <div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div><main class="page">
-<nav class="nav"><a class="brand" href="index.html"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a class="nav-link" href="seasons.html">Сезоны</a><a class="nav-link" href="stats.html">Статистика</a><a class="nav-link" href="winners.html">Победители</a><a class="nav-link" href="experts.html">Эксперты сотни</a><a class="nav-link" href="index.html">← На главную</a></div></nav>
+<nav class="nav"><a class="brand" href="/"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a class="nav-link" href="/seasons/">Сезоны</a><a class="nav-link" href="/stats/">Статистика</a><a class="nav-link" href="/winners/">Победители</a><a class="nav-link" href="/experts/">Эксперты сотни</a><a class="nav-link" href="/">← На главную</a></div></nav>
 <header class="hero" id="ratingHero"><div class="eyebrow">Голос зрителей · Народный рейтинг</div><h1>Любимцы зрителей</h1><p>Кто чаще всего получает ваше «Да»? Здесь собраны голоса под выступлениями участников. Выбирайте сезон или смотрите общий рейтинг — результаты обновляются на основе голосования зрителей.</p></header>
 <section class="controls" id="ratingControls"><input id="search" type="search" placeholder="Найти участника…"><select id="season"><option value="all">Все сезоны</option></select></section><section id="fanProfile" class="fan-profile" hidden><div class="fan-profile-nav"><button class="fan-back" id="fanBack" type="button">← К рейтингу</button><button class="fan-share" id="fanShare" type="button">Поделиться профилем ↗</button></div><div id="fanProfileContent"></div></section>
 <section id="podiumSection" hidden><div class="section-label"><h2>Лидеры голосования</h2><span id="periodLabel">Все сезоны</span></div><div class="podium" id="podium"></div></section>
@@ -128,7 +128,7 @@ function renderFanProfile(person){
  document.title=person+' — Любимчик зрителей';
  return true;
 }
-function openFanProfile(person){const u=new URL('rating.html',location.href);u.searchParams.set('profile',person);location.assign(u.href)}
+function openFanProfile(person){const u=new URL('/rating/',location.href);u.searchParams.set('profile',person);location.assign(u.href)}
 async function init(){
  try{
   const [ar,pr]=await Promise.all([fetch(API+'/api/participants',{cache:'no-store'}),fetch(API+'/api/polls',{cache:'no-store'})]);
@@ -141,7 +141,7 @@ async function init(){
    $('ratingHero').hidden=true;$('ratingControls').hidden=true;$('podiumSection').hidden=true;
    document.querySelectorAll('main>section:not(#fanProfile)').forEach(s=>{if(s.id!=='fanProfile')s.hidden=true});
    $('fanProfile').hidden=false;
-   $('fanBack').addEventListener('click',()=>location.href='rating.html');
+   $('fanBack').addEventListener('click',()=>location.href='/rating/');
    $('fanShare').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href)}catch{}$('fanShare').textContent='Ссылка скопирована'});
   }else{render()}
  }catch(err){$('count').textContent='Ошибка загрузки';$('ranking').innerHTML='<div class="empty">Не удалось получить данные. Попробуйте обновить страницу чуть позже.</div>'}
