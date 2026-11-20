@@ -301,6 +301,19 @@ async function handleApi(request, env, url) {
       } catch (error) { return json({ error: "Не удалось сохранить события.", detail: error.message }, 500); }
     }
 
+    if (request.method === "GET" && path === "/api/admin/expert-tags") {
+      try { const row=await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("expert_tags").first();let tags=[];try{tags=row?JSON.parse(row.value):[]}catch{}return json({tags:Array.isArray(tags)?tags:[]},200,{"cache-control":"no-store"}); }
+      catch(error){return json({error:"Не удалось загрузить теги.",detail:error.message},500);}
+    }
+    if (request.method === "PUT" && path === "/api/admin/expert-tags") {
+      let body;try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}
+      const tags=body?.tags;if(!Array.isArray(tags)||tags.length>200)return json({error:"Допускается не более 200 тегов."},400);
+      const clean=[],seen=new Set();
+      for(const value of tags){if(typeof value!=="string")return json({error:"Каждый тег должен быть текстом."},400);const tag=value.trim().replace(/\\s+/g," "),key=tag.toLocaleLowerCase("ru");if(!tag||tag.length>32||seen.has(key))return json({error:"Теги должны быть уникальными и содержать от 1 до 32 символов."},400);seen.add(key);clean.push(tag)}
+      try{await env.DB.prepare("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at").bind("expert_tags",JSON.stringify(clean),new Date().toISOString()).run();return json({ok:true,tags:clean})}
+      catch(error){return json({error:"Не удалось сохранить теги.",detail:error.message},500)}
+    }
+
     if (request.method === "GET" && path === "/api/admin/experts") {
       try {
         const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("experts").first();
@@ -324,6 +337,7 @@ async function handleApi(request, env, url) {
         if (!/^https:\/\//i.test(photo) || photo.length > 2048) return json({ error: "Добавьте фотографию эксперта через загрузку изображения." }, 400);
         if (typeof expert.bio !== "undefined" && (typeof expert.bio !== "string" || expert.bio.length > 3000)) return json({ error: "Комментарий эксперта не должен превышать 3000 символов." }, 400);
         if (typeof expert.leader !== "undefined" && typeof expert.leader !== "boolean") return json({ error: "Некорректная отметка лидера." }, 400);
+        if (typeof expert.tags !== "undefined" && (!Array.isArray(expert.tags) || expert.tags.length > 30 || expert.tags.some(tag => typeof tag !== "string" || !tag.trim() || tag.length > 32))) return json({ error: "Некорректный список тегов эксперта." }, 400);
         ids.add(id);
       }
       if (experts.filter(expert => expert.leader === true).length > 1) return json({ error: "Лидером сотни может быть отмечен только один эксперт." }, 400);
