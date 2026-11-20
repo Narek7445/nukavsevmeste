@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<base href="/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4efe8">
+<title>Статистика — Ну-ка, все вместе!</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+:root{--ink:#241d24;--muted:#83777d;--paper:#f4efe8;--card:#fffdf9;--wine:#71334b;--wine-dark:#421d30;--gold:#c7a36a;--line:#e4d9cf}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 88% 0%,#ead8cf 0,transparent 34%),radial-gradient(circle at 0 65%,#eee3d8 0,transparent 26%),var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif}
+.page{width:min(1240px,100%);margin:auto;padding:24px clamp(16px,4vw,54px) 70px}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.brand-mark{display:grid;place-items:center;width:39px;height:39px;border-radius:12px;background:var(--wine);color:#fff;font:24px Georgia,serif;box-shadow:0 5px 14px #71334b35}
+.nav-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.nav-link{padding:10px 14px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--wine);font-size:12px;font-weight:800;transition:.2s}.nav-link:hover,.nav-link.active{background:var(--wine);border-color:var(--wine);color:#fff}
+.hero{position:relative;overflow:hidden;margin:28px 0 24px;padding:clamp(26px,5vw,58px);border-radius:26px;background:linear-gradient(118deg,#201a30 0%,#512943 58%,#7c4554 100%);color:#fff;box-shadow:0 20px 50px #321a2b25}
+.hero:after{content:'✳';position:absolute;right:5%;top:50%;transform:translateY(-54%) rotate(-12deg);font:clamp(150px,25vw,300px)/1 Georgia,serif;color:#ffffff0d;pointer-events:none}
+.kicker{color:#e3c99e;font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
+.hero h1{position:relative;z-index:1;margin:13px 0 12px;font:600 clamp(42px,7vw,78px)/.98 Georgia,serif;letter-spacing:-.055em}
+.hero p{position:relative;z-index:1;max-width:650px;margin:0;color:#f0e4e7;font-size:15px;line-height:1.7}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 0 36px}
+.metric{position:relative;overflow:hidden;min-width:0;padding:21px;border:1px solid #e5d7cb;border-radius:19px;background:linear-gradient(145deg,#fffdf9,#f8eee9);box-shadow:0 10px 28px #39212a0c}
+.metric:after{content:attr(data-mark);position:absolute;right:12px;bottom:-25px;color:#71334b0c;font:100px Georgia,serif}
+.metric-label{display:block;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.metric strong{position:relative;z-index:1;display:block;margin:12px 0 5px;color:var(--wine-dark);font:600 clamp(30px,4vw,44px)/1 Georgia,serif;font-variant-numeric:tabular-nums}
+.metric small{color:#9b8987;font-size:11px}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin:0 2px 15px}
+.section-head h2{margin:0;color:var(--wine-dark);font:600 clamp(25px,4vw,36px)/1.1 Georgia,serif}
+.section-head p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+.season-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:38px}
+.season-card{padding:20px;border:1px solid #e4d8cd;border-radius:18px;background:var(--card);box-shadow:0 8px 24px #35202a0a}
+.season-card-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:17px}
+.season-card h3{margin:0;color:var(--wine-dark);font:600 23px Georgia,serif}
+.season-badge{padding:7px 10px;border-radius:99px;background:#f4eee8;color:#826e68;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.season-numbers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.season-number{padding:12px 10px;border-radius:11px;background:#f8f3ee}
+.season-number strong{display:block;color:var(--wine);font:600 25px/1 Georgia,serif}
+.season-number span{display:block;margin-top:6px;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.season-progress{height:6px;margin-top:16px;border-radius:99px;background:#eee5df;overflow:hidden}
+.season-progress span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#71334b,#c7a36a)}
+.songs-section{padding:clamp(17px,3vw,27px);border:1px solid #e4d8cd;border-radius:22px;background:#fffdf9;box-shadow:0 10px 30px #35202a0a}
+.song-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px}
+.song-toolbar p{margin:0;color:var(--muted);font-size:12px}
+.song-search{width:min(340px,100%);padding:12px 14px;border:1px solid #d8c8bf;border-radius:11px;background:#fff;color:var(--ink);font:13px 'DM Sans',sans-serif;outline:none}
+.song-search:focus{border-color:var(--wine);box-shadow:0 0 0 4px #71334b16}
+.song-list{display:grid;gap:8px}
+.song-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 13px;border:1px solid #eee5df;border-radius:12px;background:linear-gradient(100deg,#fff,#fcf8f4)}
+.song-rank{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#f1e8e1;color:#8a6a59;font-size:11px;font-weight:800}
+.song-name{min-width:0;color:#49363f;font:600 15px/1.35 Georgia,serif;overflow-wrap:anywhere}
+.song-count{padding:7px 10px;border-radius:99px;background:#f5ebdc;color:#805a2d;font-size:10px;font-weight:800;white-space:nowrap}
+.empty{padding:45px 20px;border:1px dashed #d4c2b7;border-radius:18px;color:var(--muted);text-align:center;line-height:1.7}
+.footer{display:flex;justify-content:space-between;gap:15px;margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:#978b88;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+@media(max-width:850px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.page{padding:15px 12px 45px}.nav{align-items:flex-start}.brand{font-size:12px}.brand-mark{width:34px;height:34px}.nav-links{gap:5px}.nav-link{padding:8px 10px;font-size:10px}.hero{margin:18px 0 20px;border-radius:19px}.hero p{font-size:13px}.metrics{gap:9px}.metric{padding:15px;border-radius:15px}.metric strong{font-size:31px}.metric-label{font-size:9px}.season-grid{grid-template-columns:1fr;gap:10px}.season-card{padding:16px}.season-numbers{gap:6px}.season-number{padding:10px 7px}.season-number strong{font-size:22px}.season-number span{font-size:8px}.song-toolbar{align-items:stretch;flex-direction:column}.song-search{width:100%}.song-row{gap:9px;padding:10px}.song-name{font-size:14px}.footer{flex-direction:column}}
+</style>
+<style id="fan-disclaimer-style">.fan-disclaimer{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 18px;background:linear-gradient(100deg,#30203f,#56304f 52%,#304653);color:#fff8ef;border-bottom:1px solid rgba(255,255,255,.2);font:500 13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;text-align:center;letter-spacing:.01em}.fan-disclaimer strong{color:#ffd58b;font-weight:800}.fan-disclaimer-icon{flex:0 0 auto;color:#ffd58b;font-size:16px}@media(max-width:560px){.fan-disclaimer{padding:9px 13px;font-size:11px;gap:7px}}</style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon.svg">
+</head>
+<body>
+<div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div>
+<main class="page">
+<nav class="nav"><a class="brand" href="/"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div class="nav-links"><a class="nav-link" href="/seasons/">Сезоны</a><a class="nav-link" href="/contestants/">Все конкурсанты</a><a class="nav-link active" href="/stats/">Статистика</a><a class="nav-link" href="/winners/">Победители</a><a class="nav-link" href="/experts/">Эксперты сотни</a><a class="nav-link" href="/">На главную</a></div></nav>
+<header class="hero"><div class="kicker">Цифры, голоса и история</div><h1>Статистика<br>архива.</h1><p>Вся картина проекта в цифрах: сколько участников собрано в архиве, сколько выступлений получили 100 баллов, как распределяются выпуски и участники по сезонам и какие песни звучали чаще других.</p></header>
+<section class="metrics" aria-label="Общая статистика">
+ <article class="metric" data-mark="♟"><span class="metric-label">Участники</span><strong id="totalPeople">—</strong><small>уникальных конкурсантов</small></article>
+ <article class="metric" data-mark="♫"><span class="metric-label">Стобальные выступления</span><strong id="totalHundreds">—</strong><small>записей с результатом 100</small></article>
+ <article class="metric" data-mark="✳"><span class="metric-label">Сезоны</span><strong id="totalSeasons">—</strong><small>представлено в архиве</small></article>
+ <article class="metric" data-mark="▦"><span class="metric-label">Выпуски</span><strong id="totalEpisodes">—</strong><small>уникальных выпусков по сезонам</small></article>
+</section>
+<section aria-labelledby="seasonStatsTitle">
+ <div class="section-head"><div><h2 id="seasonStatsTitle">Сезоны в цифрах</h2><p>Количество выпусков, участников и стобальных выступлений в каждом сезоне.</p></div></div>
+ <div class="season-grid" id="seasonGrid"><div class="empty">Загружаем статистику…</div></div>
+</section>
+<section class="songs-section" aria-labelledby="songsTitle">
+ <div class="section-head"><div><h2 id="songsTitle">Песни архива</h2><p>Сколько раз каждая песня исполнялась в записях сайта.</p></div></div>
+ <div class="song-toolbar"><p id="songSummary">Подсчёт исполнений по названию песни.</p><input id="songSearch" class="song-search" type="search" placeholder="Найти песню…" aria-label="Поиск по песням"></div>
+ <div class="song-list" id="songList"><div class="empty">Подготавливаем список песен…</div></div>
+</section>
+<footer class="footer"><span>Ну-ка, все вместе!</span><span>Статистика архива</span></footer>
+</main>
+<script>
+(()=>{
+ const API='https://api.nukavsevmeste.org';
+ const $=id=>document.getElementById(id);
+ let songs=[];
+ const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ const norm=v=>String(v??'').trim();
+ const personKey=e=>(norm(e.firstName)+' '+norm(e.lastName)).trim().toLocaleLowerCase('ru');
+ const seasonOrder=(a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')};
+ const renderSongs=()=>{
+  const q=norm($('songSearch').value).toLocaleLowerCase('ru');
+  const shown=songs.filter(x=>x.name.toLocaleLowerCase('ru').includes(q));
+  $('songSummary').textContent='Всего '+songs.length.toLocaleString('ru-RU')+' '+(songs.length===1?'название песни':'названий песен')+' · отображается '+shown.length.toLocaleString('ru-RU');
+  $('songList').innerHTML=shown.length?shown.map((x,i)=>'<div class="song-row"><span class="song-rank">'+(i+1)+'</span><span class="song-name">«'+esc(x.name)+'»</span><span class="song-count">'+x.count+' '+(x.count%10===1&&x.count%100!==11?'исполнение':x.count%10>=2&&x.count%10<=4&&(x.count%100<12||x.count%100>14)?'исполнения':'исполнений')+'</span></div>').join(''):'<div class="empty">По вашему запросу песни не найдены.</div>';
+ };
+ $('songSearch').addEventListener('input',renderSongs);
+ async function load(){
+  try{
+   const res=await fetch(API+'/api/participants',{cache:'no-store'});
+   if(!res.ok)throw new Error('Не удалось загрузить архив ('+res.status+').');
+   const data=await res.json();
+   const entries=Array.isArray(data.participants)?data.participants.filter(e=>e&&!e.hidden):[];
+   const people=new Set(entries.map(personKey).filter(Boolean));
+   const hundreds=entries.filter(e=>Number(e.score??100)===100);
+   const seasonNames=[...new Set(entries.map(e=>norm(e.season)).filter(Boolean))].sort(seasonOrder);
+   const episodeTotal=new Set();
+   const seasonStats=seasonNames.map(season=>{
+    const list=entries.filter(e=>norm(e.season)===season);
+    const participants=new Set(list.map(personKey).filter(Boolean));
+    const episodes=[...new Set(list.map(e=>norm(e.episode)).filter(Boolean))];
+    episodes.forEach(ep=>episodeTotal.add(season+'::'+ep));
+    return {season,list,people:participants.size,episodes:episodes.length,hundreds:list.filter(e=>Number(e.score??100)===100).length};
+   });
+   $('totalPeople').textContent=people.size.toLocaleString('ru-RU');
+   $('totalHundreds').textContent=hundreds.length.toLocaleString('ru-RU');
+   $('totalSeasons').textContent=seasonNames.length.toLocaleString('ru-RU');
+   $('totalEpisodes').textContent=episodeTotal.size.toLocaleString('ru-RU');
+   const maxPeople=Math.max(1,...seasonStats.map(x=>x.people));
+   $('seasonGrid').innerHTML=seasonStats.length?seasonStats.map(x=>'<article class="season-card"><div class="season-card-top"><h3>'+esc(x.season)+(Number.isFinite(Number(x.season))?' сезон':'')+'</h3><span class="season-badge">'+x.list.length+' записей</span></div><div class="season-numbers"><div class="season-number"><strong>'+x.episodes+'</strong><span>выпусков</span></div><div class="season-number"><strong>'+x.people+'</strong><span>участников</span></div><div class="season-number"><strong>'+x.hundreds+'</strong><span>100 баллов</span></div></div><div class="season-progress" title="'+x.people+' участников"><span style="width:'+(x.people/maxPeople*100)+'%"></span></div></article>').join(''):'<div class="empty">В архиве пока нет данных о сезонах.</div>';
+   const songMap=new Map();
+   entries.forEach(e=>{const name=norm(e.song).replace(/^«\s*|\s*»$/g,'').trim();if(!name)return;const key=name.toLocaleLowerCase('ru');const old=songMap.get(key);if(old)old.count++;else songMap.set(key,{name,count:1})});
+   songs=[...songMap.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'ru'));
+   renderSongs();
+  }catch(err){$('seasonGrid').innerHTML='<div class="empty">'+esc(err.message||'Не удалось загрузить статистику.')+'</div>';$('songList').innerHTML='<div class="empty">Список песен временно недоступен.</div>'}
+ }
+ load();
+})();
+</script>
+</body>
+</html>
