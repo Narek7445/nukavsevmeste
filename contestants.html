@@ -249,7 +249,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  const score=e=>Number(e.score)||100;
  const photoFor=e=>(Array.isArray(e.photos)?e.photos.find(Boolean):'')||e.photo||'';
 
- const POLL_API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';let pollResults={};
+ const POLL_API='https://api.nukavsevmeste.org';let pollResults={};
  function pollVoterId(){let id='';try{id=localStorage.getItem('nuka-poll-voter-id')||'';if(!id){id=crypto.randomUUID();localStorage.setItem('nuka-poll-voter-id',id)}}catch{id=crypto.randomUUID()}return id}
  function hasVoted(id){try{return localStorage.getItem('nuka-poll-voted-'+id)==='1'}catch{return false}}
  function markVoted(id){try{localStorage.setItem('nuka-poll-voted-'+id,'1')}catch{}}
@@ -314,7 +314,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
 function openProfile(personName){const target=new URL('contestants.html',location.href);target.searchParams.set('profile',personName);location.assign(target.href)}
 async function init(){
   try{
-   const API_BASE='https://nukavsevmeste-api.nukavsevmeste.workers.dev';
+   const API_BASE='https://api.nukavsevmeste.org';
    const apiResponse=await fetch(API_BASE+'/api/participants',{cache:'no-store'});
    if(!apiResponse.ok)throw new Error('HTTP '+apiResponse.status);
    const apiData=await apiResponse.json();
@@ -357,6 +357,6 @@ async function init(){
 </script>
 
 <script>
-(()=>{const API='https://nukavsevmeste-api.nukavsevmeste.workers.dev';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}})();</script>
+(()=>{const API='https://api.nukavsevmeste.org';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}})();</script>
 </body>
 </html>
