@@ -574,6 +574,44 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .feedback-form-bottom button:disabled{opacity:.6;cursor:wait}
 .feedback-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;opacity:0!important}
 @media(max-width:700px){.visitor-feedback{grid-template-columns:1fr;border-radius:13px}.feedback-form-bottom{align-items:stretch;flex-direction:column}.feedback-form-bottom button{width:100%}}
+
+/* New cinematic event banner theme */
+.event-countdown{
+ border:1px solid rgba(153,211,222,.42);
+ border-radius:22px 22px 22px 7px;
+ background:
+  radial-gradient(ellipse at 8% 8%,rgba(60,190,198,.30),transparent 36%),
+  radial-gradient(ellipse at 92% 95%,rgba(145,91,201,.34),transparent 42%),
+  radial-gradient(ellipse at 78% -25%,rgba(237,184,104,.18),transparent 38%),
+  linear-gradient(118deg,#101c35 0%,#17294a 48%,#252044 100%);
+ box-shadow:0 22px 55px rgba(5,10,28,.38),inset 0 1px 0 rgba(255,255,255,.13);
+}
+.event-countdown:before{
+ width:390px;height:390px;right:-115px;top:-255px;
+ border:1px solid rgba(166,222,230,.22);
+ box-shadow:0 0 0 24px rgba(166,222,230,.035),0 0 0 55px rgba(166,222,230,.025);
+}
+.event-countdown:after{
+ width:250px;height:250px;right:24%;bottom:-205px;
+ border-color:rgba(211,177,239,.20);
+ box-shadow:0 0 0 22px rgba(211,177,239,.035);
+}
+.event-countdown-kicker{color:#8ee0df;letter-spacing:.24em}
+.event-countdown-copy h2{color:#fff;font-size:clamp(24px,3.8vw,38px);text-shadow:0 4px 24px rgba(0,0,0,.35)}
+.event-countdown-copy p{color:rgba(230,239,255,.78)}
+.countdown-unit strong{color:#f4d18f;text-shadow:0 0 24px rgba(244,209,143,.2)}
+.countdown-unit span{color:rgba(219,232,250,.72)}
+.event-countdown-timer>i{color:#91d8dc}
+.event-countdown-profiles{border-top-color:rgba(175,220,232,.23)}
+.event-countdown-profiles-label{color:#9ce2df}
+.event-countdown-profile{border-color:rgba(195,226,238,.32);background:rgba(255,255,255,.08)}
+.event-countdown-profile:hover{border-color:#9ce2df;background:rgba(255,255,255,.15)}
+.event-countdown-spark{color:#f5d69e}
+@media(prefers-reduced-motion:no-preference){
+ .event-countdown:before{animation:eventHaloDrift 16s ease-in-out infinite alternate}
+ .event-countdown:after{animation:eventHaloDrift 21s ease-in-out infinite alternate-reverse}
+}
+@keyframes eventHaloDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-18px,12px,0)}}
 </style>
 <script>
 (()=>{const form=document.getElementById('visitorFeedbackForm');if(!form)return;const status=document.getElementById('feedbackStatus'),button=document.getElementById('feedbackSubmit');form.addEventListener('submit',async e=>{e.preventDefault();button.disabled=true;button.textContent='Отправка…';status.textContent='';try{const res=await fetch('https://nukavsevmeste-api.nukavsevmeste.workers.dev/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('feedbackName').value,message:document.getElementById('feedbackMessage').value,website:form.elements.website.value})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Не удалось отправить отзыв.');form.reset();status.textContent='Спасибо! Ваш отзыв отправлен.';button.textContent='Отправить ещё';}catch(err){status.textContent=err.message||'Ошибка отправки. Попробуйте ещё раз.';button.textContent='Повторить отправку';}finally{button.disabled=false;}})})();
@@ -844,7 +882,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
    activeEvent=next||null;
    if(!activeEvent){banner.hidden=true;return}
    $('eventCountdownTitle').textContent=activeEvent.title;
-   $('eventCountdownDate').textContent=new Intl.DateTimeFormat('ru-RU',{timeZone:'Asia/Yerevan',weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(activeEvent.dateTime))+' · Ереван';
+   $('eventCountdownDate').textContent=new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(activeEvent.dateTime))+' · МСК';
    renderEventProfiles(activeEvent.profiles,peopleData.participants);
    banner.hidden=false;paint();
   }catch(error){banner.hidden=true}
