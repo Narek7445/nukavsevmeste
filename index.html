@@ -530,7 +530,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 <style id="home-title-refresh">.topline-brand{display:grid;gap:14px}.topline-brand>.eyebrow{display:inline-flex;align-items:center;gap:10px;width:max-content;max-width:100%;padding:9px 15px;border:1px solid rgba(255,224,166,.45);border-radius:999px;background:linear-gradient(110deg,rgba(255,224,166,.16),rgba(255,255,255,.1));color:#ffe2a6;font-size:10px;font-weight:900;letter-spacing:.2em;backdrop-filter:blur(12px);box-shadow:0 7px 22px #100b2a30}.topline-brand>.eyebrow:before{content:"✦";color:#ffd078;font-size:14px}.topline-brand h1.home-title{display:flex;flex-direction:column;align-items:flex-start;gap:0;max-width:950px;margin:0;color:#fffaf2;font:800 clamp(42px,6.2vw,78px)/.94 var(--sans);letter-spacing:-.065em;text-transform:uppercase;text-shadow:0 5px 35px #160d2cbb}.home-title-line{display:block}.home-title-accent{padding:0 .08em .08em 0;background:linear-gradient(100deg,#ffe5ae 0%,#f4c5dc 48%,#c9b9ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 5px 18px #160d2c66)}@media(max-width:760px){.topline-brand{gap:11px}.topline-brand>.eyebrow{font-size:9px;padding:8px 12px}.topline-brand h1.home-title{font-size:clamp(31px,8.4vw,49px);line-height:.98;letter-spacing:-.055em}}@media(max-width:390px){.topline-brand h1.home-title{font-size:clamp(28px,8vw,34px)}}</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="favicon.svg">
-<script>(()=>{const p=location.pathname;if(p==='/maintenance.html'||p==='/admin'||p==='/admin/'||p==='/admin.html'||p.startsWith('/admin/'))return;const check=async()=>{try{const r=await fetch('https://api.nukavsevmeste.org/api/site-status',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(d.maintenance&&location.pathname!=='/maintenance.html')location.replace('/maintenance.html')}catch{}};check();setInterval(check,15000)})();</script>
+
 
 <script src="/maintenance-guard.js" defer></script>
 </head>
@@ -870,8 +870,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
 })();
 </script>
 
-<script>
-(()=>{const API='https://api.nukavsevmeste.org';try{let id=localStorage.getItem('nuka-visitor-id');if(!id){id=crypto.randomUUID?crypto.randomUUID():('v'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('nuka-visitor-id',id)}fetch(API+'/api/analytics/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:id,page:location.pathname})}).catch(()=>{})}catch(e){}} )();</script>
+
 
 
 
