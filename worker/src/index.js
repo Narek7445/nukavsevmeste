@@ -196,6 +196,10 @@ async function handleApi(request, env, url) {
     } catch (error) { return json({ error: "Не удалось отправить отзыв.", detail: error.message }, 500); }
   }
 
+  if (request.method === "GET" && path === "/api/site-status") {
+    try { const row=await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("maintenance_mode").first(); let enabled=false; try{enabled=!!JSON.parse(row?.value||"false")}catch{} return json({maintenance:enabled},200,{"cache-control":"no-store"}); }
+    catch(error){return json({maintenance:false,error:"status_unavailable"},200,{"cache-control":"no-store"});}
+  }
   if (request.method === "GET" && path === "/api/events") {
     try {
       const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("events").first();
@@ -267,6 +271,16 @@ async function handleApi(request, env, url) {
     if (!(await isAdmin(request, env))) return json({ error: "Требуется авторизация администратора." }, 401);
 
 
+    if (request.method === "GET" && path === "/api/admin/site-status") {
+      try { const row=await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("maintenance_mode").first(); let enabled=false; try{enabled=!!JSON.parse(row?.value||"false")}catch{} return json({maintenance:enabled},200,{"cache-control":"no-store"}); }
+      catch(error){return json({error:"Не удалось получить статус сайта."},500);}
+    }
+    if (request.method === "PUT" && path === "/api/admin/site-status") {
+      let body; try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}
+      if(typeof body?.maintenance!=="boolean")return json({error:"Укажите состояние сайта."},400);
+      try{await env.DB.prepare("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at").bind("maintenance_mode",JSON.stringify(body.maintenance),new Date().toISOString()).run();return json({ok:true,maintenance:body.maintenance},200,{"cache-control":"no-store"})}
+      catch(error){return json({error:"Не удалось изменить режим сайта.",detail:error.message},500);}
+    }
     if (request.method === "GET" && path === "/api/admin/analytics") {
       try {
         await ensureCommunityTables(env);
