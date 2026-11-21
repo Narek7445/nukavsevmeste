@@ -341,7 +341,7 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
   <article class="stat stat-people"><div class="stat-top"><span class="stat-icon" aria-hidden="true">♟</span><span class="stat-overline">Голоса проекта</span></div><strong id="peopleCount">—</strong><span class="stat-caption">конкурсантов</span><span class="stat-decoration" aria-hidden="true">02</span></article>
   <article class="stat stat-seasons"><div class="stat-top"><span class="stat-icon" aria-hidden="true">✳</span><span class="stat-overline">История шоу</span></div><strong id="seasonCount">—</strong><span class="stat-caption">сезонов</span><span class="stat-decoration" aria-hidden="true">03</span></article>
  </section>
- <section class="toolbar" aria-label="Фильтры"><input id="search" type="search" placeholder="Имя конкурсанта или название песни..." aria-label="Поиск"><select id="season"><option value="all">Все сезоны</option></select><select id="score"><option value="all">Любое количество баллов</option><option value="100">100 баллов</option><option value="other">Меньше 100 баллов</option></select></section>
+ <section class="toolbar" aria-label="Фильтры"><input id="search" type="search" placeholder="Имя конкурсанта или название песни..." aria-label="Поиск"><select id="season"><option value="all">Все сезоны</option></select><select id="score" aria-label="Фильтр выступлений"><option value="all">Все выступления</option><option value="100">100 баллов</option></select></section>
  <div class="result-line"><span id="resultCount">Загружаем архив…</span><span>АРХИВ ШОУ</span></div>
  <section class="grid" id="grid" aria-live="polite"></section>
  <section id="profileView" class="profile-view" hidden>
@@ -400,7 +400,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  let visibleCount=PAGE_SIZE,filteredList=[];
  function render(){
   const q=$('search').value.trim().toLocaleLowerCase('ru'),season=$('season').value,scoreFilter=$('score').value;
-  filteredList=entries.filter(e=>(season==='all'||String(e.season)===season)&&(scoreFilter==='all'||(scoreFilter==='100'?score(e)===100:score(e)<100))&&(!q||(name(e)+' '+String(e.song||'')+' '+String(e.season||'')+' '+String(e.episode||'')).toLocaleLowerCase('ru').includes(q))).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a)||name(a).localeCompare(name(b),'ru'));
+  filteredList=entries.filter(e=>(season==='all'||String(e.season)===season)&&(scoreFilter!=='100'||score(e)===100)&&(!q||(name(e)+' '+String(e.song||'')+' '+String(e.season||'')+' '+String(e.episode||'')).toLocaleLowerCase('ru').includes(q))).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a)||name(a).localeCompare(name(b),'ru'));
   visibleCount=PAGE_SIZE;
   renderCards(true);
  }
@@ -461,6 +461,7 @@ async function init(){
    const d=apiData.participants;
    const params=new URLSearchParams(window.location.search);
    const requested=params.get('profile')||params.get('name')||'';
+   $('score').value=params.get('score')==='100'?'100':'all';
    allEntries=d;
    entries=d.filter(item=>!isHiddenPerformance(item));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}if(requested){const profileKey=normalizeProfileName(requested);await loadPolls(entries.filter(item=>normalizeProfileName(name(item))===profileKey).map(item=>item.id));}
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
