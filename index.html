@@ -529,6 +529,16 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .site-menu a:before{content:"";position:absolute;left:7px;top:50%;width:3px;height:3px;border-radius:50%;background:#e6bd75;transform:translateY(-50%);opacity:.8}
 .site-menu a:hover,.site-menu a:focus-visible{background:linear-gradient(100deg,rgba(218,170,99,.22),rgba(255,255,255,.07));border-color:rgba(236,194,123,.25);color:#ffe0a4;transform:translateX(2px);outline:none}
 .site-menu a:active{background:rgba(218,170,99,.28)}
+
+/* Events section heading */
+.events-section-heading{display:flex;align-items:center;gap:16px;margin:0 0 15px;animation:eventCountdownIn .45s ease both}
+.events-section-heading:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,rgba(242,184,75,.7),rgba(255,255,255,.08))}
+.events-section-heading h2{margin:0;color:#fff8ef;font:700 clamp(23px,3vw,31px)/1.1 Georgia,"Times New Roman",serif;letter-spacing:-.025em;text-shadow:0 3px 18px #0005}
+.site-menu-toggle{border:1px solid rgba(242,184,75,.78)!important;background:linear-gradient(135deg,#783b73 0%,#542d62 52%,#42264e 100%)!important;color:#fff8ef!important;box-shadow:0 8px 24px rgba(18,8,29,.38),inset 0 1px rgba(255,255,255,.2)!important}
+.site-menu-toggle:hover{background:linear-gradient(135deg,#92518b 0%,#693b78 52%,#52305e 100%)!important;box-shadow:0 11px 28px rgba(18,8,29,.48),inset 0 1px rgba(255,255,255,.24)!important}
+.site-menu-toggle:focus-visible{outline:2px solid #f2b84b!important;outline-offset:3px}
+.site-menu-toggle .menu-lines i{background:#fff8ef!important}
+
 </style>
 <style id="fan-disclaimer-style">.fan-disclaimer{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 18px;background:linear-gradient(100deg,#30203f,#56304f 52%,#304653);color:#fff8ef;border-bottom:1px solid rgba(255,255,255,.2);font:500 13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;text-align:center;letter-spacing:.01em}.fan-disclaimer strong{color:#ffd58b;font-weight:800}.fan-disclaimer-icon{flex:0 0 auto;color:#ffd58b;font-size:16px}@media(max-width:560px){.fan-disclaimer{padding:9px 13px;font-size:11px;gap:7px}}</style>
 <style id="home-title-refresh">.topline-brand{display:grid;gap:14px}.topline-brand>.eyebrow{display:inline-flex;align-items:center;gap:10px;width:max-content;max-width:100%;padding:9px 15px;border:1px solid rgba(255,224,166,.45);border-radius:999px;background:linear-gradient(110deg,rgba(255,224,166,.16),rgba(255,255,255,.1));color:#ffe2a6;font-size:10px;font-weight:900;letter-spacing:.2em;backdrop-filter:blur(12px);box-shadow:0 7px 22px #100b2a30}.topline-brand>.eyebrow:before{content:"✦";color:#ffd078;font-size:14px}.topline-brand h1.home-title{display:flex;flex-direction:column;align-items:flex-start;gap:0;max-width:950px;margin:0;color:#fffaf2;font:800 clamp(42px,6.2vw,78px)/.94 var(--sans);letter-spacing:-.065em;text-transform:uppercase;text-shadow:0 5px 35px #160d2cbb}.home-title-line{display:block}.home-title-accent{padding:0 .08em .08em 0;background:linear-gradient(100deg,#ffe5ae 0%,#f4c5dc 48%,#c9b9ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 5px 18px #160d2c66)}@media(max-width:760px){.topline-brand{gap:11px}.topline-brand>.eyebrow{font-size:9px;padding:8px 12px}.topline-brand h1.home-title{font-size:clamp(31px,8.4vw,49px);line-height:.98;letter-spacing:-.055em}}@media(max-width:390px){.topline-brand h1.home-title{font-size:clamp(28px,8vw,34px)}}</style>
@@ -542,6 +552,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 <div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div>
 <main class="page" id="archivePage">
   <header class="topline"><div class="topline-brand"><div class="eyebrow">Ну-ка, все вместе!</div><h1 class="home-title"><span class="home-title-line">Стобальные</span><span class="home-title-line home-title-accent">выступления</span></h1></div><div class="site-menu-wrap"><button class="site-menu-toggle" id="siteMenuToggle" type="button" aria-label="Открыть меню" title="Меню" aria-expanded="false" aria-controls="siteMenu"><span class="menu-lines" aria-hidden="true"><i></i><i></i><i></i></span></button><nav class="site-menu" id="siteMenu" aria-label="Разделы сайта" hidden><a href="/seasons/">Сезоны</a><a href="/contestants/">Все конкурсанты</a><a href="/rating/">Любимцы зрителей</a><a href="#participantsDirectory">Участники</a><a href="#record-holder">Рекордсмен</a><a href="/stats/">Статистика</a><a href="/winners/">Победители</a><a href="/experts/">Эксперты сотни</a><a href="/games/">Игры</a><a href="/articles/">Статьи</a><a href="#visitorFeedbackTitle">Оставить отзыв</a></nav></div></header>
+  <div class="events-section-heading" id="eventsSectionHeading" hidden><h2>События</h2></div>
   <section class="event-countdown" id="eventCountdown" aria-live="polite" hidden>
    <div class="event-countdown-copy"><span class="event-countdown-kicker">СЛЕДУЮЩЕЕ СОБЫТИЕ</span><h2 id="eventCountdownTitle"></h2><p id="eventCountdownDate"></p></div>
    <div class="event-countdown-timer" aria-label="Обратный отсчёт">
@@ -932,7 +943,9 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
    eventParticipants=Array.isArray(peopleData.participants)?peopleData.participants.filter(person=>person&&!person.hidden):[];
    futureEvents=(Array.isArray(data.events)?data.events:[]).filter(e=>e&&e.title&&Number.isFinite(Date.parse(e.dateTime))&&Date.parse(e.dateTime)>now).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));
    activeEvent=futureEvents[0]||null;
-   if(!activeEvent){banner.hidden=true;return}
+   const eventsHeading=$('eventsSectionHeading');
+   if(!activeEvent){banner.hidden=true;eventsHeading.hidden=true;return}
+   eventsHeading.hidden=false;
    banner.dataset.eventId=String(activeEvent.id||activeEvent.title);$('eventCountdownTitle').textContent=activeEvent.title;
    $('eventCountdownDate').textContent=moscowDate(activeEvent.dateTime);
    renderEventProfiles(activeEvent.profiles,eventParticipants);
