@@ -303,7 +303,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .search-hint:hover,.search-hint:focus{background:#f5eaf3}
 .search-hint small{color:#78677c;line-height:1.4}
 .select-wrap{flex:0 1 250px;width:250px;min-width:175px}
-.controls select{height:48px;border-radius:999px;padding-top:0;padding-bottom:0;font-size:14px}
+.controls select#seasonFilter{height:48px;border-radius:999px!important;padding-top:0;padding-bottom:0;font-size:14px;overflow:hidden}
 .count{flex:0 0 auto;white-space:nowrap;margin-left:auto}
 @media(max-width:1000px) and (min-width:761px){
  .controls{flex-wrap:wrap}
@@ -551,7 +551,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   <section class="site-polls" id="sitePolls" hidden aria-label="Опросы зрителей"><div class="site-polls-head"><div><span class="site-polls-kicker">ГОЛОС ЗРИТЕЛЕЙ</span><h2 id="sitePollTitle"></h2></div><div class="site-polls-arrows"><button id="sitePollPrev" type="button" aria-label="Предыдущий опрос">‹</button><button id="sitePollNext" type="button" aria-label="Следующий опрос">›</button></div></div><div class="site-poll-options" id="sitePollOptions"></div><div class="site-poll-results" id="sitePollResults" hidden></div><div class="site-poll-footer"><button class="site-poll-vote" id="sitePollVote" type="button" disabled>Выбрать</button><span id="sitePollPosition"></span></div></section>
 
   <section class="controls" aria-label="Поиск и фильтр выступлений">
-    <div class="search-wrap"><input id="searchInput" type="search" autocomplete="off" placeholder="Поиск по участнику или песне..." aria-label="Поиск по участнику или песне" aria-autocomplete="list" aria-controls="searchHints"><div class="search-hints" id="searchHints" role="listbox" hidden></div></div>
+    <div class="search-wrap"><input id="searchInput" type="search" autocomplete="off" placeholder="Поиск среди стобальных выступлений" aria-label="Поиск среди стобальных выступлений" aria-autocomplete="list" aria-controls="searchHints"><div class="search-hints" id="searchHints" role="listbox" hidden></div></div>
     <div class="select-wrap"><select id="seasonFilter" aria-label="Выбрать сезон"><option value="all">Все сезоны</option></select></div>
     <div class="count" id="count">0 выступлений</div>
   </section>
