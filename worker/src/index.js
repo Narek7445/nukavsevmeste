@@ -248,7 +248,7 @@ async function handleApi(request, env, url) {
     const username = String(body?.username || "").normalize("NFKC").trim();
     const usernameNormalized = username.toLocaleLowerCase("ru");
     const password = typeof body?.password === "string" ? body.password : "";
-    if (!/^[\\p{L}\\p{N}_-]{3,24}$/u.test(username)) return json({ error: "Никнейм: от 3 до 24 символов — буквы, цифры, дефис или подчёркивание." }, 400);
+    if (!/^[\p{L}\p{N}_-]{3,24}$/u.test(username)) return json({ error: "Никнейм: от 3 до 24 символов — буквы, цифры, дефис или подчёркивание." }, 400);
     if (password.length < 8 || password.length > 128) return json({ error: "Пароль должен содержать от 8 до 128 символов." }, 400);
     try {
       await ensureForumUsersTable(env);
