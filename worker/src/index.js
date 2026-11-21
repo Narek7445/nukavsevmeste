@@ -162,6 +162,28 @@ async function ensureCommunityTables(env) {
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL DEFAULT '', message TEXT NOT NULL, created_at TEXT NOT NULL)").run();
 }
 
+async function cachedJsonResponse(request, ttlSeconds, createResponse) {
+  const cache = caches.default;
+  const cacheRequest = new Request(request.url, { method: "GET" });
+  try {
+    const cached = await cache.match(cacheRequest);
+    if (cached) return cached;
+  } catch {}
+
+  const response = await createResponse();
+  if (!response.ok) return response;
+
+  const headers = new Headers(response.headers);
+  headers.set("cache-control", "public, max-age=" + ttlSeconds);
+  const cacheable = new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+  try { await cache.put(cacheRequest, cacheable.clone()); } catch {}
+  return cacheable;
+}
+
 async function handleApi(request, env, url) {
   const path = url.pathname;
 
@@ -201,36 +223,53 @@ async function handleApi(request, env, url) {
     catch(error){return json({maintenance:false,error:"status_unavailable"},200,{"cache-control":"no-store"});}
   }
   if (request.method === "GET" && path === "/api/events") {
-    try {
-      const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("events").first();
-      let events = [];
-      try { events = row ? JSON.parse(row.value) : []; } catch { events = []; }
-      const now = Date.now();
-      events = (Array.isArray(events) ? events : []).filter(event => event && typeof event.title === "string" && Number.isFinite(Date.parse(event.dateTime)) && Date.parse(event.dateTime) > now)
-        .sort((a, b) => Date.parse(a.dateTime) - Date.parse(b.dateTime));
-      return json({ events }, 200, { "cache-control": "public, max-age=15, stale-while-revalidate=30" });
-    } catch (error) { return json({ error: "Не удалось загрузить события.", detail: error.message }, 500); }
+    return cachedJsonResponse(request, 15, async () => {
+      try {
+        const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("events").first();
+        let events = [];
+        try { events = row ? JSON.parse(row.value) : []; } catch { events = []; }
+        const now = Date.now();
+        events = (Array.isArray(events) ? events : []).filter(event => event && typeof event.title === "string" && Number.isFinite(Date.parse(event.dateTime)) && Date.parse(event.dateTime) > now)
+          .sort((a, b) => Date.parse(a.dateTime) - Date.parse(b.dateTime));
+        return json({ events });
+      } catch (error) { return json({ error: "Не удалось загрузить события.", detail: error.message }, 500); }
+    });
   }
 
   if (request.method === "GET" && path === "/api/experts") {
-    try {
-      const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("experts").first();
-      let experts = [];
-      try { experts = row ? JSON.parse(row.value) : []; } catch { experts = []; }
-      return json({ experts: Array.isArray(experts) ? experts : [] }, 200, { "cache-control": "public, max-age=60, stale-while-revalidate=180" });
-    } catch (error) { return json({ error: "Не удалось загрузить экспертов.", detail: error.message }, 500); }
+    return cachedJsonResponse(request, 60, async () => {
+      try {
+        const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("experts").first();
+        let experts = [];
+        try { experts = row ? JSON.parse(row.value) : []; } catch { experts = []; }
+        return json({ experts: Array.isArray(experts) ? experts : [] });
+      } catch (error) { return json({ error: "Не удалось загрузить экспертов.", detail: error.message }, 500); }
+    });
   }
 
   if (request.method === "GET" && path === "/api/participants") {
-    try {
-      const participants = publicArchive(await readArchive(env));
-      return json({ participants, updatedAt: await env.DB.prepare("SELECT updated_at FROM app_state WHERE key = ?").bind("participants").first().then(row => row?.updated_at || null) }, 200, { "cache-control": "public, max-age=30, stale-while-revalidate=120" });
-    } catch (error) {
-      return json({ error: "Не удалось прочитать архив.", detail: error.message }, 500);
-    }
+    return cachedJsonResponse(request, 60, async () => {
+      try {
+        const row = await env.DB.prepare("SELECT value, updated_at FROM app_state WHERE key = ?").bind("participants").first();
+        let stored = [];
+        try { stored = row ? JSON.parse(row.value) : []; } catch { throw new Error("Archive data in D1 is invalid JSON"); }
+        const participants = publicArchive(Array.isArray(stored) ? stored : []);
+        return json({ participants, updatedAt: row?.updated_at || null });
+      } catch (error) {
+        return json({ error: "Не удалось прочитать архив.", detail: error.message }, 500);
+      }
+    });
   }
 
-  if (request.method === "GET" && path === "/api/site-polls") {try{const now=Date.now(),polls=(await getSitePolls(env)).filter(p=>p&&p.active!==false&&(!p.endAt||Date.parse(p.endAt)>now));return json({polls},200,{"cache-control":"no-store"})}catch(error){return json({error:"Не удалось загрузить опросы.",detail:error.message},500)}}
+  if (request.method === "GET" && path === "/api/site-polls") {
+    return cachedJsonResponse(request, 15, async () => {
+      try {
+        const now = Date.now();
+        const polls = (await getSitePolls(env)).filter(p => p && p.active !== false && (!p.endAt || Date.parse(p.endAt) > now));
+        return json({ polls });
+      } catch (error) { return json({ error: "Не удалось загрузить опросы.", detail: error.message }, 500); }
+    });
+  }
   if (request.method === "POST" && path === "/api/site-polls/vote") {let body;try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}const pollId=String(body?.pollId||""),voterId=String(body?.voterId||""),optionIds=Array.isArray(body?.optionIds)?[...new Set(body.optionIds.map(x=>String(x)))]:[String(body?.optionId||"")];if(!/^[a-zA-Z0-9_-]{1,100}$/.test(pollId)||!/^[a-zA-Z0-9_-]{16,100}$/.test(voterId)||!optionIds.length||optionIds.length>3||optionIds.some(id=>!/^[a-zA-Z0-9_-]{1,100}$/.test(id)))return json({error:"Проверьте выбранные варианты ответа."},400);try{const poll=(await getSitePolls(env)).find(p=>p.id===pollId);if(!poll||poll.active===false)return json({error:"Опрос больше недоступен."},404);if(poll.endAt&&Date.parse(poll.endAt)<=Date.now())return json({error:"Время голосования завершилось."},410);const limit=Math.max(1,Math.min(3,Number(poll.maxSelections)||1));if(optionIds.length>limit)return json({error:"В этом опросе можно выбрать не более "+limit+" вариантов."},400);if(!Array.isArray(poll.options)||optionIds.some(id=>!poll.options.some(o=>o.id===id)))return json({error:"Такого варианта ответа нет."},400);await ensureSitePollVoteTable(env);await ensureSitePollMultiVoteTable(env);const existing=await env.DB.prepare("SELECT 1 AS voted FROM site_poll_votes WHERE poll_id=? AND voter_id=? UNION ALL SELECT 1 AS voted FROM site_poll_multi_votes WHERE poll_id=? AND voter_id=? LIMIT 1").bind(pollId,voterId,pollId,voterId).first();if(existing)return json({error:"Вы уже голосовали в этом опросе."},409);const now=new Date().toISOString();await env.DB.batch(optionIds.map(id=>env.DB.prepare("INSERT OR IGNORE INTO site_poll_multi_votes (poll_id,voter_id,option_id,created_at) VALUES (?,?,?,?)").bind(pollId,voterId,id,now)));const result=await getSitePollResults(env,pollId);return json({ok:true,...result},200,{"cache-control":"no-store"})}catch(error){return json({error:"Не удалось сохранить голос.",detail:error.message},500)}}
   if (request.method === "GET" && path === "/api/site-polls/results") {const pollId=String(url.searchParams.get("id")||""),voterId=String(url.searchParams.get("voterId")||"");if(!/^[a-zA-Z0-9_-]{1,100}$/.test(pollId)|| (voterId&&!/^[a-zA-Z0-9_-]{16,100}$/.test(voterId)))return json({error:"Некорректный опрос."},400);try{const result=await getSitePollResults(env,pollId);let alreadyVoted=false;if(voterId){await ensureSitePollVoteTable(env);await ensureSitePollMultiVoteTable(env);const existing=await env.DB.prepare("SELECT 1 AS voted FROM site_poll_votes WHERE poll_id=? AND voter_id=? UNION ALL SELECT 1 AS voted FROM site_poll_multi_votes WHERE poll_id=? AND voter_id=? LIMIT 1").bind(pollId,voterId,pollId,voterId).first();alreadyVoted=!!existing}return json({...result,alreadyVoted},200,{"cache-control":"no-store"})}catch(error){return json({error:"Не удалось загрузить результаты.",detail:error.message},500)}}
   if (request.method === "GET" && path === "/api/polls") {
