@@ -70,6 +70,16 @@ async function isAdmin(request, env) {
 
 
 
+
+async function ensureArticlesTable(env) {
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS articles (slug TEXT PRIMARY KEY, title TEXT NOT NULL, summary TEXT NOT NULL DEFAULT '', content TEXT NOT NULL, cover_image TEXT, attachments_json TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL CHECK(status IN ('draft','published')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL, published_at TEXT)").run();
+}
+function parseArticleRow(row) {
+  if (!row) return null;
+  let attachments=[];try{attachments=JSON.parse(row.attachments_json||"[]")}catch{}
+  return {slug:row.slug,title:row.title,summary:row.summary||"",content:row.content||"",coverImage:row.cover_image||"",attachments:Array.isArray(attachments)?attachments:[],status:row.status,createdAt:row.created_at,updatedAt:row.updated_at,publishedAt:row.published_at||null};
+}
+
 async function readArchive(env) {
   const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("participants").first();
   if (!row) return [];
@@ -228,6 +238,22 @@ async function handleApi(request, env, url) {
     } catch (error) { return json({ error: "Не удалось отправить отзыв.", detail: error.message }, 500); }
   }
 
+
+  if (request.method === "GET" && path === "/api/articles") {
+    try {
+      await ensureArticlesTable(env);
+      const slug=String(url.searchParams.get("id")||"").trim();
+      if(slug){
+        if(!/^[a-z0-9-]{1,180}$/.test(slug))return json({error:"Некорректная ссылка на статью."},400);
+        const row=await env.DB.prepare("SELECT * FROM articles WHERE slug = ? AND status = 'published'").bind(slug).first();
+        if(!row)return json({error:"Статья не найдена."},404,{ "cache-control":"no-store" });
+        return json({article:parseArticleRow(row)},200,{ "cache-control":"public, max-age=60" });
+      }
+      const result=await env.DB.prepare("SELECT * FROM articles WHERE status = 'published' ORDER BY published_at DESC, created_at DESC LIMIT 100").all();
+      return json({articles:(result.results||[]).map(parseArticleRow)},200,{ "cache-control":"public, max-age=60" });
+    } catch(error){return json({error:"Не удалось загрузить статьи."},500);}
+  }
+
   if (request.method === "GET" && path === "/api/site-status") {
     try { const row=await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("maintenance_mode").first(); let enabled=false; try{enabled=!!JSON.parse(row?.value||"false")}catch{} return json({maintenance:enabled},200,{"cache-control":"no-store"}); }
     catch(error){return json({maintenance:false,error:"status_unavailable"},200,{"cache-control":"no-store"});}
@@ -319,6 +345,51 @@ async function handleApi(request, env, url) {
   if (path.startsWith("/api/admin/")) {
     if (!(await isAdmin(request, env))) return json({ error: "Требуется авторизация администратора." }, 401);
 
+
+
+    if (request.method === "GET" && path === "/api/admin/articles") {
+      try { await ensureArticlesTable(env);const result=await env.DB.prepare("SELECT * FROM articles ORDER BY updated_at DESC").all();return json({articles:(result.results||[]).map(parseArticleRow)},200,{ "cache-control":"no-store" }); }
+      catch(error){return json({error:"Не удалось загрузить статьи.",detail:error.message},500);}
+    }
+    if (request.method === "PUT" && path === "/api/admin/articles") {
+      let body;try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}
+      const a=body?.article;if(!a||typeof a!=="object"||Array.isArray(a))return json({error:"Некорректная статья."},400);
+      const slug=String(a.slug||"").trim(),title=String(a.title||"").trim(),summary=String(a.summary||""),content=String(a.content||""),coverImage=String(a.coverImage||""),status=String(a.status||"draft"),attachments=a.attachments;
+      if(!/^[a-z0-9-]{1,180}$/.test(slug))return json({error:"Некорректный уникальный адрес статьи."},400);
+      if(!title||title.length>160)return json({error:"Заголовок обязателен и не должен превышать 160 символов."},400);
+      if(summary.length>400||!content.trim()||content.length>150000)return json({error:"Проверьте описание и текст статьи."},400);
+      if(coverImage&&(!coverImage.startsWith("https://")||coverImage.length>2048))return json({error:"Некорректная обложка статьи."},400);
+      if(!["draft","published"].includes(status))return json({error:"Некорректный статус статьи."},400);
+      if(!Array.isArray(attachments)||attachments.length>50)return json({error:"Допускается не более 50 вложений."},400);
+      const allowedTypes=new Set(["image","file","profile","performance","episode"]);
+      for(const item of attachments){if(!item||!allowedTypes.has(item.type)||typeof item.name!=="string"||!item.name.trim()||item.name.length>300)return json({error:"Проверьте список вложений."},400);if(["image","file"].includes(item.type)&&(!String(item.url||"").startsWith("https://")||String(item.url).length>2048))return json({error:"Некорректная ссылка вложения."},400);if(item.href&&(!String(item.href).startsWith("/")||String(item.href).startsWith("//")))return json({error:"Некорректная ссылка на материал архива."},400)}
+      const serialized=JSON.stringify(attachments);if(new TextEncoder().encode(serialized).length>100000)return json({error:"Вложения слишком велики."},413);
+      try{
+        await ensureArticlesTable(env);
+        const existing=await env.DB.prepare("SELECT created_at,published_at FROM articles WHERE slug = ?").bind(slug).first();
+        const now=new Date().toISOString(),publishedAt=status==="published"?(existing?.published_at||now):null;
+        await env.DB.prepare("INSERT INTO articles (slug,title,summary,content,cover_image,attachments_json,status,created_at,updated_at,published_at) VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(slug) DO UPDATE SET title=excluded.title,summary=excluded.summary,content=excluded.content,cover_image=excluded.cover_image,attachments_json=excluded.attachments_json,status=excluded.status,updated_at=excluded.updated_at,published_at=excluded.published_at")
+          .bind(slug,title,summary,content,coverImage,serialized,status,existing?.created_at||now,now,publishedAt).run();
+        const row=await env.DB.prepare("SELECT * FROM articles WHERE slug = ?").bind(slug).first();
+        return json({ok:true,article:parseArticleRow(row)},200,{ "cache-control":"no-store" });
+      }catch(error){return json({error:"Не удалось сохранить статью.",detail:error.message},500)}
+    }
+    if(request.method==="DELETE"&&path.startsWith("/api/admin/articles/")){
+      let slug;try{slug=decodeURIComponent(path.slice("/api/admin/articles/".length))}catch{return json({error:"Некорректный адрес статьи."},400)}
+      if(!/^[a-z0-9-]{1,180}$/.test(slug))return json({error:"Некорректный адрес статьи."},400);
+      try{await ensureArticlesTable(env);const result=await env.DB.prepare("DELETE FROM articles WHERE slug = ?").bind(slug).run();if(!(result.meta?.changes>0))return json({error:"Статья не найдена."},404);return json({ok:true})}catch(error){return json({error:"Не удалось удалить статью.",detail:error.message},500)}
+    }
+    if(request.method==="POST"&&path==="/api/admin/article-upload"){
+      if(!env.IMAGES)return json({error:"Хранилище R2 ещё не подключено."},503);
+      let form;try{form=await request.formData()}catch{return json({error:"Не удалось прочитать файл."},400)}
+      const file=form.get("file");if(!file||typeof file.arrayBuffer!=="function")return json({error:"Файл не выбран."},400);
+      if(file.size>25*1024*1024)return json({error:"Размер файла не должен превышать 25 МБ."},413);
+      const allowed=new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["image/avif","avif"],["image/gif","gif"],["application/pdf","pdf"],["text/plain","txt"],["application/zip","zip"],["application/x-zip-compressed","zip"],["application/vnd.openxmlformats-officedocument.wordprocessingml.document","docx"],["application/msword","doc"],["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","xlsx"],["application/vnd.ms-excel","xls"],["application/vnd.openxmlformats-officedocument.presentationml.presentation","pptx"],["application/vnd.ms-powerpoint","ppt"]]);
+      const extension=allowed.get(file.type);if(!extension)return json({error:"Формат файла не поддерживается. Разрешены изображения, PDF, Office, TXT и ZIP."},415);
+      const key="articles/"+crypto.randomUUID()+"."+extension;
+      try{await env.IMAGES.put(key,await file.arrayBuffer(),{httpMetadata:{contentType:file.type,cacheControl:"public, max-age=31536000, immutable"}});return json({url:new URL("/files/"+key,url.origin).toString(),key,name:String(file.name||"").slice(0,240),mime:file.type,size:file.size})}
+      catch(error){return json({error:"Не удалось загрузить файл в R2.",detail:error.message},500)}
+    }
 
     if (request.method === "GET" && path === "/api/admin/site-status") {
       try { const row=await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("maintenance_mode").first(); let enabled=false; try{enabled=!!JSON.parse(row?.value||"false")}catch{} return json({maintenance:enabled},200,{"cache-control":"no-store"}); }
@@ -559,6 +630,16 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders(request, env) });
+
+
+    if (request.method === "GET" && url.pathname.startsWith("/files/")) {
+      if (!env.IMAGES) return new Response("File storage is not configured", { status:503 });
+      let key;try{key=decodeURIComponent(url.pathname.slice("/files/".length))}catch{return new Response("Not found",{status:404})}
+      if(!key||!key.startsWith("articles/")||key.includes("..")||key.includes("\\\\"))return new Response("Not found",{status:404});
+      const object=await env.IMAGES.get(key);if(!object)return new Response("Not found",{status:404});
+      const headers=new Headers();object.writeHttpMetadata(headers);headers.set("etag",object.httpEtag);headers.set("cache-control","public, max-age=31536000, immutable");
+      return new Response(object.body,{headers});
+    }
 
     if (request.method === "GET" && url.pathname.startsWith("/images/")) {
       if (!env.IMAGES) return new Response("Image storage is not configured", { status: 503 });
