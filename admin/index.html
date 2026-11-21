@@ -496,7 +496,7 @@ function buildArticleReferenceOptions(){
  $('articleReferenceValue').innerHTML=opts.length?opts.map(o=>'<option value="'+esc(o.value)+'">'+esc(o.label)+'</option>').join(''):'<option value="">Нет доступных записей</option>';
  $('articleReferenceValue')._articleOptions=opts;
 }
-async function loadArticleArchive(){if(articleArchiveLoaded)return;const d=await req('/api/admin/participants',{cache:'no-store'});entries=Array.isArray(d.participants)?d.participants:[];articleArchiveLoaded=true;buildArticleReferenceOptions()}
+async function loadArticleArchive(){if(articleArchiveLoaded)return;const [d,eventData]=await Promise.all([req('/api/admin/participants',{cache:'no-store'}),req('/api/admin/events',{cache:'no-store'})]);entries=Array.isArray(d.participants)?d.participants:[];adminEvents=Array.isArray(eventData.events)?eventData.events:[];articleArchiveLoaded=true;buildArticleReferenceOptions()}
 async function loadArticles(){const d=await req('/api/admin/articles',{cache:'no-store'});adminArticles=Array.isArray(d.articles)?d.articles:[];renderArticleList()}
 function renderArticleList(){
  $('articlesCount').textContent=adminArticles.length+' статей';$('articlesListCount').textContent=adminArticles.length;
