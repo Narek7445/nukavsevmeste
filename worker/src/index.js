@@ -184,6 +184,13 @@ async function cachedJsonResponse(request, ttlSeconds, createResponse) {
   return cacheable;
 }
 
+async function invalidatePublicCache(request, path) {
+  try {
+    const cacheRequest = new Request(new URL(path, request.url).toString(), { method: "GET" });
+    await caches.default.delete(cacheRequest);
+  } catch {}
+}
+
 async function handleApi(request, env, url) {
   const path = url.pathname;
 
@@ -401,7 +408,7 @@ async function handleApi(request, env, url) {
     }
 
     if (request.method === "GET" && path === "/api/admin/site-polls") {try{return json({polls:await getSitePolls(env)},200,{"cache-control":"no-store"})}catch(error){return json({error:"Не удалось загрузить опросы.",detail:error.message},500)}}
-    if (request.method === "PUT" && path === "/api/admin/site-polls") {let body;try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}const polls=body?.polls;if(!Array.isArray(polls)||polls.length>100)return json({error:"Допускается не более 100 опросов."},400);const ids=new Set();for(const p of polls){if(!p||typeof p!=="object"||Array.isArray(p))return json({error:"Некорректный опрос."},400);const id=String(p.id||""),title=String(p.title||"").trim();if(!/^[a-zA-Z0-9_-]{1,100}$/.test(id)||ids.has(id))return json({error:"У опросов должны быть уникальные ID."},400);if(!title||title.length>140)return json({error:"Название опроса обязательно (до 140 символов)."},400);if(!Array.isArray(p.options)||p.options.length<2||p.options.some(o=>!o||typeof o.id!=="string"||!/^[a-zA-Z0-9_-]{1,100}$/.test(o.id)||typeof o.label!=="string"||!o.label.trim()||o.label.length>120))return json({error:"Укажите минимум два корректных варианта ответа."},400);if(p.maxSelections!==undefined&&(!Number.isInteger(Number(p.maxSelections))||Number(p.maxSelections)<1||Number(p.maxSelections)>3))return json({error:"Максимум выбранных ответов должен быть от 1 до 3."},400);if(p.endAt!==null&&p.endAt!==undefined&&(!Number.isFinite(Date.parse(p.endAt))))return json({error:"Некорректная дата окончания."},400);if(p.participants!==undefined&&(!Array.isArray(p.participants)||p.participants.length>100||p.participants.some(n=>typeof n!=="string"||n.length>250)))return json({error:"Некорректный список участников выпуска."},400);ids.add(id)}const value=JSON.stringify(polls);if(new TextEncoder().encode(value).length>150000)return json({error:"Список опросов слишком большой."},413);try{await env.DB.prepare("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at").bind("site_polls",value,new Date().toISOString()).run();return json({ok:true,count:polls.length})}catch(error){return json({error:"Не удалось сохранить опросы.",detail:error.message},500)}}
+    if (request.method === "PUT" && path === "/api/admin/site-polls") {let body;try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}const polls=body?.polls;if(!Array.isArray(polls)||polls.length>100)return json({error:"Допускается не более 100 опросов."},400);const ids=new Set();for(const p of polls){if(!p||typeof p!=="object"||Array.isArray(p))return json({error:"Некорректный опрос."},400);const id=String(p.id||""),title=String(p.title||"").trim();if(!/^[a-zA-Z0-9_-]{1,100}$/.test(id)||ids.has(id))return json({error:"У опросов должны быть уникальные ID."},400);if(!title||title.length>140)return json({error:"Название опроса обязательно (до 140 символов)."},400);if(!Array.isArray(p.options)||p.options.length<2||p.options.some(o=>!o||typeof o.id!=="string"||!/^[a-zA-Z0-9_-]{1,100}$/.test(o.id)||typeof o.label!=="string"||!o.label.trim()||o.label.length>120))return json({error:"Укажите минимум два корректных варианта ответа."},400);if(p.maxSelections!==undefined&&(!Number.isInteger(Number(p.maxSelections))||Number(p.maxSelections)<1||Number(p.maxSelections)>3))return json({error:"Максимум выбранных ответов должен быть от 1 до 3."},400);if(p.endAt!==null&&p.endAt!==undefined&&(!Number.isFinite(Date.parse(p.endAt))))return json({error:"Некорректная дата окончания."},400);if(p.participants!==undefined&&(!Array.isArray(p.participants)||p.participants.length>100||p.participants.some(n=>typeof n!=="string"||n.length>250)))return json({error:"Некорректный список участников выпуска."},400);ids.add(id)}const value=JSON.stringify(polls);if(new TextEncoder().encode(value).length>150000)return json({error:"Список опросов слишком большой."},413);try{await env.DB.prepare("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at").bind("site_polls",value,new Date().toISOString()).run();await invalidatePublicCache(request,"/api/site-polls");return json({ok:true,count:polls.length})}catch(error){return json({error:"Не удалось сохранить опросы.",detail:error.message},500)}}
     if (request.method === "GET" && path === "/api/admin/events") {
       try {
         const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("events").first();
@@ -434,6 +441,7 @@ async function handleApi(request, env, url) {
       try {
         await env.DB.prepare("INSERT INTO app_state (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at")
           .bind("events", serialized, updatedAt).run();
+        await invalidatePublicCache(request, "/api/events");
         return json({ ok: true, count: events.length, updatedAt });
       } catch (error) { return json({ error: "Не удалось сохранить события.", detail: error.message }, 500); }
     }
@@ -486,6 +494,7 @@ async function handleApi(request, env, url) {
       try {
         await env.DB.prepare("INSERT INTO app_state (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at")
           .bind("experts", serialized, updatedAt).run();
+        await invalidatePublicCache(request, "/api/experts");
         return json({ ok: true, count: experts.length, updatedAt });
       } catch (error) { return json({ error: "Не удалось сохранить экспертов.", detail: error.message }, 500); }
     }
@@ -509,6 +518,7 @@ async function handleApi(request, env, url) {
       try {
         await env.DB.prepare("INSERT INTO app_state (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at")
           .bind("participants", serialized, updatedAt).run();
+        await invalidatePublicCache(request, "/api/participants");
         return json({ ok: true, count: participants.length, updatedAt });
       } catch (error) {
         return json({ error: "Не удалось сохранить архив в D1.", detail: error.message }, 500);
