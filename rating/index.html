@@ -108,7 +108,7 @@ function getRanking(){
   if(!groups.has(key))groups.set(key,{name,performances:0,yes:0,no:0,seasons:new Set()});
   const g=groups.get(key),p=polls[String(e.id)]||{yes:0,no:0};g.performances++;g.yes+=Number(p.yes)||0;g.no+=Number(p.no)||0;g.seasons.add(String(e.season||''));
  });
- return [...groups.values()].map(g=>({...g,total:g.yes+g.no,percent:g.yes+g.no?g.yes/(g.yes+g.no):0})).sort((a,b)=>b.yes-a.yes||b.percent-a.percent||b.total-a.total||a.name.localeCompare(b.name,'ru'));
+ return [...groups.values()].map(g=>({...g,total:g.yes+g.no,percent:g.yes+g.no?g.yes/(g.yes+g.no):0})).filter(g=>g.total>0).sort((a,b)=>b.yes-a.yes||b.percent-a.percent||b.total-a.total||a.name.localeCompare(b.name,'ru'));
 }
 function medalCard(p,place){const person=entries.find(e=>personName(e).toLocaleLowerCase('ru')===p.name.toLocaleLowerCase('ru'));const photo=person?((Array.isArray(person.photos)?person.photos.find(Boolean):'')||person.photo||''):'';return '<article class="podium-card '+(place===1?'first':place===2?'second':'third')+'" role="link" tabindex="0" data-fan-profile="'+safe(p.name)+'">'+(photo?'<img class="podium-photo" src="'+safe(photo)+'" alt="" loading="lazy">':'')+'<div class="podium-info"><div class="podium-crown" aria-hidden="true">♛</div><h3 class="podium-name">'+safe(p.name)+'</h3><div class="podium-votes">'+p.yes.toLocaleString('ru-RU')+'</div><div class="podium-caption">голосов «Да»</div><div class="podium-support">'+Math.round(p.percent*100)+'% поддержки</div></div></article>'}
 function render(){
