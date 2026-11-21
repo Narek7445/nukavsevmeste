@@ -94,6 +94,19 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
 const API='https://api.nukavsevmeste.org', $=id=>document.getElementById(id);
 let entries=[],polls={};
 const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ async function loadPolls(ids){
+  const validIds=[...new Set(ids.map(value=>String(value||'')).filter(id=>/^[a-zA-Z0-9._-]{1,100}$/.test(id)))],result={};
+  const chunkSize=80;
+  for(let offset=0;offset<validIds.length;offset+=chunkSize*4){
+   const requests=[];
+   for(let start=offset;start<Math.min(offset+chunkSize*4,validIds.length);start+=chunkSize){
+    const chunk=validIds.slice(start,start+chunkSize);
+    requests.push((async()=>{const response=await fetch(API+'/api/polls?ids='+chunk.join(','),{cache:'no-store'});if(!response.ok)throw new Error('Не удалось загрузить результаты голосования');const data=await response.json();return data.polls||{}})());
+   }
+   for(const values of await Promise.all(requests))Object.assign(result,values);
+  }
+  return result;
+ }
 const personName=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
 const seasonLabel=s=>/^\d+$/.test(String(s))?String(s)+' сезон':String(s);
 function getRanking(){
@@ -134,9 +147,10 @@ function renderFanProfile(person){
 function openFanProfile(person){const u=new URL('/rating/',location.href);u.searchParams.set('profile',person);location.assign(u.href)}
 async function init(){
  try{
-  const [ar,pr]=await Promise.all([fetch(API+'/api/participants',{cache:'no-store'}),fetch(API+'/api/polls',{cache:'no-store'})]);
-  if(!ar.ok||!pr.ok)throw new Error('Не удалось загрузить данные.');
-  const a=await ar.json(),p=await pr.json();entries=Array.isArray(a.participants)?a.participants.filter(item=>!item.hidden):[];polls=p.polls||{};
+  const ar=await fetch(API+'/api/participants',{cache:'no-store'});
+  if(!ar.ok)throw new Error('Не удалось загрузить архив.');
+  const a=await ar.json();entries=Array.isArray(a.participants)?a.participants.filter(item=>item&&item.hidden!==true&&item.hidden!==1&&!['true','1'].includes(String(item.hidden??'').trim().toLowerCase())):[];
+  polls=await loadPolls(entries.map(item=>item.id));
   const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
   $('season').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+safe(s)+'">'+safe(seasonLabel(s))+'</option>').join('');
   const requested=new URLSearchParams(location.search).get('profile')||'';

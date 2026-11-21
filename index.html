@@ -738,7 +738,29 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  function hasVoted(id){try{return localStorage.getItem('nuka-poll-voted-'+id)==='1'}catch{return false}}
  function markVoted(id){try{localStorage.setItem('nuka-poll-voted-'+id,'1')}catch{}}
  function pollMarkup(e){const id=String(e.id||''),p=pollResults[id]||{yes:0,no:0},total=p.yes+p.no,voted=hasVoted(id),yesPct=total?Math.round(p.yes/total*100):0,noPct=total?100-yesPct:0;return '<section class="audience-poll" data-poll="'+escapeHTML(id)+'"><div class="audience-poll-title">Вы бы встали на месте экспертов?</div><div class="audience-poll-actions"><button type="button" data-vote="yes" '+(voted?'disabled':'')+'>Да · '+p.yes+'</button><button type="button" data-vote="no" '+(voted?'disabled':'')+'>Нет · '+p.no+'</button></div>'+(total?'<div class="audience-poll-results"><div class="audience-poll-row"><span>Да</span><div class="audience-poll-track"><div class="audience-poll-fill" style="width:'+yesPct+'%"></div></div><span>'+yesPct+'%</span></div><div class="audience-poll-row"><span>Нет</span><div class="audience-poll-track"><div class="audience-poll-fill" style="width:'+noPct+'%"></div></div><span>'+noPct+'%</span></div></div>':'')+'<div class="audience-poll-total">'+(voted?'Ваш голос учтён · ':'')+total+' '+(total===1?'голос':total>=2&&total<=4?'голоса':'голосов')+'</div></section>'}
- async function loadPolls(){try{const r=await fetch(POLL_API+'/api/polls',{cache:'no-store'});if(!r.ok)return;const d=await r.json();pollResults=d.polls||{}}catch{}}
+ async function loadPolls(ids) {
+    pollResults = {};
+    const validIds = [...new Set((Array.isArray(ids) ? ids : []).map(value => String(value || "")).filter(id => /^[a-zA-Z0-9._-]{1,100}$/.test(id)))];
+    const chunkSize = 80;
+    try {
+      for (let offset = 0; offset < validIds.length; offset += chunkSize * 4) {
+        const batch = [];
+        for (let start = offset; start < Math.min(offset + chunkSize * 4, validIds.length); start += chunkSize) {
+          const chunk = validIds.slice(start, start + chunkSize);
+          batch.push((async () => {
+            const response = await fetch(POLL_API + "/api/polls?ids=" + chunk.join(","), { cache: "no-store" });
+            if (!response.ok) throw new Error("Не удалось загрузить результаты голосования");
+            const result = await response.json();
+            return result.polls || {};
+          })());
+        }
+        const results = await Promise.all(batch);
+        for (const result of results) Object.assign(pollResults, result);
+      }
+    } catch {
+      // Ошибка загрузки голосов не должна мешать открытию архива и профилей.
+    }
+  }
  async function submitPollVote(button){const poll=button.closest('[data-poll]');if(!poll)return;const id=poll.dataset.poll,choice=button.dataset.vote;if(!id||hasVoted(id))return;poll.querySelectorAll('button').forEach(b=>b.disabled=true);try{const r=await fetch(POLL_API+'/api/polls/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({performanceId:id,voterId:pollVoterId(),choice})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Не удалось сохранить голос');pollResults[id]=d.poll||{yes:0,no:0};markVoted(id);render();renderParticipantPage()}catch(err){poll.querySelectorAll('button').forEach(b=>b.disabled=false);notify(err.message||'Не удалось сохранить голос')}}
 
  let activeIndex=0;
@@ -844,7 +866,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>close(b.dataset.close)));
  document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)close(o.id)}));
  document.addEventListener('keydown',e=>{if(e.code==='Numpad8'&&!e.repeat){e.preventDefault();location.href='/admin/'}if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(o=>close(o.id))});
- load().then(async data=>{entries=Array.isArray(data)?data.filter(item=>!item.hidden):[];activeIndex=0;await loadPolls();render();renderParticipantPage()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить данные из Cloudflare D1')});
+ load().then(async data=>{entries=Array.isArray(data)?data.filter(item=>!item.hidden):[];activeIndex=0;const needsAllPolls=location.hash.startsWith('#participant=');const pollEntries=needsAllPolls?entries:entries.filter(item=>(Number(item.score)||100)===100);await loadPolls(pollEntries.map(item=>item.id));render();renderParticipantPage()}).catch(err=>{console.error(err);entries=[];render();notify('Не удалось загрузить данные из Cloudflare D1')});
 })();
 </script>
 

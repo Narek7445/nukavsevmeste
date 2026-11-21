@@ -324,7 +324,29 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  function hasVoted(id){try{return localStorage.getItem('nuka-poll-voted-'+id)==='1'}catch{return false}}
  function markVoted(id){try{localStorage.setItem('nuka-poll-voted-'+id,'1')}catch{}}
  function pollMarkup(e){const id=String(e.id||''),p=pollResults[id]||{yes:0,no:0},total=p.yes+p.no,voted=hasVoted(id),yp=total?Math.round(p.yes/total*100):0,np=total?100-yp:0;return '<section class="audience-poll" data-poll="'+safe(id)+'"><div class="audience-poll-title">Вы бы встали на месте экспертов?</div><div class="audience-poll-actions"><button type="button" data-vote="yes" '+(voted?'disabled':'')+'>Да · '+p.yes+'</button><button type="button" data-vote="no" '+(voted?'disabled':'')+'>Нет · '+p.no+'</button></div>'+(total?'<div class="audience-poll-results"><div class="audience-poll-row"><span>Да</span><div class="audience-poll-track"><div class="audience-poll-fill" style="width:'+yp+'%"></div></div><span>'+yp+'%</span></div><div class="audience-poll-row"><span>Нет</span><div class="audience-poll-track"><div class="audience-poll-fill" style="width:'+np+'%"></div></div><span>'+np+'%</span></div></div>':'')+'<div class="audience-poll-total">'+(voted?'Ваш голос учтён · ':'')+total+' голосов</div></section>'}
- async function loadPolls(){try{const r=await fetch(POLL_API+'/api/polls',{cache:'no-store'});if(r.ok){const d=await r.json();pollResults=d.polls||{}}}catch{}}
+ async function loadPolls(ids) {
+    pollResults = {};
+    const validIds = [...new Set((Array.isArray(ids) ? ids : []).map(value => String(value || "")).filter(id => /^[a-zA-Z0-9._-]{1,100}$/.test(id)))];
+    const chunkSize = 80;
+    try {
+      for (let offset = 0; offset < validIds.length; offset += chunkSize * 4) {
+        const batch = [];
+        for (let start = offset; start < Math.min(offset + chunkSize * 4, validIds.length); start += chunkSize) {
+          const chunk = validIds.slice(start, start + chunkSize);
+          batch.push((async () => {
+            const response = await fetch(POLL_API + "/api/polls?ids=" + chunk.join(","), { cache: "no-store" });
+            if (!response.ok) throw new Error("Не удалось загрузить результаты голосования");
+            const result = await response.json();
+            return result.polls || {};
+          })());
+        }
+        const results = await Promise.all(batch);
+        for (const result of results) Object.assign(pollResults, result);
+      }
+    } catch {
+      // Ошибка загрузки голосов не должна мешать открытию архива и профилей.
+    }
+  }
  async function submitPollVote(button){const box=button.closest('[data-poll]');if(!box)return;const id=box.dataset.poll;if(!id||hasVoted(id))return;box.querySelectorAll('button').forEach(b=>b.disabled=true);try{const r=await fetch(POLL_API+'/api/polls/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({performanceId:id,voterId:pollVoterId(),choice:button.dataset.vote})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Не удалось сохранить голос');pollResults[id]=d.poll||{yes:0,no:0};markVoted(id);const profile=new URLSearchParams(location.search).get('profile')||'';renderProfile(profile)}catch(err){box.querySelectorAll('button').forEach(b=>b.disabled=false);alert(err.message||'Не удалось сохранить голос')}}
 
  const PAGE_SIZE=30;
@@ -392,7 +414,7 @@ async function init(){
    if(!Array.isArray(apiData.participants))throw new Error('Некорректный формат архива');
    const d=apiData.participants;
    allEntries=d;
-   entries=d.filter(item=>!isHiddenPerformance(item));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}await loadPolls();
+   entries=d.filter(item=>!isHiddenPerformance(item));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}if(requested){const profileKey=normalizeProfileName(requested);await loadPolls(entries.filter(item=>normalizeProfileName(name(item))===profileKey).map(item=>item.id));}
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
    const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
    $('performanceCount').textContent=entries.length.toLocaleString('ru-RU');

@@ -208,19 +208,9 @@ async function handleApi(request, env, url) {
 
 
 
+  // Legacy compatibility: analytics are no longer written to D1.
   if (request.method === "POST" && path === "/api/analytics/view") {
-    let body;
-    try { body = await request.json(); } catch { return json({ error: "Некорректный JSON." }, 400); }
-    const visitorId = String(body?.visitorId || "");
-    const page = String(body?.page || "/").slice(0, 120);
-    if (!/^[a-zA-Z0-9._-]{16,100}$/.test(visitorId) || !/^\/[a-zA-Z0-9._/-]*$/.test(page)) return json({ error: "Некорректные данные посещения." }, 400);
-    try {
-      await ensureCommunityTables(env);
-      const country = String(request.cf?.country || "XX").toUpperCase().slice(0, 2);
-      await env.DB.prepare("INSERT INTO site_visits (visitor_id, country, page, created_at) VALUES (?, ?, ?, ?)")
-        .bind(visitorId, country, page, new Date().toISOString()).run();
-      return json({ ok: true }, 200, { "cache-control": "no-store" });
-    } catch (error) { return json({ error: "Не удалось записать посещение.", detail: error.message }, 500); }
+    return json({ ok: true, disabled: true }, 200, { "cache-control": "no-store" });
   }
 
   if (request.method === "POST" && path === "/api/feedback") {
@@ -255,8 +245,16 @@ async function handleApi(request, env, url) {
   }
 
   if (request.method === "GET" && path === "/api/site-status") {
-    try { const row=await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("maintenance_mode").first(); let enabled=false; try{enabled=!!JSON.parse(row?.value||"false")}catch{} return json({maintenance:enabled},200,{"cache-control":"no-store"}); }
-    catch(error){return json({maintenance:false,error:"status_unavailable"},200,{"cache-control":"no-store"});}
+    return cachedJsonResponse(request, 15, async () => {
+      try {
+        const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("maintenance_mode").first();
+        let enabled = false;
+        try { enabled = !!JSON.parse(row?.value || "false"); } catch {}
+        return json({ maintenance: enabled });
+      } catch (error) {
+        return json({ maintenance: false, error: "status_unavailable" });
+      }
+    });
   }
   if (request.method === "GET" && path === "/api/events") {
     return cachedJsonResponse(request, 15, async () => {
@@ -310,8 +308,13 @@ async function handleApi(request, env, url) {
   if (request.method === "GET" && path === "/api/site-polls/results") {const pollId=String(url.searchParams.get("id")||""),voterId=String(url.searchParams.get("voterId")||"");if(!/^[a-zA-Z0-9_-]{1,100}$/.test(pollId)|| (voterId&&!/^[a-zA-Z0-9_-]{16,100}$/.test(voterId)))return json({error:"Некорректный опрос."},400);try{const result=await getSitePollResults(env,pollId);let alreadyVoted=false;if(voterId){await ensureSitePollVoteTable(env);await ensureSitePollMultiVoteTable(env);const existing=await env.DB.prepare("SELECT 1 AS voted FROM site_poll_votes WHERE poll_id=? AND voter_id=? UNION ALL SELECT 1 AS voted FROM site_poll_multi_votes WHERE poll_id=? AND voter_id=? LIMIT 1").bind(pollId,voterId,pollId,voterId).first();alreadyVoted=!!existing}return json({...result,alreadyVoted},200,{"cache-control":"no-store"})}catch(error){return json({error:"Не удалось загрузить результаты.",detail:error.message},500)}}
   if (request.method === "GET" && path === "/api/polls") {
     const ids = [...new Set((url.searchParams.get("ids") || "").split(",").map(x => x.trim()).filter(x => /^[a-zA-Z0-9._-]{1,100}$/.test(x)))].slice(0, 100);
-    try { return json({ polls: await readPolls(env, ids) }, 200, { "cache-control": "no-store" }); }
-    catch (error) { return json({ error: "Не удалось загрузить результаты опроса.", detail: error.message }, 500); }
+    return cachedJsonResponse(request, 10, async () => {
+      try {
+        return json({ polls: await readPolls(env, ids) });
+      } catch (error) {
+        return json({ error: "Не удалось загрузить результаты опроса.", detail: error.message }, 500);
+      }
+    });
   }
 
   if (request.method === "POST" && path === "/api/polls/vote") {
@@ -398,7 +401,7 @@ async function handleApi(request, env, url) {
     if (request.method === "PUT" && path === "/api/admin/site-status") {
       let body; try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}
       if(typeof body?.maintenance!=="boolean")return json({error:"Укажите состояние сайта."},400);
-      try{await env.DB.prepare("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at").bind("maintenance_mode",JSON.stringify(body.maintenance),new Date().toISOString()).run();return json({ok:true,maintenance:body.maintenance},200,{"cache-control":"no-store"})}
+      try{await env.DB.prepare("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at").bind("maintenance_mode",JSON.stringify(body.maintenance),new Date().toISOString()).run();await invalidatePublicCache(request,"/api/site-status");return json({ok:true,maintenance:body.maintenance},200,{"cache-control":"no-store"})}
       catch(error){return json({error:"Не удалось изменить режим сайта.",detail:error.message},500);}
     }
     if (request.method === "GET" && path === "/api/admin/versions") {
