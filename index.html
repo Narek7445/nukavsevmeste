@@ -896,7 +896,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   });
   list.hidden=!expanded;toggle.textContent=expanded?'Скрыть':'Ещё '+rest.length+' событий';toggle.setAttribute('aria-expanded',String(expanded));
  }
- function followRequestedEvent(){const wanted=new URLSearchParams(location.search).get('followEvent');if(!wanted)return;const match=e=>String(e.id||e.title)===wanted||String(e.title)===wanted;let target=null;if(activeEvent&&match(activeEvent))target=banner;else{const index=futureEvents.findIndex(match);if(index>=1){expanded=true;renderMoreEvents();target=Array.from(document.querySelectorAll('.event-more-card')).find(card=>card.dataset.eventId===String(futureEvents[index].id||futureEvents[index].title))}}if(target)setTimeout(()=>target.scrollIntoView({behavior:'smooth',block:'center'}),120)}
+ function followRequestedEvent(){const params=new URLSearchParams(location.search),wanted=params.get('followEvent');if(!wanted)return;const norm=v=>String(v??'').trim().toLocaleLowerCase('ru');const match=e=>norm(e.id)===norm(wanted)||norm(e.title)===norm(wanted);const index=futureEvents.findIndex(match);let target=null;if(index===0)target=banner;else if(index>0){expanded=true;renderMoreEvents();const event=futureEvents[index];target=Array.from(document.querySelectorAll('.event-more-card')).find(card=>norm(card.dataset.eventId)===norm(event.id||event.title))}if(target){const scroll=()=>target.scrollIntoView({behavior:'smooth',block:'center'});requestAnimationFrame(()=>requestAnimationFrame(scroll));setTimeout(scroll,500)}}
  async function loadEvents(){
   try{
    const [eventResponse,peopleResponse]=await Promise.all([fetch(API+'/api/events',{cache:'no-store'}),fetch(API+'/api/participants',{cache:'no-store'})]);
