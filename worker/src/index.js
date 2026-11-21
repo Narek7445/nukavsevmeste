@@ -260,8 +260,9 @@ async function handleApi(request, env, url) {
       const user = await publicForumUser(env, id);
       return json({ token: await issueForumToken(env.SESSION_SECRET, id), expiresIn: FORUM_TOKEN_TTL_SECONDS, user }, 201, { "cache-control": "no-store" });
     } catch (error) {
+      console.error("Forum registration failed:", error);
       if (/unique|constraint/i.test(String(error?.message || ""))) return json({ error: "Этот никнейм уже занят. Попробуйте другой." }, 409, { "cache-control": "no-store" });
-      return json({ error: "Не удалось создать аккаунт." }, 500, { "cache-control": "no-store" });
+      return json({ error: "Не удалось создать аккаунт. Ошибка записана в журнал сервера." }, 500, { "cache-control": "no-store" });
     }
   }
 
