@@ -22,7 +22,6 @@
 .hero p{position:relative;z-index:1;max-width:650px;margin:0;color:#f0e4e7;font-size:15px;line-height:1.7}
 .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 0 36px}
 .metric{position:relative;overflow:hidden;min-width:0;padding:21px;border:1px solid #e5d7cb;border-radius:19px;background:linear-gradient(145deg,#fffdf9,#f8eee9);box-shadow:0 10px 28px #39212a0c}
-.metric:after{content:attr(data-mark);position:absolute;right:12px;bottom:-25px;color:#71334b0c;font:100px Georgia,serif}
 .metric-label{display:block;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
 .metric strong{position:relative;z-index:1;display:block;margin:12px 0 5px;color:var(--wine-dark);font:600 clamp(30px,4vw,44px)/1 Georgia,serif;font-variant-numeric:tabular-nums}
 .metric small{color:#9b8987;font-size:11px}
@@ -68,10 +67,10 @@
 <nav class="nav"><a class="brand" href="/"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div class="nav-links"><a class="nav-link" href="/seasons/">Сезоны</a><a class="nav-link" href="/contestants/">Все конкурсанты</a><a class="nav-link active" href="/stats/">Статистика</a><a class="nav-link" href="/winners/">Победители</a><a class="nav-link" href="/experts/">Эксперты сотни</a><a class="nav-link" href="/">На главную</a></div></nav>
 <header class="hero"><div class="kicker">Цифры, голоса и история</div><h1>Статистика<br>архива.</h1><p>Вся картина проекта в цифрах: сколько участников собрано в архиве, сколько выступлений получили 100 баллов, как распределяются выпуски и участники по сезонам и какие песни звучали чаще других.</p></header>
 <section class="metrics" aria-label="Общая статистика">
- <article class="metric" data-mark="♟"><span class="metric-label">Участники</span><strong id="totalPeople">—</strong><small>уникальных конкурсантов</small></article>
- <article class="metric" data-mark="♫"><span class="metric-label">Стобальные выступления</span><strong id="totalHundreds">—</strong><small>записей с результатом 100</small></article>
- <article class="metric" data-mark="✳"><span class="metric-label">Сезоны</span><strong id="totalSeasons">—</strong><small>представлено в архиве</small></article>
- <article class="metric" data-mark="▦"><span class="metric-label">Выпуски</span><strong id="totalEpisodes">—</strong><small>уникальных выпусков по сезонам</small></article>
+ <article class="metric"><span class="metric-label">Участники</span><strong id="totalPeople">—</strong><small>уникальных конкурсантов</small></article>
+ <article class="metric"><span class="metric-label">Стобальные выступления</span><strong id="totalHundreds">—</strong><small>записей с результатом 100</small></article>
+ <article class="metric"><span class="metric-label">Сезоны</span><strong id="totalSeasons">—</strong><small>представлено в архиве</small></article>
+ <article class="metric"><span class="metric-label">Выпуски</span><strong id="totalEpisodes">—</strong><small>уникальных выпусков по сезонам</small></article>
 </section>
 <section aria-labelledby="seasonStatsTitle">
  <div class="section-head"><div><h2 id="seasonStatsTitle">Сезоны в цифрах</h2><p>Количество выпусков, участников и стобальных выступлений в каждом сезоне.</p></div></div>
