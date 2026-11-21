@@ -134,14 +134,10 @@ input,textarea{width:100%;border:1px solid #d9ccc3;border-radius:5px;background:
  </section>
  <section class="events-workspace versions-workspace" id="versionsWorkspace" hidden>
   <div class="events-intro"><div><div class="eyebrow">ИСТОРИЯ ОБНОВЛЕНИЙ</div><h2>Версии сайта</h2><p>Журнал опубликованных обновлений. Каждая запись сохраняется в общей базе данных и доступна из любой админ-сессии.</p></div><span class="events-timezone">CHANGELOG</span></div>
-  <form class="event-editor" id="versionForm">
-   <div class="event-form-title"><span class="event-form-icon">↗</span><div><strong>Добавить новую версию</strong><small>Указывайте номер версии и основные изменения релиза.</small></div></div>
-   <div class="event-form-grid" style="grid-template-columns:minmax(150px,.65fr) minmax(0,2fr)">
-    <div class="field"><label for="versionNumber">Версия</label><input id="versionNumber" maxlength="32" placeholder="Например, 1.0.1" pattern="[0-9]+\.[0-9]+\.[0-9]+([+-][A-Za-z0-9.-]+)?" required></div>
-    <div class="field"><label for="versionChanges">Что изменилось</label><textarea id="versionChanges" maxlength="4000" rows="4" placeholder="Каждое изменение — с новой строки" required></textarea><span class="help">Каждая новая строка станет отдельным пунктом журнала.</span></div>
-   </div>
-   <div class="event-form-actions"><button class="btn" id="saveVersion" type="submit">Добавить версию →</button><span class="help" id="versionError" role="status"></span></div>
-  </form>
+  <div class="event-editor version-readonly">
+   <div class="event-form-title"><span class="event-form-icon">✦</span><div><strong>Журнал ведётся разработчиком</strong><small>Записи автоматически обновляются вместе с сайтом. Вручную добавлять или редактировать их здесь нельзя.</small></div></div>
+   <p class="help">Формат каждой версии: номер и дата, затем пункты с метками «Добавлено», «Исправлено», «Изменено» или «Удалено».</p>
+  </div>
   <div class="events-list-head"><div><h3>История релизов</h3><p>Последние обновления сайта</p></div><span class="events-count" id="versionsCount">0</span></div>
   <div class="versions-list" id="versionsList"><div class="empty">Загрузка истории версий…</div></div>
  </section>
@@ -256,24 +252,28 @@ const notify=msg=>{$('toast').textContent=msg;$('toast').hidden=false;clearTimeo
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const words=n=>n%10===1&&n%100!==11?'запись':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'записи':'записей';
 let siteVersions=[];
+function parseChangelog(markdown){
+ return markdown.split(/^##\\s+/m).slice(1).map(section=>{
+  const lines=section.trim().split(/\\r?\\n/),heading=lines.shift().trim(),items=lines.filter(line=>/^[-*]\\s+/.test(line)).map(line=>line.replace(/^[-*]\\s+/,'').trim());
+  const match=heading.match(/^Версия\\s+(.+?)\\s+[—–-]\\s+(.+)$/i);
+  return {version:match?match[1]:heading,date:match?match[2]:'',changes:items};
+ }).filter(entry=>entry.version);
+}
 function renderVersions(){
  $('versionsCount').textContent=siteVersions.length;
  $('versionsList').innerHTML=siteVersions.length?siteVersions.map(entry=>{
-  const date=entry.date?new Intl.DateTimeFormat('ru-RU',{timeZone:'Asia/Yerevan',day:'numeric',month:'long',year:'numeric'}).format(new Date(entry.date))+' · Ереван':'Дата не указана';
-  const changes=Array.isArray(entry.changes)?entry.changes:[];
-  return '<article class="version-entry"><div class="version-entry-head"><strong>Версия '+esc(entry.version)+'</strong><span class="version-entry-date">'+esc(date)+'</span></div><ul>'+changes.map(change=>'<li>'+esc(change)+'</li>').join('')+'</ul></article>';
- }).join(''):'<div class="empty">Пока нет записей. Добавьте первую версию выше.</div>';
+  const changes=entry.changes.map(change=>{
+   const match=change.match(/^\\[(Добавлено|Исправлено|Изменено|Удалено)\\]\\s*(.*)$/i),type=match?match[1]:'Обновление',description=match?match[2]:change;
+   return '<li class="version-change"><strong class="version-tag">'+esc(type)+'</strong> '+esc(description)+'</li>';
+  }).join('');
+  return '<article class="version-entry"><div class="version-entry-head"><strong>Версия '+esc(entry.version)+'</strong><span class="version-entry-date">'+esc(entry.date)+'</span></div><ul>'+changes+'</ul></article>';
+ }).join(''):'<div class="empty">История изменений пока пуста.</div>';
 }
-async function loadVersions(){const d=await req('/api/admin/versions',{cache:'no-store'});siteVersions=Array.isArray(d.versions)?d.versions:[];renderVersions()}
-$('versionForm').addEventListener('submit',async e=>{
- e.preventDefault();$('versionError').textContent='';
- const version=$('versionNumber').value.trim(),changes=$('versionChanges').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
- if(!version||!changes.length){$('versionError').textContent='Укажите версию и хотя бы одно изменение.';return}
- const button=$('saveVersion');button.disabled=true;button.textContent='Сохранение…';
- try{const d=await req('/api/admin/versions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version,changes})});siteVersions=Array.isArray(d.versions)?d.versions:siteVersions;renderVersions();$('versionForm').reset();notify('Версия '+version+' добавлена в журнал')}
- catch(err){$('versionError').textContent=err.message||'Не удалось добавить версию.'}
- finally{button.disabled=false;button.textContent='Добавить версию →'}
-});
+async function loadVersions(){
+ const response=await fetch('/CHANGELOG.md',{cache:'no-store'});
+ if(!response.ok)throw new Error('Не удалось загрузить CHANGELOG.md');
+ siteVersions=parseChangelog(await response.text());renderVersions();
+}
 let maintenanceEnabled=false;
 async function loadMaintenanceStatus(){const d=await req('/api/admin/site-status',{cache:'no-store'});maintenanceEnabled=!!d.maintenance;renderMaintenanceStatus()}
 function renderMaintenanceStatus(){$('maintenanceStatusTitle').textContent=maintenanceEnabled?'Сайт отключён для посетителей':'Сайт работает в обычном режиме';$('maintenanceStatusText').textContent=maintenanceEnabled?'Посетители перенаправляются на страницу технических работ. Админ-панель доступна.':'Все страницы сайта доступны посетителям.';$('maintenanceToggle').textContent=maintenanceEnabled?'Включить сайт':'Отключить сайт';$('maintenanceToggle').disabled=false;$('maintenanceToggle').classList.toggle('danger',!maintenanceEnabled);$('maintenanceError').textContent=''}
