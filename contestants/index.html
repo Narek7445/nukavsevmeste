@@ -343,7 +343,9 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const isHiddenPerformance=item=>item?.hidden===true||item?.hidden===1||String(item?.hidden??'').trim().toLocaleLowerCase('en')==='true'||String(item?.hidden??'').trim()==='1';
  const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,' ').trim();
-  function decodeProfileName(value){let text=String(value??'').trim();for(let i=0;i<2&&/%[0-9a-f]{2}/i.test(text);i++){try{text=decodeURIComponent(text)}catch{break}}return text.normalize('NFKC').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/[\u00A0\u202F]/g,' ').replace(/\s+/g,' ').trim()}\n  function normalizeProfileName(value){return decodeProfileName(value).toLocaleLowerCase('ru').replace(/ё/g,'е')}\n  function normalizeProfileNameForShare(value){return decodeProfileName(value)}
+  function decodeProfileName(value){let text=String(value??'').trim();for(let i=0;i<2&&/%[0-9a-f]{2}/i.test(text);i++){try{text=decodeURIComponent(text)}catch{break}}return text.normalize('NFKC').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/[\u00A0\u202F]/g,' ').replace(/\s+/g,' ').trim()} 
+  function normalizeProfileName(value){return decodeProfileName(value).toLocaleLowerCase('ru').replace(/ё/g,'е')} 
+  function normalizeProfileNameForShare(value){return decodeProfileName(value)}
  function profileEventMarkup(personName){const key=normalizeProfileName(personName);const event=profileUpcomingEvents.find(e=>Array.isArray(e.profiles)&&e.profiles.some(p=>String(p||'').trim().toLocaleLowerCase('ru')===key));return event?'<aside class="profile-event-banner"><span class="profile-event-kicker">БЛИЖАЙШЕЕ СОБЫТИЕ</span><strong>Участвует в событии «'+safe(event.title)+'»</strong><a href="/#eventCountdown">Перейти →</a></aside>':'';}
  const score=e=>Number(e.score)||100;
  const photoFor=e=>(Array.isArray(e.photos)?e.photos.find(Boolean):'')||e.photo||'';
