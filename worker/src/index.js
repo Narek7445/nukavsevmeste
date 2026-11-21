@@ -281,6 +281,54 @@ async function handleApi(request, env, url) {
       try{await env.DB.prepare("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at").bind("maintenance_mode",JSON.stringify(body.maintenance),new Date().toISOString()).run();return json({ok:true,maintenance:body.maintenance},200,{"cache-control":"no-store"})}
       catch(error){return json({error:"Не удалось изменить режим сайта.",detail:error.message},500);}
     }
+    if (request.method === "GET" && path === "/api/admin/versions") {
+      try {
+        const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("site_versions").first();
+        let versions = [];
+        try { versions = row ? JSON.parse(row.value) : []; } catch { versions = []; }
+        if (!row) {
+          versions = [{
+            id: "release-1-0-0",
+            version: "1.0.0",
+            date: "2026-11-21T10:00:00+04:00",
+            changes: [
+              "Добавлен раздел «Версии сайта» в панели администратора.",
+              "Создан общий журнал обновлений с сохранением записей в Cloudflare D1."
+            ]
+          }];
+          await env.DB.prepare("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at")
+            .bind("site_versions", JSON.stringify(versions), new Date().toISOString()).run();
+        }
+        return json({ versions: Array.isArray(versions) ? versions : [] }, 200, { "cache-control": "no-store" });
+      } catch (error) { return json({ error: "Не удалось загрузить историю версий.", detail: error.message }, 500); }
+    }
+
+    if (request.method === "POST" && path === "/api/admin/versions") {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Некорректный JSON." }, 400); }
+      const version = String(body?.version || "").trim();
+      const changes = body?.changes;
+      if (!/^[0-9]+\.[0-9]+\.[0-9]+(?:[+-][A-Za-z0-9.-]+)?$/.test(version) || version.length > 32)
+        return json({ error: "Укажите версию в формате 1.2.3." }, 400);
+      if (!Array.isArray(changes) || changes.length < 1 || changes.length > 30 || changes.some(change => typeof change !== "string" || !change.trim() || change.length > 400))
+        return json({ error: "Добавьте от 1 до 30 корректных пунктов изменений (до 400 символов каждый)." }, 400);
+      try {
+        const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("site_versions").first();
+        let versions = [];
+        try { versions = row ? JSON.parse(row.value) : []; } catch { versions = []; }
+        if (!Array.isArray(versions)) versions = [];
+        if (versions.some(entry => entry.version === version)) return json({ error: "Эта версия уже есть в журнале." }, 409);
+        const entry = { id: "release-" + crypto.randomUUID(), version, date: new Date().toISOString(), changes: changes.map(change => change.trim()) };
+        versions.unshift(entry);
+        if (versions.length > 200) versions = versions.slice(0, 200);
+        const serialized = JSON.stringify(versions);
+        if (new TextEncoder().encode(serialized).length > 100_000) return json({ error: "История версий слишком большая." }, 413);
+        await env.DB.prepare("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at")
+          .bind("site_versions", serialized, new Date().toISOString()).run();
+        return json({ ok: true, versions }, 201, { "cache-control": "no-store" });
+      } catch (error) { return json({ error: "Не удалось сохранить версию.", detail: error.message }, 500); }
+    }
+
     if (request.method === "GET" && path === "/api/admin/analytics") {
       try {
         await ensureCommunityTables(env);
