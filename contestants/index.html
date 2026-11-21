@@ -330,7 +330,7 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
  <section class="grid" id="grid" aria-live="polite"></section>
  <section id="profileView" class="profile-view" hidden>
   <div id="profileEventNotice"></div>
-  <div class="profile-nav"><button class="profile-back" id="profileBack" type="button">← Ко всем конкурсантам</button><button class="profile-share" id="profileShare" type="button">Поделиться профилем ↗</button></div>
+  <div class="profile-nav"><button class="profile-back" id="profileBack" type="button">← Назад</button><button class="profile-share" id="profileShare" type="button">Поделиться профилем ↗</button></div>
   <div id="profileContent"></div>
  </section>
  <footer class="footer"><span>Ну-ка, все вместе! · Архив конкурсантов</span><span>Каждый сезон · Каждое выступление</span></footer>
@@ -462,7 +462,7 @@ async function init(){
      document.querySelector('.result-line').style.display='none';
      $('grid').style.display='none';
      $('profileView').removeAttribute('hidden');
-     $('profileContent').addEventListener('click',e=>{const photo=e.target.closest('[data-photo-index]');if(photo){showLightbox(Number(photo.dataset.photoIndex));return}const vote=e.target.closest('[data-vote]');if(vote){e.stopPropagation();submitPollVote(vote)}});$('profileBack').addEventListener('click',()=>{location.href='/contestants/'});
+     $('profileContent').addEventListener('click',e=>{const photo=e.target.closest('[data-photo-index]');if(photo){showLightbox(Number(photo.dataset.photoIndex));return}const vote=e.target.closest('[data-vote]');if(vote){e.stopPropagation();submitPollVote(vote)}});$('profileBack').addEventListener('click',()=>{if(window.history.length>1){window.history.back()}else{location.assign('/contestants/')}});
      $('profileShare').addEventListener('click',async()=>{const shareUrl=new URL('/contestants/',location.origin);shareUrl.searchParams.set('profile',normalizeProfileNameForShare(requested));const shortUrl=shareUrl.href;try{await navigator.clipboard.writeText(shortUrl)}catch{const field=document.createElement('textarea');field.value=shortUrl;field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();try{document.execCommand('copy')}catch{}field.remove()}$('profileShare').textContent='Ссылка скопирована'});
     }else{
      $('resultCount').textContent='Профиль не найден';
