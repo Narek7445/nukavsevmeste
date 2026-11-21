@@ -31,5 +31,26 @@ p{max-width:470px;margin:0 auto;color:var(--muted);font-size:15px;line-height:1.
 <div class="rule"></div>
 <div class="note">СПАСИБО ЗА ТЕРПЕНИЕ</div>
 </main>
+
+<script>
+(async function () {
+  try {
+    const response = await fetch('https://api.nukavsevmeste.org/api/site-status', {
+      method: 'GET',
+      cache: 'no-store',
+      credentials: 'omit',
+      headers: { Accept: 'application/json' }
+    });
+    if (!response.ok) return;
+    const status = await response.json();
+    if (status && status.maintenance === false) {
+      window.location.replace('/');
+    }
+  } catch (error) {
+    // При недоступности API оставляем страницу доступной,
+    // чтобы не создавать цикл или ложное перенаправление.
+  }
+})();
+</script>
 </body>
 </html>
