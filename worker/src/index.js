@@ -103,7 +103,9 @@ async function isAdmin(request, env) {
 
 async function ensureArticlesTable(env) {
   await ensureD1Tables(env, "articles", [
-    "CREATE TABLE IF NOT EXISTS articles (slug TEXT PRIMARY KEY, title TEXT NOT NULL, summary TEXT NOT NULL DEFAULT '', content TEXT NOT NULL, cover_image TEXT, attachments_json TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL CHECK(status IN ('draft','published')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL, published_at TEXT)"
+    "CREATE TABLE IF NOT EXISTS articles (slug TEXT PRIMARY KEY, title TEXT NOT NULL, summary TEXT NOT NULL DEFAULT '', content TEXT NOT NULL, cover_image TEXT, attachments_json TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL CHECK(status IN ('draft','published')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL, published_at TEXT)",
+    "CREATE TABLE IF NOT EXISTS article_reactions (article_slug TEXT NOT NULL, voter_id TEXT NOT NULL, reaction TEXT NOT NULL CHECK(reaction IN ('❤️','👍','😂','😮','😢')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY(article_slug, voter_id))",
+    "CREATE INDEX IF NOT EXISTS idx_article_reactions_slug ON article_reactions(article_slug)"
   ]);
 }
 function parseArticleRow(row) {
@@ -298,19 +300,48 @@ async function handleApi(request, env, url) {
   }
 
 
+  if (request.method === "POST" && path === "/api/articles/reaction") {
+    let body;try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}
+    const slug=String(body?.slug||"").trim(),voterId=String(body?.voterId||""),reaction=String(body?.reaction||"");
+    const allowed=new Set(["❤️","👍","😂","😮","😢"]);
+    if(!/^[a-z0-9-]{1,180}$/.test(slug)||!/^[a-zA-Z0-9_-]{16,80}$/.test(voterId)||(reaction&&!allowed.has(reaction)))return json({error:"Некорректные данные реакции."},400);
+    try{
+      await ensureArticlesTable(env);
+      const exists=await env.DB.prepare("SELECT slug FROM articles WHERE slug = ? AND status = 'published'").bind(slug).first();
+      if(!exists)return json({error:"Статья не найдена."},404);
+      const now=new Date().toISOString();
+      if(!reaction)await env.DB.prepare("DELETE FROM article_reactions WHERE article_slug = ? AND voter_id = ?").bind(slug,voterId).run();
+      else await env.DB.prepare("INSERT INTO article_reactions (article_slug,voter_id,reaction,created_at,updated_at) VALUES (?,?,?,?,?) ON CONFLICT(article_slug,voter_id) DO UPDATE SET reaction=excluded.reaction,updated_at=excluded.updated_at").bind(slug,voterId,reaction,now,now).run();
+      const rows=await env.DB.prepare("SELECT reaction,COUNT(*) AS count FROM article_reactions WHERE article_slug = ? GROUP BY reaction").bind(slug).all();
+      const reactionCounts={};for(const row of rows.results||[])reactionCounts[row.reaction]=Number(row.count)||0;
+      return json({ok:true,reactionCounts,myReaction:reaction||null},200,{"cache-control":"no-store"});
+    }catch(error){return json({error:"Не удалось сохранить реакцию."},500);}
+  }
+
   if (request.method === "GET" && path === "/api/articles") {
     try {
       await ensureArticlesTable(env);
+      const voterId=String(url.searchParams.get("voterId")||"");
+      if(voterId&&!/^[a-zA-Z0-9_-]{16,80}$/.test(voterId))return json({error:"Некорректный идентификатор посетителя."},400);
       const slug=String(url.searchParams.get("id")||"").trim();
       if(slug){
         if(!/^[a-z0-9-]{1,180}$/.test(slug))return json({error:"Некорректная ссылка на статью."},400);
         const row=await env.DB.prepare("SELECT * FROM articles WHERE slug = ? AND status = 'published'").bind(slug).first();
-        if(!row)return json({error:"Статья не найдена."},404,{ "cache-control":"no-store" });
-        return json({article:parseArticleRow(row)},200,{ "cache-control":"public, max-age=60" });
+        if(!row)return json({error:"Статья не найдена."},404,{"cache-control":"no-store"});
+        const stats=await env.DB.prepare("SELECT reaction,COUNT(*) AS count FROM article_reactions WHERE article_slug = ? GROUP BY reaction").bind(slug).all();
+        const reactionCounts={};for(const item of stats.results||[])reactionCounts[item.reaction]=Number(item.count)||0;
+        const mine=voterId?await env.DB.prepare("SELECT reaction FROM article_reactions WHERE article_slug = ? AND voter_id = ?").bind(slug,voterId).first():null;
+        return json({article:{...parseArticleRow(row),reactionCounts,myReaction:mine?.reaction||null}},200,{"cache-control":"no-store"});
       }
       const result=await env.DB.prepare("SELECT * FROM articles WHERE status = 'published' ORDER BY published_at DESC, created_at DESC LIMIT 100").all();
-      return json({articles:(result.results||[]).map(parseArticleRow)},200,{ "cache-control":"public, max-age=60" });
-    } catch(error){return json({error:"Не удалось загрузить статьи."},500);}
+      const articles=(result.results||[]).map(parseArticleRow);
+      const stats=await env.DB.prepare("SELECT article_slug,reaction,COUNT(*) AS count FROM article_reactions GROUP BY article_slug,reaction").all();
+      const mine=voterId?await env.DB.prepare("SELECT article_slug,reaction FROM article_reactions WHERE voter_id = ?").bind(voterId).all():{results:[]};
+      const countsBySlug={},mineBySlug={};
+      for(const item of stats.results||[]){(countsBySlug[item.article_slug]??={})[item.reaction]=Number(item.count)||0}
+      for(const item of mine.results||[])mineBySlug[item.article_slug]=item.reaction;
+      return json({articles:articles.map(item=>({...item,reactionCounts:countsBySlug[item.slug]||{},myReaction:mineBySlug[item.slug]||null}))},200,{"cache-control":"no-store"});
+    }catch(error){return json({error:"Не удалось загрузить статьи."},500);}
   }
 
   if (request.method === "GET" && path === "/api/site-status") {
