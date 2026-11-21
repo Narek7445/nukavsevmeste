@@ -58,7 +58,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="favicon.svg">
 <script>(()=>{const p=location.pathname;if(p==='/maintenance.html'||p==='/admin'||p==='/admin/'||p==='/admin.html'||p.startsWith('/admin/'))return;const check=async()=>{try{const r=await fetch('https://api.nukavsevmeste.org/api/site-status',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(d.maintenance&&location.pathname!=='/maintenance.html')location.replace('/maintenance.html')}catch{}};check();setInterval(check,15000)})();</script>
-</head>
+\n<script src="/maintenance-guard.js" defer></script>\n</head>
 <body>
 <div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div>
 <main class="page">
