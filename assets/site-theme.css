@@ -33,3 +33,45 @@ input:focus,select:focus{border-color:var(--site-gold)!important;box-shadow:0 0 
 .audience-poll{border-color:#dfc99f!important;background:linear-gradient(135deg,#fffaf0,#f3e8d8)!important;color:var(--site-ink)!important}
 .audience-poll button{border-color:#dfc99f!important;color:var(--site-wine)!important}
 .audience-poll-fill{background:linear-gradient(90deg,var(--site-gold),var(--site-wine))!important}
+
+
+/* Единая мобильная адаптация сайта */
+@media (max-width:760px) {
+ html,body{max-width:100%;overflow-x:clip}
+ img,video,iframe{max-width:100%}
+ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+ .page,.wrap,.shell{min-width:0}
+ .nav{display:flex;flex-direction:column;align-items:stretch!important;gap:12px}
+ .nav>.brand{max-width:100%;min-width:0}
+ .nav .nav-links,.nav .links,.nav>div:not(.brand){
+  display:flex!important;flex-wrap:nowrap!important;justify-content:flex-start!important;align-items:center;
+  gap:7px;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;
+  padding:2px 1px 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none
+ }
+ .nav .nav-links::-webkit-scrollbar,.nav .links::-webkit-scrollbar,.nav>div:not(.brand)::-webkit-scrollbar{display:none}
+ .nav .nav-link,.nav .links a,.nav>div:not(.brand)>a{flex:0 0 auto;white-space:nowrap}
+ .hero,.toolbar,.card,.profile-detail,.profile-performance,.season-panel,.season-directory,.metric,.season-card,.winner-card,.leader-card,.game-card{min-width:0}
+ .hero h1,.hero p,.section-head h2,.brand,.nav-link,.card,.song,.name,.participant-name,.winner-name,.leader-content h2{overflow-wrap:anywhere}
+ input,select,textarea{max-width:100%;min-width:0}
+ button,.btn,.load-more,.profile-back,.profile-share{min-height:42px}
+ .fan-disclaimer{margin-left:10px;margin-right:10px;border-radius:12px}
+ .footer{gap:8px;text-align:center}
+}
+@media(max-width:560px){
+ .hero{padding-left:18px;padding-right:18px}
+ .hero h1{font-size:clamp(30px,9vw,44px);line-height:1.04}
+ .hero p{font-size:13px;line-height:1.55}
+ .nav .brand,.top .brand{font-size:12px}
+ .nav .brand-mark,.top .brand-mark{flex:0 0 auto}
+ .nav-link{min-height:40px;display:inline-flex;align-items:center}
+ .toolbar{gap:9px}
+ .toolbar input,.toolbar select{width:100%}
+ .card,.profile-detail,.profile-performance,.season-card,.metric{border-radius:15px}
+ .photo img,.profile-main-photo img,.winner-card-photo{max-width:100%}
+ .profile-nav{flex-wrap:wrap}
+ .profile-nav>*{min-width:0}
+}
+@media(max-width:380px){
+ .nav .nav-link,.nav .links a,.nav>div:not(.brand)>a{font-size:10px;padding-left:9px;padding-right:9px}
+ .hero{padding-left:15px;padding-right:15px}
+}
