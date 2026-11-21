@@ -276,6 +276,12 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 .profile-view .audience-poll button{border-color:#d5b779;color:#71334b}
 @media(max-width:720px){.profile-view .profile-hero{grid-template-columns:1fr}.profile-view .profile-main-photo{aspect-ratio:4/3;max-height:300px}.profile-view .profile-stats{gap:6px}.profile-view .profile-stat{padding:11px 8px;font-size:10px}}
 @media(prefers-reduced-motion:reduce){.profile-view .profile-hero{animation:none!important}}
+
+/* Уведомление о событии не должно влиять на расположение кнопок: навигация закреплена внутри обложки */
+.profile-view .record-hero>.profile-nav{position:absolute;z-index:10;top:18px;left:18px;right:18px;width:auto;height:auto;margin:0;padding:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;pointer-events:none}
+.profile-view .record-hero>.profile-nav button{position:relative;flex:0 1 auto;width:auto;min-width:0;max-width:calc(50% - 6px);white-space:normal;overflow-wrap:anywhere;pointer-events:auto}
+@media(max-width:720px){.profile-view .record-hero>.profile-nav{top:14px;left:14px;right:14px;gap:8px}.profile-view .record-hero>.profile-nav button{max-width:calc(50% - 4px);padding:10px 12px;font-size:11px}}
+
 </style>
 <style id="fan-disclaimer-style">.fan-disclaimer{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 18px;background:linear-gradient(100deg,#30203f,#56304f 52%,#304653);color:#fff8ef;border-bottom:1px solid rgba(255,255,255,.2);font:500 13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;text-align:center;letter-spacing:.01em}.fan-disclaimer strong{color:#ffd58b;font-weight:800}.fan-disclaimer-icon{flex:0 0 auto;color:#ffd58b;font-size:16px}@media(max-width:560px){.fan-disclaimer{padding:9px 13px;font-size:11px;gap:7px}}</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
