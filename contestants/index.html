@@ -343,7 +343,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const isHiddenPerformance=item=>item?.hidden===true||item?.hidden===1||String(item?.hidden??'').trim().toLocaleLowerCase('en')==='true'||String(item?.hidden??'').trim()==='1';
  const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,' ').trim();\n  function decodeProfileName(value){let text=String(value??'').trim();for(let i=0;i<2&&/%[0-9a-f]{2}/i.test(text);i++){try{text=decodeURIComponent(text)}catch{break}}return text.normalize('NFKC').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/[\u00A0\u202F]/g,' ').replace(/\s+/g,' ').trim()}\n  function normalizeProfileName(value){return decodeProfileName(value).toLocaleLowerCase('ru').replace(/ё/g,'е')}\n  function normalizeProfileNameForShare(value){return decodeProfileName(value)}
- function profileEventMarkup(personName){const key=String(personName||'').trim().toLocaleLowerCase('ru');const event=profileUpcomingEvents.find(e=>Array.isArray(e.profiles)&&e.profiles.some(p=>String(p||'').trim().toLocaleLowerCase('ru')===key));return event?'<aside class="profile-event-banner"><span class="profile-event-kicker">БЛИЖАЙШЕЕ СОБЫТИЕ</span><strong>Участвует в событии «'+safe(event.title)+'»</strong><a href="/#eventCountdown">Перейти →</a></aside>':'';}
+ function profileEventMarkup(personName){const key=normalizeProfileName(personName);const event=profileUpcomingEvents.find(e=>Array.isArray(e.profiles)&&e.profiles.some(p=>String(p||'').trim().toLocaleLowerCase('ru')===key));return event?'<aside class="profile-event-banner"><span class="profile-event-kicker">БЛИЖАЙШЕЕ СОБЫТИЕ</span><strong>Участвует в событии «'+safe(event.title)+'»</strong><a href="/#eventCountdown">Перейти →</a></aside>':'';}
  const score=e=>Number(e.score)||100;
  const photoFor=e=>(Array.isArray(e.photos)?e.photos.find(Boolean):'')||e.photo||'';
 
@@ -379,7 +379,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
 
  function renderProfile(personName){
   const key=String(personName||'').trim().toLocaleLowerCase('ru');
-  const list=entries.filter(e=>name(e).toLocaleLowerCase('ru')===key).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a));
+  const list=entries.filter(e=>normalizeProfileName(name(e))===key).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a));
   if(!list.length)return false;
   const visibleProfileEntries=list.filter(e=>!isHiddenPerformance(e));const visiblePhotos=[...new Set(visibleProfileEntries.flatMap(e=>[...(Array.isArray(e.photos)?e.photos:[]),e.photo||'']).filter(Boolean))];const primary=visibleProfileEntries.find(e=>e.primaryPhoto&&visiblePhotos.includes(e.primaryPhoto))?.primaryPhoto||'';const first=visibleProfileEntries.find(e=>e.primaryPhoto&&visiblePhotos.includes(e.primaryPhoto))||visibleProfileEntries.find(e=>e.photo||(Array.isArray(e.photos)&&e.photos.length))||visibleProfileEntries[0];
   const photos=[...new Set([primary,...visiblePhotos].filter(Boolean))];lightboxPhotos=photos;
