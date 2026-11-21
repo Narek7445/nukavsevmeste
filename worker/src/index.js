@@ -1,4 +1,34 @@
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
+const d1SetupByBinding = new WeakMap();
+
+async function ensureD1Tables(env, setupKey, statements) {
+  const db = env?.DB;
+  if (!db || (typeof db !== "object" && typeof db !== "function")) {
+    throw new Error("D1 binding is not configured");
+  }
+
+  let setups = d1SetupByBinding.get(db);
+  if (!setups) {
+    setups = new Map();
+    d1SetupByBinding.set(db, setups);
+  }
+
+  let setup = setups.get(setupKey);
+  if (!setup) {
+    setup = (async () => {
+      for (const statement of statements) {
+        await db.prepare(statement).run();
+      }
+    })().catch(error => {
+      setups.delete(setupKey);
+      throw error;
+    });
+    setups.set(setupKey, setup);
+  }
+
+  await setup;
+}
+
 const TOKEN_TTL_SECONDS = 12 * 60 * 60;
 const MAX_ARCHIVE_BYTES = 1_800_000;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -72,7 +102,9 @@ async function isAdmin(request, env) {
 
 
 async function ensureArticlesTable(env) {
-  await env.DB.prepare("CREATE TABLE IF NOT EXISTS articles (slug TEXT PRIMARY KEY, title TEXT NOT NULL, summary TEXT NOT NULL DEFAULT '', content TEXT NOT NULL, cover_image TEXT, attachments_json TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL CHECK(status IN ('draft','published')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL, published_at TEXT)").run();
+  await ensureD1Tables(env, "articles", [
+    "CREATE TABLE IF NOT EXISTS articles (slug TEXT PRIMARY KEY, title TEXT NOT NULL, summary TEXT NOT NULL DEFAULT '', content TEXT NOT NULL, cover_image TEXT, attachments_json TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL CHECK(status IN ('draft','published')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL, published_at TEXT)"
+  ]);
 }
 function parseArticleRow(row) {
   if (!row) return null;
@@ -145,7 +177,9 @@ function validateArchive(value) {
 }
 
 async function ensureVoteTable(env) {
-  await env.DB.prepare("CREATE TABLE IF NOT EXISTS performance_votes (performance_id TEXT NOT NULL, voter_id TEXT NOT NULL, choice TEXT NOT NULL CHECK(choice IN ('yes','no')), created_at TEXT NOT NULL, PRIMARY KEY(performance_id, voter_id))").run();
+  await ensureD1Tables(env, "performance_votes", [
+    "CREATE TABLE IF NOT EXISTS performance_votes (performance_id TEXT NOT NULL, voter_id TEXT NOT NULL, choice TEXT NOT NULL CHECK(choice IN ('yes','no')), created_at TEXT NOT NULL, PRIMARY KEY(performance_id, voter_id))"
+  ]);
 }
 
 async function readPolls(env, ids) {
@@ -164,14 +198,49 @@ async function readPolls(env, ids) {
 
 
 
-async function ensureSitePollVoteTable(env){await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_poll_votes (poll_id TEXT NOT NULL, voter_id TEXT NOT NULL, option_id TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(poll_id,voter_id))").run()}
-async function ensureSitePollMultiVoteTable(env){await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_poll_multi_votes (poll_id TEXT NOT NULL, voter_id TEXT NOT NULL, option_id TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(poll_id,voter_id,option_id))").run()}
+async function ensureSitePollVoteTable(env) {
+  await ensureD1Tables(env, "site_poll_votes", [
+    "CREATE TABLE IF NOT EXISTS site_poll_votes (poll_id TEXT NOT NULL, voter_id TEXT NOT NULL, option_id TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(poll_id,voter_id))"
+  ]);
+}
+async function ensureSitePollMultiVoteTable(env) {
+  await ensureD1Tables(env, "site_poll_multi_votes", [
+    "CREATE TABLE IF NOT EXISTS site_poll_multi_votes (poll_id TEXT NOT NULL, voter_id TEXT NOT NULL, option_id TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(poll_id,voter_id,option_id))"
+  ]);
+}
 async function getSitePolls(env){const row=await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("site_polls").first();let polls=[];try{polls=row?JSON.parse(row.value):[]}catch{}return Array.isArray(polls)?polls:[]}
 async function getSitePollResults(env,pollId){await ensureSitePollVoteTable(env);await ensureSitePollMultiVoteTable(env);const [legacy,multi]=await Promise.all([env.DB.prepare("SELECT option_id,COUNT(*) AS count FROM site_poll_votes WHERE poll_id=? GROUP BY option_id").bind(pollId).all(),env.DB.prepare("SELECT option_id,COUNT(*) AS count FROM site_poll_multi_votes WHERE poll_id=? GROUP BY option_id").bind(pollId).all()]);const counts={};let total=0;for(const r of [...(legacy.results||[]),...(multi.results||[])]){counts[r.option_id]=(counts[r.option_id]||0)+(Number(r.count)||0);total+=Number(r.count)||0}return {counts,total}}
 
+
+async function cachedSitePollResults(request, env, pollId, refresh = false) {
+  const cacheUrl = new URL(request.url);
+  cacheUrl.pathname = "/api/site-polls/results";
+  cacheUrl.search = "";
+  cacheUrl.searchParams.set("id", pollId);
+  const cacheRequest = new Request(cacheUrl.toString(), { method: "GET" });
+
+  if (!refresh) {
+    try {
+      const cached = await caches.default.match(cacheRequest);
+      if (cached) return await cached.json();
+    } catch {}
+  }
+
+  const result = await getSitePollResults(env, pollId);
+  try {
+    await caches.default.put(
+      cacheRequest,
+      json(result, 200, { "cache-control": "public, max-age=10" })
+    );
+  } catch {}
+  return result;
+}
+
 async function ensureCommunityTables(env) {
-  await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_visits (id INTEGER PRIMARY KEY AUTOINCREMENT, visitor_id TEXT NOT NULL, country TEXT NOT NULL, page TEXT NOT NULL, created_at TEXT NOT NULL)").run();
-  await env.DB.prepare("CREATE TABLE IF NOT EXISTS site_feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL DEFAULT '', message TEXT NOT NULL, created_at TEXT NOT NULL)").run();
+  await ensureD1Tables(env, "community", [
+    "CREATE TABLE IF NOT EXISTS site_visits (id INTEGER PRIMARY KEY AUTOINCREMENT, visitor_id TEXT NOT NULL, country TEXT NOT NULL, page TEXT NOT NULL, created_at TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS site_feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL DEFAULT '', message TEXT NOT NULL, created_at TEXT NOT NULL)"
+  ]);
 }
 
 async function cachedJsonResponse(request, ttlSeconds, createResponse) {
@@ -304,8 +373,8 @@ async function handleApi(request, env, url) {
       } catch (error) { return json({ error: "Не удалось загрузить опросы.", detail: error.message }, 500); }
     });
   }
-  if (request.method === "POST" && path === "/api/site-polls/vote") {let body;try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}const pollId=String(body?.pollId||""),voterId=String(body?.voterId||""),optionIds=Array.isArray(body?.optionIds)?[...new Set(body.optionIds.map(x=>String(x)))]:[String(body?.optionId||"")];if(!/^[a-zA-Z0-9_-]{1,100}$/.test(pollId)||!/^[a-zA-Z0-9_-]{16,100}$/.test(voterId)||!optionIds.length||optionIds.length>3||optionIds.some(id=>!/^[a-zA-Z0-9_-]{1,100}$/.test(id)))return json({error:"Проверьте выбранные варианты ответа."},400);try{const poll=(await getSitePolls(env)).find(p=>p.id===pollId);if(!poll||poll.active===false)return json({error:"Опрос больше недоступен."},404);if(poll.endAt&&Date.parse(poll.endAt)<=Date.now())return json({error:"Время голосования завершилось."},410);const limit=Math.max(1,Math.min(3,Number(poll.maxSelections)||1));if(optionIds.length>limit)return json({error:"В этом опросе можно выбрать не более "+limit+" вариантов."},400);if(!Array.isArray(poll.options)||optionIds.some(id=>!poll.options.some(o=>o.id===id)))return json({error:"Такого варианта ответа нет."},400);await ensureSitePollVoteTable(env);await ensureSitePollMultiVoteTable(env);const existing=await env.DB.prepare("SELECT 1 AS voted FROM site_poll_votes WHERE poll_id=? AND voter_id=? UNION ALL SELECT 1 AS voted FROM site_poll_multi_votes WHERE poll_id=? AND voter_id=? LIMIT 1").bind(pollId,voterId,pollId,voterId).first();if(existing)return json({error:"Вы уже голосовали в этом опросе."},409);const now=new Date().toISOString();await env.DB.batch(optionIds.map(id=>env.DB.prepare("INSERT OR IGNORE INTO site_poll_multi_votes (poll_id,voter_id,option_id,created_at) VALUES (?,?,?,?)").bind(pollId,voterId,id,now)));const result=await getSitePollResults(env,pollId);return json({ok:true,...result},200,{"cache-control":"no-store"})}catch(error){return json({error:"Не удалось сохранить голос.",detail:error.message},500)}}
-  if (request.method === "GET" && path === "/api/site-polls/results") {const pollId=String(url.searchParams.get("id")||""),voterId=String(url.searchParams.get("voterId")||"");if(!/^[a-zA-Z0-9_-]{1,100}$/.test(pollId)|| (voterId&&!/^[a-zA-Z0-9_-]{16,100}$/.test(voterId)))return json({error:"Некорректный опрос."},400);try{const result=await getSitePollResults(env,pollId);let alreadyVoted=false;if(voterId){await ensureSitePollVoteTable(env);await ensureSitePollMultiVoteTable(env);const existing=await env.DB.prepare("SELECT 1 AS voted FROM site_poll_votes WHERE poll_id=? AND voter_id=? UNION ALL SELECT 1 AS voted FROM site_poll_multi_votes WHERE poll_id=? AND voter_id=? LIMIT 1").bind(pollId,voterId,pollId,voterId).first();alreadyVoted=!!existing}return json({...result,alreadyVoted},200,{"cache-control":"no-store"})}catch(error){return json({error:"Не удалось загрузить результаты.",detail:error.message},500)}}
+  if (request.method === "POST" && path === "/api/site-polls/vote") {let body;try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}const pollId=String(body?.pollId||""),voterId=String(body?.voterId||""),optionIds=Array.isArray(body?.optionIds)?[...new Set(body.optionIds.map(x=>String(x)))]:[String(body?.optionId||"")];if(!/^[a-zA-Z0-9_-]{1,100}$/.test(pollId)||!/^[a-zA-Z0-9_-]{16,100}$/.test(voterId)||!optionIds.length||optionIds.length>3||optionIds.some(id=>!/^[a-zA-Z0-9_-]{1,100}$/.test(id)))return json({error:"Проверьте выбранные варианты ответа."},400);try{const poll=(await getSitePolls(env)).find(p=>p.id===pollId);if(!poll||poll.active===false)return json({error:"Опрос больше недоступен."},404);if(poll.endAt&&Date.parse(poll.endAt)<=Date.now())return json({error:"Время голосования завершилось."},410);const limit=Math.max(1,Math.min(3,Number(poll.maxSelections)||1));if(optionIds.length>limit)return json({error:"В этом опросе можно выбрать не более "+limit+" вариантов."},400);if(!Array.isArray(poll.options)||optionIds.some(id=>!poll.options.some(o=>o.id===id)))return json({error:"Такого варианта ответа нет."},400);await ensureSitePollVoteTable(env);await ensureSitePollMultiVoteTable(env);const existing=await env.DB.prepare("SELECT 1 AS voted FROM site_poll_votes WHERE poll_id=? AND voter_id=? UNION ALL SELECT 1 AS voted FROM site_poll_multi_votes WHERE poll_id=? AND voter_id=? LIMIT 1").bind(pollId,voterId,pollId,voterId).first();if(existing)return json({error:"Вы уже голосовали в этом опросе."},409);const now=new Date().toISOString();await env.DB.batch(optionIds.map(id=>env.DB.prepare("INSERT OR IGNORE INTO site_poll_multi_votes (poll_id,voter_id,option_id,created_at) VALUES (?,?,?,?)").bind(pollId,voterId,id,now)));const result=await cachedSitePollResults(request,env,pollId,true);return json({ok:true,...result},200,{"cache-control":"no-store"})}catch(error){return json({error:"Не удалось сохранить голос.",detail:error.message},500)}}
+  if (request.method === "GET" && path === "/api/site-polls/results") {const pollId=String(url.searchParams.get("id")||""),voterId=String(url.searchParams.get("voterId")||"");if(!/^[a-zA-Z0-9_-]{1,100}$/.test(pollId)|| (voterId&&!/^[a-zA-Z0-9_-]{16,100}$/.test(voterId)))return json({error:"Некорректный опрос."},400);try{const result=await cachedSitePollResults(request,env,pollId);let alreadyVoted=false;if(voterId){await ensureSitePollVoteTable(env);await ensureSitePollMultiVoteTable(env);const existing=await env.DB.prepare("SELECT 1 AS voted FROM site_poll_votes WHERE poll_id=? AND voter_id=? UNION ALL SELECT 1 AS voted FROM site_poll_multi_votes WHERE poll_id=? AND voter_id=? LIMIT 1").bind(pollId,voterId,pollId,voterId).first();alreadyVoted=!!existing}return json({...result,alreadyVoted},200,{"cache-control":"no-store"})}catch(error){return json({error:"Не удалось загрузить результаты.",detail:error.message},500)}}
   if (request.method === "GET" && path === "/api/polls") {
     const ids = [...new Set((url.searchParams.get("ids") || "").split(",").map(x => x.trim()).filter(x => /^[a-zA-Z0-9._-]{1,100}$/.test(x)))].slice(0, 100);
     return cachedJsonResponse(request, 10, async () => {
