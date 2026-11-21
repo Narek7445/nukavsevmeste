@@ -70,49 +70,6 @@ async function isAdmin(request, env) {
 
 
 
-const FORUM_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
-const FORUM_PASSWORD_ITERATIONS = 120000;
-
-async function ensureForumUsersTable(env) {
-  await env.DB.prepare("CREATE TABLE IF NOT EXISTS forum_users (id TEXT PRIMARY KEY, username TEXT NOT NULL, username_normalized TEXT NOT NULL UNIQUE, password_salt TEXT NOT NULL, password_hash TEXT NOT NULL, created_at TEXT NOT NULL)").run();
-}
-
-async function hashForumPassword(password, saltBytes) {
-  const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: saltBytes, iterations: FORUM_PASSWORD_ITERATIONS, hash: "SHA-256" }, material, 256);
-  return base64url(new Uint8Array(bits));
-}
-
-async function issueForumToken(secret, userId) {
-  const payload = base64url(new TextEncoder().encode(JSON.stringify({
-    role: "forum_user",
-    uid: userId,
-    exp: Math.floor(Date.now() / 1000) + FORUM_TOKEN_TTL_SECONDS
-  })));
-  const key = await importSigningKey(secret);
-  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
-  return payload + "." + base64url(new Uint8Array(signature));
-}
-
-async function forumUserFromRequest(request, env) {
-  if (!env.SESSION_SECRET) return null;
-  const authorization = request.headers.get("Authorization") || "";
-  const parts = (authorization.startsWith("Bearer ") ? authorization.slice(7) : "").split(".");
-  if (parts.length !== 2) return null;
-  try {
-    const key = await importSigningKey(env.SESSION_SECRET);
-    const valid = await crypto.subtle.verify("HMAC", key, fromBase64url(parts[1]), new TextEncoder().encode(parts[0]));
-    if (!valid) return null;
-    const payload = JSON.parse(new TextDecoder().decode(fromBase64url(parts[0])));
-    if (payload.role !== "forum_user" || typeof payload.uid !== "string" || Number(payload.exp) <= Math.floor(Date.now() / 1000)) return null;
-    return payload;
-  } catch { return null; }
-}
-
-async function publicForumUser(env, id) {
-  return env.DB.prepare("SELECT id, username, created_at FROM forum_users WHERE id = ?").bind(id).first();
-}
-
 async function readArchive(env) {
   const row = await env.DB.prepare("SELECT value FROM app_state WHERE key = ?").bind("participants").first();
   if (!row) return [];
@@ -240,69 +197,6 @@ async function handleApi(request, env, url) {
   const path = url.pathname;
 
 
-
-  if (request.method === "POST" && path === "/api/forum/register") {
-    if (!env.SESSION_SECRET) return json({ error: "Регистрация временно недоступна: сервер не настроен." }, 503, { "cache-control": "no-store" });
-    let body;
-    try { body = await request.json(); } catch { return json({ error: "Некорректный JSON." }, 400); }
-    const username = String(body?.username || "").normalize("NFKC").trim();
-    const usernameNormalized = username.toLocaleLowerCase("ru");
-    const password = typeof body?.password === "string" ? body.password : "";
-    if (!/^[\p{L}\p{N}_-]{3,24}$/u.test(username)) return json({ error: "Никнейм: от 3 до 24 символов — буквы, цифры, дефис или подчёркивание." }, 400);
-    if (password.length < 8 || password.length > 128) return json({ error: "Пароль должен содержать от 8 до 128 символов." }, 400);
-    try {
-      await ensureForumUsersTable(env);
-      const id = crypto.randomUUID();
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      const passwordHash = await hashForumPassword(password, salt);
-      await env.DB.prepare("INSERT INTO forum_users (id, username, username_normalized, password_salt, password_hash, created_at) VALUES (?, ?, ?, ?, ?, ?)")
-        .bind(id, username, usernameNormalized, base64url(salt), passwordHash, new Date().toISOString()).run();
-      const user = await publicForumUser(env, id);
-      return json({ token: await issueForumToken(env.SESSION_SECRET, id), expiresIn: FORUM_TOKEN_TTL_SECONDS, user }, 201, { "cache-control": "no-store" });
-    } catch (error) {
-      console.error("Forum registration failed:", error);
-      if (/unique|constraint/i.test(String(error?.message || ""))) return json({ error: "Этот никнейм уже занят. Попробуйте другой." }, 409, { "cache-control": "no-store" });
-      return json({ error: "Не удалось создать аккаунт. Ошибка записана в журнал сервера." }, 500, { "cache-control": "no-store" });
-    }
-  }
-
-  if (request.method === "POST" && path === "/api/forum/login") {
-    if (!env.SESSION_SECRET) return json({ error: "Вход временно недоступен: сервер не настроен." }, 503, { "cache-control": "no-store" });
-    let body;
-    try { body = await request.json(); } catch { return json({ error: "Некорректный JSON." }, 400); }
-    const username = String(body?.username || "").normalize("NFKC").trim();
-    const password = typeof body?.password === "string" ? body.password : "";
-    if (!username || !password || password.length > 128) return json({ error: "Укажите никнейм и пароль." }, 400);
-    try {
-      await ensureForumUsersTable(env);
-      const user = await env.DB.prepare("SELECT id, username, password_salt, password_hash FROM forum_users WHERE username_normalized = ?")
-        .bind(username.toLocaleLowerCase("ru")).first();
-      if (!user) return json({ error: "Неверный никнейм или пароль." }, 401, { "cache-control": "no-store" });
-      const actualHash = await hashForumPassword(password, fromBase64url(user.password_salt));
-      const actualBytes = fromBase64url(actualHash);
-      const expectedBytes = fromBase64url(user.password_hash);
-      let difference = actualBytes.length ^ expectedBytes.length;
-      for (let i = 0; i < Math.max(actualBytes.length, expectedBytes.length); i++) {
-        difference |= (actualBytes[i] || 0) ^ (expectedBytes[i] || 0);
-      }
-      if (difference !== 0) return json({ error: "Неверный никнейм или пароль." }, 401, { "cache-control": "no-store" });
-      const publicUser = await publicForumUser(env, user.id);
-      return json({ token: await issueForumToken(env.SESSION_SECRET, user.id), expiresIn: FORUM_TOKEN_TTL_SECONDS, user: publicUser }, 200, { "cache-control": "no-store" });
-    } catch {
-      return json({ error: "Не удалось выполнить вход." }, 500, { "cache-control": "no-store" });
-    }
-  }
-
-  if (request.method === "GET" && path === "/api/forum/me") {
-    const session = await forumUserFromRequest(request, env);
-    if (!session) return json({ error: "Необходим вход в аккаунт." }, 401, { "cache-control": "no-store" });
-    try {
-      await ensureForumUsersTable(env);
-      const user = await publicForumUser(env, session.uid);
-      if (!user) return json({ error: "Аккаунт не найден." }, 401, { "cache-control": "no-store" });
-      return json({ user }, 200, { "cache-control": "no-store" });
-    } catch { return json({ error: "Не удалось загрузить аккаунт." }, 500, { "cache-control": "no-store" }); }
-  }
 
   if (request.method === "POST" && path === "/api/analytics/view") {
     let body;
