@@ -40,20 +40,20 @@
 .season-number span{display:block;margin-top:6px;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
 .season-progress{height:6px;margin-top:16px;border-radius:99px;background:#eee5df;overflow:hidden}
 .season-progress span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#71334b,#c7a36a)}
-.songs-section{padding:clamp(17px,3vw,27px);border:1px solid #e4d8cd;border-radius:22px;background:#fffdf9;box-shadow:0 10px 30px #35202a0a}
-.song-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px}
+
+
 .song-toolbar p{margin:0;color:var(--muted);font-size:12px}
-.song-search{width:min(340px,100%);padding:12px 14px;border:1px solid #d8c8bf;border-radius:11px;background:#fff;color:var(--ink);font:13px 'DM Sans',sans-serif;outline:none}
+
 .song-search:focus{border-color:var(--wine);box-shadow:0 0 0 4px #71334b16}
-.song-list{display:grid;gap:8px}
-.song-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 13px;border:1px solid #eee5df;border-radius:12px;background:linear-gradient(100deg,#fff,#fcf8f4)}
-.song-rank{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#f1e8e1;color:#8a6a59;font-size:11px;font-weight:800}
-.song-name{min-width:0;color:#49363f;font:600 15px/1.35 Georgia,serif;overflow-wrap:anywhere}
-.song-count{padding:7px 10px;border-radius:99px;background:#f5ebdc;color:#805a2d;font-size:10px;font-weight:800;white-space:nowrap}
+
+
+
+
+
 .empty{padding:45px 20px;border:1px dashed #d4c2b7;border-radius:18px;color:var(--muted);text-align:center;line-height:1.7}
 .footer{display:flex;justify-content:space-between;gap:15px;margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:#978b88;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
 @media(max-width:850px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.page{padding:15px 12px 45px}.nav{align-items:flex-start}.brand{font-size:12px}.brand-mark{width:34px;height:34px}.nav-links{gap:5px}.nav-link{padding:8px 10px;font-size:10px}.hero{margin:18px 0 20px;border-radius:19px}.hero p{font-size:13px}.metrics{gap:9px}.metric{padding:15px;border-radius:15px}.metric strong{font-size:31px}.metric-label{font-size:9px}.season-grid{grid-template-columns:1fr;gap:10px}.season-card{padding:16px}.season-numbers{gap:6px}.season-number{padding:10px 7px}.season-number strong{font-size:22px}.season-number span{font-size:8px}.song-toolbar{align-items:stretch;flex-direction:column}.song-search{width:100%}.song-row{gap:9px;padding:10px}.song-name{font-size:14px}.footer{flex-direction:column}}
+@media(max-width:600px){.page{padding:15px 12px 45px}.nav{align-items:flex-start}.brand{font-size:12px}.brand-mark{width:34px;height:34px}.nav-links{gap:5px}.nav-link{padding:8px 10px;font-size:10px}.hero{margin:18px 0 20px;border-radius:19px}.hero p{font-size:13px}.metrics{gap:9px}.metric{padding:15px;border-radius:15px}.metric strong{font-size:31px}.metric-label{font-size:9px}.season-grid{grid-template-columns:1fr;gap:10px}.season-card{padding:16px}.season-numbers{gap:6px}.season-number{padding:10px 7px}.season-number strong{font-size:22px}.season-number span{font-size:8px}.footer{flex-direction:column}}
 </style>
 <style id="fan-disclaimer-style">.fan-disclaimer{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 18px;background:linear-gradient(100deg,#30203f,#56304f 52%,#304653);color:#fff8ef;border-bottom:1px solid rgba(255,255,255,.2);font:500 13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;text-align:center;letter-spacing:.01em}.fan-disclaimer strong{color:#ffd58b;font-weight:800}.fan-disclaimer-icon{flex:0 0 auto;color:#ffd58b;font-size:16px}@media(max-width:560px){.fan-disclaimer{padding:9px 13px;font-size:11px;gap:7px}}</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -74,29 +74,17 @@
  <div class="section-head"><div><h2 id="seasonStatsTitle">Сезоны в цифрах</h2><p>Количество выпусков, участников и стобальных выступлений в каждом сезоне.</p></div></div>
  <div class="season-grid" id="seasonGrid"><div class="empty">Загружаем статистику…</div></div>
 </section>
-<section class="songs-section" aria-labelledby="songsTitle">
- <div class="section-head"><div><h2 id="songsTitle">Песни архива</h2><p>Сколько раз каждая песня исполнялась в записях сайта.</p></div></div>
- <div class="song-toolbar"><p id="songSummary">Подсчёт исполнений по названию песни.</p><input id="songSearch" class="song-search" type="search" placeholder="Найти песню…" aria-label="Поиск по песням"></div>
- <div class="song-list" id="songList"><div class="empty">Подготавливаем список песен…</div></div>
-</section>
+
 <footer class="footer"><span>Ну-ка, все вместе!</span><span>Статистика архива</span></footer>
 </main>
 <script>
 (()=>{
  const API='https://api.nukavsevmeste.org';
  const $=id=>document.getElementById(id);
- let songs=[];
  const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  const norm=v=>String(v??'').trim();
  const personKey=e=>(norm(e.firstName)+' '+norm(e.lastName)).trim().toLocaleLowerCase('ru');
  const seasonOrder=(a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')};
- const renderSongs=()=>{
-  const q=norm($('songSearch').value).toLocaleLowerCase('ru');
-  const shown=songs.filter(x=>x.name.toLocaleLowerCase('ru').includes(q));
-  $('songSummary').textContent='Всего '+songs.length.toLocaleString('ru-RU')+' '+(songs.length===1?'название песни':'названий песен')+' · отображается '+shown.length.toLocaleString('ru-RU');
-  $('songList').innerHTML=shown.length?shown.map((x,i)=>'<div class="song-row"><span class="song-rank">'+(i+1)+'</span><span class="song-name">«'+esc(x.name)+'»</span><span class="song-count">'+x.count+' '+(x.count%10===1&&x.count%100!==11?'исполнение':x.count%10>=2&&x.count%10<=4&&(x.count%100<12||x.count%100>14)?'исполнения':'исполнений')+'</span></div>').join(''):'<div class="empty">По вашему запросу песни не найдены.</div>';
- };
- $('songSearch').addEventListener('input',renderSongs);
  async function load(){
   try{
    const res=await fetch(API+'/api/participants',{cache:'no-store'});
@@ -120,11 +108,7 @@
    $('totalEpisodes').textContent=episodeTotal.size.toLocaleString('ru-RU');
    const maxPeople=Math.max(1,...seasonStats.map(x=>x.people));
    $('seasonGrid').innerHTML=seasonStats.length?seasonStats.map(x=>'<article class="season-card"><div class="season-card-top"><h3>'+esc(x.season)+(Number.isFinite(Number(x.season))?' сезон':'')+'</h3><span class="season-badge">'+x.list.length+' записей</span></div><div class="season-numbers"><div class="season-number"><strong>'+x.episodes+'</strong><span>выпусков</span></div><div class="season-number"><strong>'+x.people+'</strong><span>участников</span></div><div class="season-number"><strong>'+x.hundreds+'</strong><span>100 баллов</span></div></div><div class="season-progress" title="'+x.people+' участников"><span style="width:'+(x.people/maxPeople*100)+'%"></span></div></article>').join(''):'<div class="empty">В архиве пока нет данных о сезонах.</div>';
-   const songMap=new Map();
-   entries.forEach(e=>{const name=norm(e.song).replace(/^«\s*|\s*»$/g,'').trim();if(!name)return;const key=name.toLocaleLowerCase('ru');const old=songMap.get(key);if(old)old.count++;else songMap.set(key,{name,count:1})});
-   songs=[...songMap.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'ru'));
-   renderSongs();
-  }catch(err){$('seasonGrid').innerHTML='<div class="empty">'+esc(err.message||'Не удалось загрузить статистику.')+'</div>';$('songList').innerHTML='<div class="empty">Список песен временно недоступен.</div>'}
+  }catch(err){$('seasonGrid').innerHTML='<div class="empty">'+esc(err.message||'Не удалось загрузить статистику.')+'</div>'}
  }
  load();
 })();
