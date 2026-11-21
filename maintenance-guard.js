@@ -1,6 +1,6 @@
 (() => {
-  const path = window.location.pathname.replace(/\\/+$/, '') || '/';
-  if (path === '/maintenance.html' || path === '/admin' || path === '/admin.html' || path.startsWith('/admin/')) return;
+  const path = window.location.pathname;
+  if (path === '/maintenance.html' || path === '/admin' || path === '/admin/' || path === '/admin.html' || path.startsWith('/admin/')) return;
 
   fetch('https://api.nukavsevmeste.org/api/site-status', {
     method: 'GET',
@@ -13,7 +13,7 @@
       return response.json();
     })
     .then(status => {
-      if (status && status.maintenance === true && window.location.pathname !== '/maintenance.html') {
+      if (status && status.maintenance === true) {
         window.location.replace('/maintenance.html');
       }
     })
