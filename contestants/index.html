@@ -249,6 +249,33 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 .profile-performance .audience-poll{margin:0 14px 14px;}
 @media(max-width:720px){.profile-performances-section{padding:15px 12px}.profile-performances{grid-template-columns:minmax(0,1fr);gap:12px}.performance-card-head{padding:16px 14px 12px}.performance-song-row{padding:15px 14px 12px}.performance-comment{margin:0 14px 13px}.profile-performance .profile-video,.profile-performance .audience-poll{margin-left:11px;margin-right:11px}.performances-heading{align-items:flex-start}.performances-total{font-size:10px;padding:6px 9px}}
 @media(max-width:380px){.performance-score{width:52px;height:52px;border-radius:14px}.performance-score strong{font-size:21px}.performance-card-meta{gap:5px}.performance-season{font-size:10px;padding:6px 8px}.performance-episode{font-size:10px}.performance-song{font-size:16px}}
+
+/* Единый золотой стиль профиля — как в «Любимцах зрителей» */
+.profile-view .profile-hero{
+ position:relative;isolation:isolate;overflow:hidden;grid-template-columns:minmax(190px,.72fr) minmax(0,1.28fr);
+ gap:clamp(22px,5vw,54px);padding:clamp(17px,3vw,32px);border:1px solid #d9c5a3;border-radius:26px;
+ background:radial-gradient(circle at 88% 8%,#f0d9aa 0,transparent 34%),linear-gradient(120deg,#fff9eb,#f0e0c9 58%,#ead4d0);
+ box-shadow:0 18px 45px #542b3517;background-size:220% 220%;animation:profileGradientFlow 18s ease-in-out infinite
+}
+.profile-view .profile-hero:after{content:"★";position:absolute;z-index:-1;right:3%;top:-35px;color:#b98a4b17;font:220px Georgia,serif;pointer-events:none}
+.profile-view .profile-hero:before{background:radial-gradient(ellipse at 25% 35%,rgba(255,255,255,.62),transparent 43%),radial-gradient(ellipse at 80% 70%,rgba(224,177,86,.24),transparent 44%)}
+.profile-view .profile-main-photo{position:relative;z-index:1;border:5px solid #fff9e9;border-radius:19px;box-shadow:0 14px 30px #4b2b3025}
+.profile-view .profile-kicker{position:relative;z-index:1;color:#916b36;font-size:10px;font-weight:900;letter-spacing:.2em}
+.profile-view .profile-name{position:relative;z-index:1;color:#3b2630;font-size:clamp(34px,6vw,68px);letter-spacing:-.075em}
+.profile-view .profile-stats{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.profile-view .profile-stat{padding:13px 12px;border:1px solid #e3d0b2;border-radius:14px;background:#fffaf0c9;color:#71334b;text-align:center;font-size:12px;font-weight:900}
+.profile-view .profile-comment{position:relative;z-index:1;color:#79666a}
+.profile-view .profile-detail{border-color:#e2d8ce;border-radius:17px;background:#fffdf9;box-shadow:0 7px 20px #39212708}
+.profile-view .profile-detail h2,.profile-view .profile-performances-title{color:#382832}
+.profile-view .profile-performance{border:1px solid #e2d8ce;border-radius:17px;background:#fffdf9;box-shadow:0 7px 20px #39212708}
+.profile-view .performance-season{background:#f2e8e2;color:#71334b}
+.profile-view .performance-score{color:#71334b}
+.profile-view .performance-song-label{color:#916b36}
+.profile-view .performance-song{color:#392832}
+.profile-view .audience-poll{border-color:#e3d0b2;background:linear-gradient(120deg,#fff9eb,#f7eee3);color:#392832}
+.profile-view .audience-poll button{border-color:#d5b779;color:#71334b}
+@media(max-width:720px){.profile-view .profile-hero{grid-template-columns:1fr}.profile-view .profile-main-photo{aspect-ratio:4/3;max-height:300px}.profile-view .profile-stats{gap:6px}.profile-view .profile-stat{padding:11px 8px;font-size:10px}}
+@media(prefers-reduced-motion:reduce){.profile-view .profile-hero{animation:none!important}}
 </style>
 <style id="fan-disclaimer-style">.fan-disclaimer{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 18px;background:linear-gradient(100deg,#30203f,#56304f 52%,#304653);color:#fff8ef;border-bottom:1px solid rgba(255,255,255,.2);font:500 13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;text-align:center;letter-spacing:.01em}.fan-disclaimer strong{color:#ffd58b;font-weight:800}.fan-disclaimer-icon{flex:0 0 auto;color:#ffd58b;font-size:16px}@media(max-width:560px){.fan-disclaimer{padding:9px 13px;font-size:11px;gap:7px}}</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
