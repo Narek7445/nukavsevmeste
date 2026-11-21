@@ -248,6 +248,12 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 .profile-performance .audience-poll{margin:0 14px 14px;}
 @media(max-width:720px){.profile-performances-section{padding:15px 12px}.profile-performances{grid-template-columns:minmax(0,1fr);gap:12px}.performance-card-head{padding:16px 14px 12px}.performance-song-row{padding:15px 14px 12px}.performance-comment{margin:0 14px 13px}.profile-performance .profile-video,.profile-performance .audience-poll{margin-left:11px;margin-right:11px}.performances-heading{align-items:flex-start}.performances-total{font-size:10px;padding:6px 9px}}
 @media(max-width:380px){.performance-score{width:52px;height:52px;border-radius:14px}.performance-score strong{font-size:21px}.performance-card-meta{gap:5px}.performance-season{font-size:10px;padding:6px 8px}.performance-episode{font-size:10px}.performance-song{font-size:16px}}
+
+/* Уведомление о событии не должно влиять на расположение кнопок: навигация закреплена внутри обложки */
+.profile-view .record-hero>.profile-nav{position:absolute;z-index:10;top:18px;left:18px;right:18px;width:auto;height:auto;margin:0;padding:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;pointer-events:none}
+.profile-view .record-hero>.profile-nav button{position:relative;flex:0 1 auto;width:auto;min-width:0;max-width:calc(50% - 6px);white-space:normal;overflow-wrap:anywhere;pointer-events:auto}
+@media(max-width:720px){.profile-view .record-hero>.profile-nav{top:14px;left:14px;right:14px;gap:8px}.profile-view .record-hero>.profile-nav button{max-width:calc(50% - 4px);padding:10px 12px;font-size:11px}}
+
 </style>
 <style id="fan-disclaimer-style">.fan-disclaimer{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 18px;background:linear-gradient(100deg,#30203f,#56304f 52%,#304653);color:#fff8ef;border-bottom:1px solid rgba(255,255,255,.2);font:500 13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;text-align:center;letter-spacing:.01em}.fan-disclaimer strong{color:#ffd58b;font-weight:800}.fan-disclaimer-icon{flex:0 0 auto;color:#ffd58b;font-size:16px}@media(max-width:560px){.fan-disclaimer{padding:9px 13px;font-size:11px;gap:7px}}</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
