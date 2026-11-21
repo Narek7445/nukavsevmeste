@@ -30,6 +30,18 @@
 .winner-card-crown{margin:0 auto 8px;color:#fff;font-size:39px;font-weight:900;line-height:1;text-shadow:0 2px 6px #392127c9}
 .winner-card-name{margin:0;color:#fff;font:900 clamp(23px,4vw,34px)/1.12 'DM Sans',sans-serif;overflow-wrap:anywhere;text-shadow:0 2px 7px #392127d9}
 .winner-card-season{margin-top:10px;padding:8px 14px;border:1px solid #ffffffa6;border-radius:99px;background:#39212770;color:#fff;font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;text-shadow:0 1px 3px #392127a6}
+.winner-card{border:1px solid #d9b979;transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease}
+.winner-card:after{content:"";position:absolute;z-index:2;inset:10px;border:2px solid rgba(245,216,157,0);border-radius:17px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0);pointer-events:none;transition:border-color .28s ease,box-shadow .28s ease}
+.winner-card-photo{transition:transform .55s cubic-bezier(.2,.7,.2,1),filter .28s ease}
+.winner-card-crown,.winner-card-name,.winner-card-season{transform:translateY(0) scale(1);transition:transform .28s cubic-bezier(.2,.7,.2,1),text-shadow .28s ease}
+.winner-card:hover,.winner-card:focus-visible{transform:translateY(-4px);border-color:#f0d49a;box-shadow:0 25px 62px #160c2c70,0 0 0 2px #d9b979a6,0 0 25px #d9b97945;outline:none}
+.winner-card:hover:after,.winner-card:focus-visible:after{border-color:rgba(245,216,157,.92);box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),0 0 18px rgba(240,212,154,.28)}
+.winner-card:hover .winner-card-photo,.winner-card:focus-visible .winner-card-photo{transform:scale(1.035);filter:saturate(1.06)}
+.winner-card:hover .winner-card-crown,.winner-card:focus-visible .winner-card-crown{transform:translateY(-2px) scale(1.09);text-shadow:0 3px 10px #392127ed,0 0 16px #f5d99f99}
+.winner-card:hover .winner-card-name,.winner-card:focus-visible .winner-card-name{transform:scale(1.035);text-shadow:0 3px 10px #392127ed,0 0 18px #f5d99f88}
+.winner-card:hover .winner-card-season,.winner-card:focus-visible .winner-card-season{transform:translateY(-2px) scale(1.045);border-color:#fff;background:#392127a8}
+@media(prefers-reduced-motion:reduce){.winner-card,.winner-card:after,.winner-card-photo,.winner-card-crown,.winner-card-name,.winner-card-season{transition:none}}
+
 .winner-empty{padding:48px 20px;border:1px dashed #d7c7bb;border-radius:18px;text-align:center;color:var(--muted);background:#fff9}
 @media(max-width:900px){.winner-carousel{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.winner-card{min-height:390px}}
 @media(max-width:560px){.winner-carousel{grid-template-columns:1fr;gap:14px}.winner-card{min-height:clamp(360px,112vw,500px);border-radius:19px}.winner-card-info{padding:16px 13px 27px}.winner-card-name{font-size:clamp(21px,6vw,29px)}}
