@@ -413,6 +413,8 @@ async function init(){
    const apiData=await apiResponse.json();
    if(!Array.isArray(apiData.participants))throw new Error('Некорректный формат архива');
    const d=apiData.participants;
+   const params=new URLSearchParams(window.location.search);
+   const requested=params.get('profile')||params.get('name')||'';
    allEntries=d;
    entries=d.filter(item=>!isHiddenPerformance(item));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}if(requested){const profileKey=normalizeProfileName(requested);await loadPolls(entries.filter(item=>normalizeProfileName(name(item))===profileKey).map(item=>item.id));}
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
@@ -421,8 +423,7 @@ async function init(){
    $('peopleCount').textContent=people.size.toLocaleString('ru-RU');
    $('seasonCount').textContent=seasons.length;
    $('season').innerHTML='<option value="all">Все сезоны</option>'+seasons.map(s=>'<option value="'+safe(s)+'">'+safe(s)+(Number.isFinite(Number(s))?' сезон':'')+'</option>').join('');
-   const params=new URLSearchParams(window.location.search);
-   const requested=params.get('profile')||params.get('name')||'';
+
    if(requested){
     if(renderProfile(requested)){
      $('hero').style.display='none';
