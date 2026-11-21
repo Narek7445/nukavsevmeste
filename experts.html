@@ -22,6 +22,7 @@
 <style id="fan-disclaimer-style">.fan-disclaimer{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 18px;background:linear-gradient(100deg,#30203f,#56304f 52%,#304653);color:#fff8ef;border-bottom:1px solid rgba(255,255,255,.2);font:500 13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;text-align:center;letter-spacing:.01em}.fan-disclaimer strong{color:#ffd58b;font-weight:800}.fan-disclaimer-icon{flex:0 0 auto;color:#ffd58b;font-size:16px}@media(max-width:560px){.fan-disclaimer{padding:9px 13px;font-size:11px;gap:7px}}</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="favicon.svg">
+<script>(()=>{const p=location.pathname;if(p==='/maintenance.html'||p==='/admin'||p==='/admin/'||p==='/admin.html'||p.startsWith('/admin/'))return;const check=async()=>{try{const r=await fetch('https://api.nukavsevmeste.org/api/site-status',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(d.maintenance&&location.pathname!=='/maintenance.html')location.replace('/maintenance.html')}catch{}};check();setInterval(check,15000)})();</script>
 </head>
 <body>
 <div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div>
