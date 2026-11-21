@@ -132,10 +132,12 @@ function renderFanProfile(person){
  document.title=person+' — Любимчик зрителей';
  return true;
 }
-function openFanProfile(person){const u=new URL('/rating/',location.href);u.searchParams.set('profile',person);location.assign(u.href)}
+function openFanProfile(person){const u=new URL('/contestants/',location.origin);u.searchParams.set('profile',person);location.assign(u.href)}
 document.addEventListener('click',event=>{const card=event.target.closest('[data-fan-profile]');if(card)openFanProfile(card.dataset.fanProfile)});
 document.addEventListener('keydown',event=>{if(event.key!=='Enter'&&event.key!==' ')return;const card=event.target.closest('[data-fan-profile]');if(!card)return;event.preventDefault();openFanProfile(card.dataset.fanProfile)});
 async function init(){
+ const legacyProfile=new URLSearchParams(location.search).get('profile')||'';
+ if(legacyProfile){const target=new URL('/contestants/',location.origin);target.searchParams.set('profile',legacyProfile);location.replace(target.href);return;}
  try{
   const [ar,pr]=await Promise.all([fetch(API+'/api/participants',{cache:'no-store'}),fetch(API+'/api/polls',{cache:'no-store'})]);
   if(!ar.ok||!pr.ok)throw new Error('Не удалось загрузить данные.');
