@@ -17,6 +17,29 @@
 .unknown{display:flex;align-items:center;gap:14px;padding:17px;border:1px dashed #d7c7bb;border-radius:15px;background:#fcf8f3}.question{display:grid;place-items:center;width:54px;height:54px;border-radius:15px;background:linear-gradient(145deg,#eee5df,#e3d6d2);color:#846e75;font:600 33px Georgia,serif}.unknown strong{display:block;color:#574751;font:600 17px Georgia,serif}.unknown small{display:block;margin-top:4px;color:var(--muted);font-size:10px}
 .empty{grid-column:1/-1;padding:45px 20px;border:1px dashed #d5c4b8;border-radius:18px;text-align:center;color:var(--muted);background:#fff9}.footer{display:flex;justify-content:space-between;gap:12px;margin-top:45px;padding-top:17px;border-top:1px solid var(--line);color:#9a8e89;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
 @media(max-width:720px){.seasons{grid-template-columns:1fr}.nav{align-items:flex-start}.brand{font-size:12px}.mark{width:34px;height:34px}.links{gap:5px}.links a{padding:8px 9px;font-size:10px}.hero{margin:18px 0 22px;border-radius:20px}.winner{grid-template-columns:62px minmax(0,1fr) auto;padding:9px}.photo{width:62px;height:70px}.winner-name{font-size:16px}.footer{flex-direction:column}}
+
+/* Победители: фотокарусель в стиле «Любимцев зрителей» */
+.winner-carousel-wrap{position:relative;margin:8px auto 0;max-width:760px;padding:0 62px 48px}
+.winner-carousel{position:relative;min-height:clamp(390px,58vw,570px);display:grid;place-items:center}
+.winner-slide{position:absolute;inset:0;display:flex;align-items:stretch;justify-content:center;opacity:0;visibility:hidden;transform:translateX(24px) scale(.98);transition:opacity .35s ease,transform .35s ease,visibility .35s}
+.winner-slide.active{position:relative;opacity:1;visibility:visible;transform:translateX(0) scale(1)}
+.winner-card{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;width:min(100%,440px);min-height:clamp(390px,58vw,570px);border:1px solid #d9b979;border-radius:24px;background:linear-gradient(145deg,#6c4b5a,#302039);box-shadow:0 22px 55px #160c2c55;text-decoration:none;text-align:center}
+.winner-card-photo{position:absolute;z-index:-2;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 28%}
+.winner-card:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(180deg,#1c10101c 0%,#1c101008 28%,#1c101080 100%)}
+.winner-card-info{position:absolute;inset:0;z-index:-1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:100%;padding:20px 20px 34px;background:linear-gradient(to top,rgba(245,218,170,.98) 0%,rgba(239,211,164,.88) 22%,rgba(226,193,143,.54) 43%,rgba(208,171,125,.2) 62%,rgba(190,151,108,0) 82%)}
+.winner-card-crown{margin:0 auto 8px;color:#fff;font-size:39px;font-weight:900;line-height:1;text-shadow:0 2px 6px #392127c9}
+.winner-card-name{margin:0;color:#fff;font:900 clamp(23px,4vw,34px)/1.12 'DM Sans',sans-serif;overflow-wrap:anywhere;text-shadow:0 2px 7px #392127d9}
+.winner-card-season{margin-top:10px;padding:8px 14px;border:1px solid #ffffffa6;border-radius:99px;background:#39212770;color:#fff;font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;text-shadow:0 1px 3px #392127a6}
+.winner-arrow{position:absolute;z-index:5;top:calc(50% - 24px);width:48px;height:48px;display:grid;place-items:center;border:1px solid #e3c68f;border-radius:50%;background:linear-gradient(135deg,#fff8ed,#f3e5f3);color:#603b70;font:400 32px/1 Georgia,serif;cursor:pointer;box-shadow:0 8px 24px #160c2c45;transition:transform .2s,box-shadow .2s}
+.winner-arrow:hover{transform:scale(1.09);box-shadow:0 12px 30px #160c2c65}.winner-arrow:disabled{opacity:.35;cursor:default;transform:none}
+.winner-arrow.prev{left:0}.winner-arrow.next{right:0}
+.winner-carousel-meta{position:absolute;left:0;right:0;bottom:9px;display:flex;align-items:center;justify-content:center;gap:13px;color:#f9eadb;font-size:11px;font-weight:800;letter-spacing:.12em}
+.winner-dots{display:flex;align-items:center;justify-content:center;gap:7px}
+.winner-dot{width:7px;height:7px;padding:0;border:0;border-radius:99px;background:#ffffff65;cursor:pointer;transition:width .2s,background .2s}
+.winner-dot.active{width:22px;background:#f2ca83}
+.winner-empty{padding:48px 20px;border:1px dashed #d7c7bb;border-radius:18px;text-align:center;color:var(--muted);background:#fff9}
+@media(max-width:560px){.winner-carousel-wrap{padding:0 38px 45px}.winner-carousel{min-height:clamp(360px,112vw,500px)}.winner-card{min-height:clamp(360px,112vw,500px);border-radius:19px}.winner-arrow{width:38px;height:38px;font-size:27px}.winner-arrow.prev{left:-2px}.winner-arrow.next{right:-2px}.winner-card-info{padding:16px 13px 27px}.winner-card-name{font-size:clamp(21px,6vw,29px)}}
+@media(prefers-reduced-motion:reduce){.winner-slide,.winner-arrow,.winner-dot{transition:none}}
 </style>
 <style id="fan-disclaimer-style">.fan-disclaimer{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 18px;background:linear-gradient(100deg,#30203f,#56304f 52%,#304653);color:#fff8ef;border-bottom:1px solid rgba(255,255,255,.2);font:500 13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;text-align:center;letter-spacing:.01em}.fan-disclaimer strong{color:#ffd58b;font-weight:800}.fan-disclaimer-icon{flex:0 0 auto;color:#ffd58b;font-size:16px}@media(max-width:560px){.fan-disclaimer{padding:9px 13px;font-size:11px;gap:7px}}</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -30,7 +53,12 @@
 <nav class="nav"><a class="brand" href="/"><span class="mark">♛</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div class="links"><a href="/seasons/">Сезоны</a><a href="/contestants/">Все конкурсанты</a><a href="/stats/">Статистика</a><a class="active" href="/winners/">Победители</a><a href="/experts/">Эксперты сотни</a><a href="/">На главную</a></div></nav>
 <header class="hero"><div class="kicker">Золотые голоса · Главные имена</div><h1>Победители.</h1><p>Участники, отмеченные победителями в архиве шоу. Если победитель сезона пока не указан, его место остаётся открытым — вместо имени стоит вопросительный знак.</p></header>
 <div class="summary"><span>Победители по сезонам</span><span id="winnerSummary"><strong>—</strong></span></div>
-<section class="seasons" id="seasonList"><div class="empty">Загружаем список победителей…</div></section>
+<section class="winner-carousel-wrap" aria-label="Карусель победителей">
+ <button class="winner-arrow prev" id="winnerPrev" type="button" aria-label="Предыдущий победитель">‹</button>
+ <div class="winner-carousel" id="seasonList"><div class="winner-empty">Загружаем список победителей…</div></div>
+ <button class="winner-arrow next" id="winnerNext" type="button" aria-label="Следующий победитель">›</button>
+ <div class="winner-carousel-meta"><span id="winnerPosition">—</span><div class="winner-dots" id="winnerDots"></div></div>
+</section>
 <footer class="footer"><span>Ну-ка, все вместе!</span><span>Зал славы</span></footer>
 </main>
 <script>
@@ -38,24 +66,40 @@
  const API='https://api.nukavsevmeste.org',root=document.getElementById('seasonList');
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const name=e=>(String(e.firstName||'')+' '+String(e.lastName||'')).trim();
- const order=(a,b)=>{const x=Number(a),y=Number(b);return Number.isFinite(x)&&Number.isFinite(y)?x-y:Number.isFinite(x)?-1:Number.isFinite(y)?1:a.localeCompare(b,'ru')};
+ let winners=[],active=0;
+ function renderCarousel(){
+  if(!winners.length){root.innerHTML='<div class="winner-empty">Победители пока не указаны.</div>';document.getElementById('winnerPosition').textContent='0';document.getElementById('winnerPrev').disabled=true;document.getElementById('winnerNext').disabled=true;return}
+  root.innerHTML=winners.map((p,i)=>'<div class="winner-slide '+(i===active?'active':'')+'" data-slide="'+i+'"><a class="winner-card" href="/contestants/?profile='+encodeURIComponent(p.name)+'" aria-label="Открыть профиль '+esc(p.name)+'">'+(p.photo?'<img class="winner-card-photo" src="'+esc(p.photo)+'" alt="Фото '+esc(p.name)+'" loading="lazy">':'')+'<div class="winner-card-info"><div class="winner-card-crown" aria-hidden="true">♛</div><h2 class="winner-card-name">'+esc(p.name)+'</h2><div class="winner-card-season">'+esc(p.seasonLabel)+'</div></div></a></div>').join('');
+  document.getElementById('winnerPosition').textContent=(active+1)+' / '+winners.length;
+  document.getElementById('winnerDots').innerHTML=winners.map((p,i)=>'<button class="winner-dot '+(i===active?'active':'')+'" type="button" data-index="'+i+'" aria-label="Победитель '+(i+1)+'"></button>').join('');
+  document.getElementById('winnerPrev').disabled=winners.length<2;document.getElementById('winnerNext').disabled=winners.length<2;
+ }
+ function show(index){if(!winners.length)return;active=(index+winners.length)%winners.length;renderCarousel()}
+ document.getElementById('winnerPrev').addEventListener('click',()=>show(active-1));
+ document.getElementById('winnerNext').addEventListener('click',()=>show(active+1));
+ document.getElementById('winnerDots').addEventListener('click',event=>{const button=event.target.closest('[data-index]');if(button)show(Number(button.dataset.index))});
  async function load(){
   try{
    const response=await fetch(API+'/api/participants',{cache:'no-store'});if(!response.ok)throw new Error('Не удалось загрузить архив.');
    const data=await response.json();if(!Array.isArray(data.participants))throw new Error('Некорректный формат архива.');
    const entries=data.participants.filter(e=>e&&!e.hidden&&name(e));
-   const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort(order);
-   let marked=0;
-   root.innerHTML=seasons.length?seasons.map(season=>{
-    const list=entries.filter(e=>String(e.season||'').trim()===season);
+   const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))];
+   const order=(a,b)=>{const x=Number(a),y=Number(b);return Number.isFinite(x)&&Number.isFinite(y)?x-y:Number.isFinite(x)?-1:Number.isFinite(y)?1:a.localeCompare(b,'ru')};
+   seasons.sort(order);
+   winners=[];
+   seasons.forEach(season=>{
     const people=new Map();
-    list.forEach(e=>{const key=name(e).toLocaleLowerCase('ru');const old=people.get(key);const photos=[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''].filter(Boolean);if(!old)people.set(key,{name:name(e),winner:!!e.winner,photo:photos[0]||'',season});else{old.winner=old.winner||!!e.winner;if(!old.photo&&photos.length)old.photo=photos[0]}});
-    const winners=[...people.values()].filter(p=>p.winner).sort((a,b)=>a.name.localeCompare(b.name,'ru'));marked+=winners.length;
-    const content=winners.length?winners.map(p=>'<a class="winner" href="/contestants/?profile='+encodeURIComponent(p.name)+'"><span class="photo">'+(p.photo?'<img src="'+esc(p.photo)+'" alt="Фото '+esc(p.name)+'" loading="lazy">':esc(p.name.split(/\s+/).slice(0,2).map(x=>x[0]||'').join('')) )+'</span><span><strong class="winner-name">'+esc(p.name)+'</strong><small class="winner-caption">Победитель · '+esc(season)+(Number.isFinite(Number(season))?' сезон':'')+'</small></span><span class="crown" aria-hidden="true">♛</span></a>').join(''):'<div class="unknown"><span class="question">?</span><span><strong>Победитель пока не указан</strong></span></div>';
-    return '<article class="season"><header class="season-head"><h2>'+esc(season)+(Number.isFinite(Number(season))?' сезон':'')+'</h2><span>'+winners.length+' '+(winners.length===1?'победитель':winners.length>=2&&winners.length<=4?'победителя':'победителей')+'</span></header><div class="winner-list">'+content+'</div></article>';
-   }).join(''):'<div class="empty">В архиве пока нет сезонов.</div>';
-   document.getElementById('winnerSummary').innerHTML='<strong>'+marked.toLocaleString('ru-RU')+'</strong> отмечено победителей';
-  }catch(error){root.innerHTML='<div class="empty">'+esc(error.message||'Не удалось загрузить список победителей.')+'</div>'}
+    entries.filter(e=>String(e.season||'').trim()===season).forEach(e=>{
+     const key=name(e).toLocaleLowerCase('ru'),photos=[...(Array.isArray(e.photos)?e.photos:[]),e.photo||''].filter(Boolean),old=people.get(key);
+     if(!old)people.set(key,{name:name(e),winner:!!e.winner,photo:photos[0]||'',season});
+     else{old.winner=old.winner||!!e.winner;if(!old.photo&&photos.length)old.photo=photos[0]}
+    });
+    [...people.values()].filter(p=>p.winner).forEach(p=>winners.push({...p,seasonLabel:season+(Number.isFinite(Number(season))?' сезон':'')}));
+   });
+   winners.sort((a,b)=>order(a.season,b.season)||a.name.localeCompare(b.name,'ru'));
+   document.getElementById('winnerSummary').innerHTML='<strong>'+winners.length.toLocaleString('ru-RU')+'</strong> отмечено победителей';
+   renderCarousel();
+  }catch(error){root.innerHTML='<div class="winner-empty">'+esc(error.message||'Не удалось загрузить список победителей.')+'</div>';document.getElementById('winnerSummary').textContent='Ошибка загрузки'}
  }
  load();
 })();
