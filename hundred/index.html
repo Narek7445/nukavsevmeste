@@ -364,6 +364,15 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   function normalizeProfileNameForShare(value){return decodeProfileName(value)}
  function profileEventMarkup(personName){const key=normalizeProfileName(personName);const event=profileUpcomingEvents.find(e=>Array.isArray(e.profiles)&&e.profiles.some(p=>String(p||'').trim().toLocaleLowerCase('ru')===key));return event?'<aside class="profile-event-banner"><span class="profile-event-kicker">БЛИЖАЙШЕЕ СОБЫТИЕ</span><strong>Участвует в событии «'+safe(event.title)+'»</strong><a href="/#eventCountdown">Перейти →</a></aside>':'';}
  const score=e=>Number(e.score)||100;
+ const normalizePerformancePart=value=>String(value??'').normalize('NFKC').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[«»"'“”‘’]/g,'').replace(/[‐‑‒–—]/g,'-').replace(/\s+/g,' ').trim();
+ function uniquePerformances(items){
+  const seen=new Set();
+  return items.filter(item=>{
+   const key=JSON.stringify([normalizePerformancePart(item.firstName),normalizePerformancePart(item.lastName),normalizePerformancePart(item.season),normalizePerformancePart(item.episode),normalizePerformancePart(item.song)]);
+   if(seen.has(key))return false;
+   seen.add(key);return true;
+  });
+ }
  const photoFor=e=>(Array.isArray(e.photos)?e.photos.find(Boolean):'')||e.photo||'';
 
  const POLL_API='https://api.nukavsevmeste.org';let pollResults={},profileUpcomingEvents=[];
@@ -462,7 +471,7 @@ async function init(){
    const params=new URLSearchParams(window.location.search);
    const requested=params.get('profile')||params.get('name')||'';
    allEntries=d;
-   entries=d.filter(item=>!isHiddenPerformance(item)&&score(item)===100);try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}if(requested){const profileKey=normalizeProfileName(requested);await loadPolls(entries.filter(item=>normalizeProfileName(name(item))===profileKey).map(item=>item.id));}
+   entries=uniquePerformances(d.filter(item=>!isHiddenPerformance(item)&&score(item)===100));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}if(requested){const profileKey=normalizeProfileName(requested);await loadPolls(entries.filter(item=>normalizeProfileName(name(item))===profileKey).map(item=>item.id));}
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
    const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
    $('performanceCount').textContent=entries.length.toLocaleString('ru-RU');

@@ -152,7 +152,7 @@ function validateArchive(value) {
   if (!Array.isArray(value)) return "Ожидается массив выступлений.";
   if (value.length > 5000) return "В архиве слишком много записей (максимум 5000).";
   const seenPerformances = new Set();
-  const normalizePart = value => String(value ?? "").normalize("NFKC").trim().replace(/\\s+/g, " ").toLocaleLowerCase("ru");
+  const normalizePart = value => String(value ?? "").normalize("NFKC").toLocaleLowerCase("ru").replace(/ё/g, "е").replace(/[«»"\u0027“”‘’]/g, "").replace(/[‐‑‒–—]/g, "-").replace(/\s+/g, " ").trim();
   for (const item of value) {
     if (!item || typeof item !== "object" || Array.isArray(item)) return "Каждая запись должна быть объектом.";
     if (!String(item.firstName || "").trim() || !String(item.song || "").trim()) {
