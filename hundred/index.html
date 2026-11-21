@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f2f3ec">
-<title>Стобальные выступления — Ну-ка, все вместе!</title>
+<title>Все выступления — Ну-ка, все вместе!</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
 :root{--ink:#182e32;--muted:#718184;--paper:#f2f3ec;--card:#fffefa;--teal:#176b68;--orange:#f08a4b;--line:#dce4dc;--lime:#dce8a6}
@@ -334,15 +334,15 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 <body>
 <div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div>
 <main class="page">
- <nav class="nav"><a class="brand" href="/"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a class="nav-link" href="/seasons/">Сезоны</a><a class="nav-link active" href="/stats/">Статистика</a><a class="nav-link" href="/winners/">Победители</a><a class="nav-link" href="/experts/">Эксперты сотни</a><a class="nav-link" href="/rating/">Любимцы зрителей</a><a class="nav-link" href="/">← Стобалльные выступления</a></div></nav>
- <header class="hero" id="hero"><div><div class="kicker">Большая сцена · Большие голоса</div><h1>Стобальные<br>выступления.</h1><p>Все номера, которые получили 100 баллов от экспертной сотни. Откройте карточку, чтобы перейти к профилю участника и посмотреть его выступления.</p></div><div class="hero-stamp"><span>Каждый голос<br>имеет значение</span></div></header>
+ <nav class="nav"><a class="brand" href="/"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a class="nav-link" href="/seasons/">Сезоны</a><a class="nav-link active" href="/stats/">Статистика</a><a class="nav-link" href="/winners/">Победители</a><a class="nav-link" href="/experts/">Эксперты сотни</a><a class="nav-link" href="/rating/">Любимцы зрителей</a><a class="nav-link" href="/">← Главная</a></div></nav>
+ <header class="hero" id="hero"><div><div class="kicker">Большая сцена · Большие голоса</div><h1>Все<br>выступления.</h1><p>Архив выступлений участников шоу. Выберите сезон, найдите участника или песню, а также оставьте только номера, получившие 100 баллов от экспертной сотни.</p></div><div class="hero-stamp"><span>Каждый голос<br>имеет значение</span></div></header>
  <section class="stats" aria-label="Статистика архива">
   <article class="stat stat-performances"><div class="stat-top"><span class="stat-icon" aria-hidden="true">♫</span><span class="stat-overline">Архив выступлений</span></div><strong id="performanceCount">—</strong><span class="stat-caption">выступлений</span><span class="stat-decoration" aria-hidden="true">01</span></article>
   <article class="stat stat-people"><div class="stat-top"><span class="stat-icon" aria-hidden="true">♟</span><span class="stat-overline">Голоса проекта</span></div><strong id="peopleCount">—</strong><span class="stat-caption">конкурсантов</span><span class="stat-decoration" aria-hidden="true">02</span></article>
   <article class="stat stat-seasons"><div class="stat-top"><span class="stat-icon" aria-hidden="true">✳</span><span class="stat-overline">История шоу</span></div><strong id="seasonCount">—</strong><span class="stat-caption">сезонов</span><span class="stat-decoration" aria-hidden="true">03</span></article>
  </section>
- <section class="toolbar" aria-label="Фильтры"><input id="search" type="search" placeholder="Имя конкурсанта или название песни..." aria-label="Поиск"><select id="season"><option value="all">Все сезоны</option></select><select id="score"><option value="all">Все стобальные выступления</option><option value="100">100 баллов</option></select></section>
- <div class="result-line"><span id="resultCount">Загружаем архив…</span><span>100 БАЛЛОВ</span></div>
+ <section class="toolbar" aria-label="Фильтры"><input id="search" type="search" placeholder="Имя конкурсанта или название песни..." aria-label="Поиск"><select id="season"><option value="all">Все сезоны</option></select><select id="score" aria-label="Тип выступлений"><option value="all">Все выступления</option><option value="100">Стобальные выступления</option></select></section>
+ <div class="result-line"><span id="resultCount">Загружаем архив…</span><span>АРХИВ ШОУ</span></div>
  <section class="grid" id="grid" aria-live="polite"></section>
  <section id="profileView" class="profile-view" hidden>
   <div id="profileEventNotice"></div>
@@ -409,7 +409,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  let visibleCount=PAGE_SIZE,filteredList=[];
  function render(){
   const q=$('search').value.trim().toLocaleLowerCase('ru'),season=$('season').value,scoreFilter=$('score').value;
-  filteredList=entries.filter(e=>(season==='all'||String(e.season)===season)&&(scoreFilter==='all'||(scoreFilter==='100'?score(e)===100:score(e)<100))&&(!q||(name(e)+' '+String(e.song||'')+' '+String(e.season||'')+' '+String(e.episode||'')).toLocaleLowerCase('ru').includes(q))).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a)||name(a).localeCompare(name(b),'ru'));
+  filteredList=entries.filter(e=>(season==='all'||String(e.season)===season)&&(scoreFilter==='all'||(scoreFilter==='100'&&score(e)===100))&&(!q||(name(e)+' '+String(e.song||'')+' '+String(e.season||'')+' '+String(e.episode||'')).toLocaleLowerCase('ru').includes(q))).sort((a,b)=>Number(b.season)-Number(a.season)||score(b)-score(a)||name(a).localeCompare(name(b),'ru'));
   visibleCount=PAGE_SIZE;
   renderCards(true);
  }
@@ -471,7 +471,7 @@ async function init(){
    const params=new URLSearchParams(window.location.search);
    const requested=params.get('profile')||params.get('name')||'';
    allEntries=d;
-   entries=uniquePerformances(d.filter(item=>!isHiddenPerformance(item)&&score(item)===100));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}if(requested){const profileKey=normalizeProfileName(requested);await loadPolls(entries.filter(item=>normalizeProfileName(name(item))===profileKey).map(item=>item.id));}
+   entries=uniquePerformances(d.filter(item=>!isHiddenPerformance(item)));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}if(requested){const profileKey=normalizeProfileName(requested);await loadPolls(entries.filter(item=>normalizeProfileName(name(item))===profileKey).map(item=>item.id));}
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
    const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
    $('performanceCount').textContent=entries.length.toLocaleString('ru-RU');
