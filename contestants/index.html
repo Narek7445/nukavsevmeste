@@ -503,7 +503,7 @@ async function init(){
    const requested=params.get('profile')||params.get('name')||'';
    $('score').value=params.get('score')==='100'?'100':'all';
    allEntries=d;
-   entries=d.filter(item=>!isHiddenPerformance(item));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}if(requested){const profileKey=normalizeProfileName(requested);await loadPolls(entries.filter(item=>normalizeProfileName(name(item))===profileKey).map(item=>item.id));}
+   entries=d.filter(item=>!isHiddenPerformance(item));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}await loadPolls(entries.map(item=>item.id));
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
    const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
    $('performanceCount').textContent=entries.length.toLocaleString('ru-RU');
