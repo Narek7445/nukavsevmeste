@@ -439,7 +439,8 @@ let adminFeedback=[];
 function feedbackDate(value){
  const date=new Date(value);
  if(!Number.isFinite(date.getTime()))return 'Дата не указана';
- return new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Yerevan',dateStyle:'medium',timeStyle:'short'}).format(date);
+ try{return new Intl.DateTimeFormat('ru-RU',{timeZone:'Asia/Yerevan',dateStyle:'medium',timeStyle:'short'}).format(date)}
+ catch{return date.toLocaleString('ru-RU')}
 }
 function renderAdminFeedback(){
  $('feedbackCount').textContent=adminFeedback.length+' '+(adminFeedback.length%10===1&&adminFeedback.length%100!==11?'отзыв':adminFeedback.length%10>=2&&adminFeedback.length%10<=4&&(adminFeedback.length%100<12||adminFeedback.length%100>14)?'отзыва':'отзывов');
