@@ -880,7 +880,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   if(!rest.length){expanded=false;return}
   list.replaceChildren();
   rest.forEach((event,index)=>{
-   const card=document.createElement('article');card.className='event-more-card';
+   const card=document.createElement('article');card.className='event-more-card';card.dataset.eventId=String(event.id||event.title);
    const head=document.createElement('div');head.className='event-more-card-head';
    const copy=document.createElement('div');copy.className='event-more-card-copy';
    const kicker=document.createElement('span');kicker.className='event-more-card-kicker';kicker.textContent='СЛЕДУЮЩЕЕ СОБЫТИЕ · '+(index+2);
@@ -896,6 +896,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   });
   list.hidden=!expanded;toggle.textContent=expanded?'Скрыть':'Ещё '+rest.length+' событий';toggle.setAttribute('aria-expanded',String(expanded));
  }
+ function followRequestedEvent(){const wanted=new URLSearchParams(location.search).get('followEvent');if(!wanted)return;const match=e=>String(e.id||e.title)===wanted||String(e.title)===wanted;let target=null;if(activeEvent&&match(activeEvent))target=banner;else{const index=futureEvents.findIndex(match);if(index>=1){expanded=true;renderMoreEvents();target=Array.from(document.querySelectorAll('.event-more-card')).find(card=>card.dataset.eventId===String(futureEvents[index].id||futureEvents[index].title))}}if(target)setTimeout(()=>target.scrollIntoView({behavior:'smooth',block:'center'}),120)}
  async function loadEvents(){
   try{
    const [eventResponse,peopleResponse]=await Promise.all([fetch(API+'/api/events',{cache:'no-store'}),fetch(API+'/api/participants',{cache:'no-store'})]);
@@ -905,11 +906,11 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
    futureEvents=(Array.isArray(data.events)?data.events:[]).filter(e=>e&&e.title&&Number.isFinite(Date.parse(e.dateTime))&&Date.parse(e.dateTime)>now).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));
    activeEvent=futureEvents[0]||null;
    if(!activeEvent){banner.hidden=true;return}
-   $('eventCountdownTitle').textContent=activeEvent.title;
+   banner.dataset.eventId=String(activeEvent.id||activeEvent.title);$('eventCountdownTitle').textContent=activeEvent.title;
    $('eventCountdownDate').textContent=moscowDate(activeEvent.dateTime);
    renderEventProfiles(activeEvent.profiles,eventParticipants);
    renderMoreEvents();
-   banner.hidden=false;paint();
+   banner.hidden=false;paint();followRequestedEvent();
   }catch(error){banner.hidden=true}
  }
  function renderEventProfiles(profileKeys,participants){
