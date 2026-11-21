@@ -1,13 +1,13 @@
 /* Единая палитра сайта: винный, тёплое золото и кремовые оттенки. */
 :root{--site-wine:#71334b;--site-wine-dark:#421d30;--site-gold:#d6b477;--site-gold-light:#f0d9a9;--site-paper:#f4efe8;--site-card:#fffdf9;--site-ink:#29232a;--site-muted:#82777d;--site-line:#e9e1d9;--wine:var(--site-wine);--wine-dark:var(--site-wine-dark);--wine2:#8a5367;--gold:var(--site-gold);--gold2:var(--site-gold-light);--teal:var(--site-wine);--orange:var(--site-gold);--lime:var(--site-gold-light);--green:var(--site-wine);--dark:var(--site-wine-dark);--purple:var(--site-gold)}
 /* Архив конкурсантов — золотисто-винная тема. */
-body:has(.fan-disclaimer):has(.page > .nav){background:var(--site-paper)!important;color:var(--site-ink)!important}
-body:has(.fan-disclaimer):has(.page > .nav):before{background:radial-gradient(circle at 90% 5%,#ead9c8 0,transparent 30%),radial-gradient(circle at 0 65%,#f0e2cd 0,transparent 28%)!important}
-.brand-mark{background:var(--site-wine)!important;color:var(--site-gold-light)!important}
-.nav-link{color:var(--site-wine)!important;border-color:#d8c5a7!important}
-.nav-link:hover,.nav-link.active,.nav-link.active:hover{background:var(--site-wine)!important;border-color:var(--site-wine)!important;color:#fff!important}
-.kicker,.result-line strong{color:var(--site-wine)!important}.kicker:before{background:var(--site-gold)!important}
-.hero-stamp{color:var(--site-wine)!important;border-color:#d8c5a7!important}.hero-stamp:before{color:var(--site-gold)!important;border-color:#dfc99f!important}
+body:has(#profileView){background:var(--site-paper)!important;color:var(--site-ink)!important}
+body:has(#profileView):before{background:radial-gradient(circle at 90% 5%,#ead9c8 0,transparent 30%),radial-gradient(circle at 0 65%,#f0e2cd 0,transparent 28%)!important}
+body:has(#profileView) .brand-mark{background:var(--site-wine)!important;color:var(--site-gold-light)!important}
+body:has(#profileView) .nav-link{color:var(--site-wine)!important;border-color:#d8c5a7!important}
+body:has(#profileView) .nav-link:hover,body:has(#profileView) .nav-link.active,body:has(#profileView) .nav-link.active:hover{background:var(--site-wine)!important;border-color:var(--site-wine)!important;color:#fff!important}
+body:has(#profileView) .kicker,body:has(#profileView) .result-line strong{color:var(--site-wine)!important}body:has(#profileView) .kicker:before{background:var(--site-gold)!important}
+body:has(#profileView) .hero-stamp{color:var(--site-wine)!important;border-color:#d8c5a7!important}body:has(#profileView) .hero-stamp:before{color:var(--site-gold)!important;border-color:#dfc99f!important}
 .stat,.card,.profile-detail,.profile-performance{background:var(--site-card)!important;border-color:#e5d8c6!important;box-shadow:0 9px 25px #4b2b2410}
 .stat strong,.stat-icon,.stat .stat-decoration{color:var(--site-wine)!important}.stat-icon{background:#d6b47730!important}
 .stat-people,.stat-seasons{background:linear-gradient(145deg,#fffdf9,#f2e6d2)!important;border-color:#e5d2ae!important}
@@ -18,7 +18,7 @@ input,select{background:#fffdf9!important;border-color:#e2d5c3!important;color:v
 input:focus,select:focus{border-color:var(--site-gold)!important;box-shadow:0 0 0 3px #d6b47730!important}
 .tag{background:#f1e6d3!important;color:var(--site-wine)!important}.tag.score{background:#f7edda!important;color:#8a642c!important}
 .photo{background:linear-gradient(145deg,#e8d9c2,#f4e9d7)!important}
-.song,.comment,.episode,.hero p{color:var(--site-muted)!important}
+body:has(#profileView) .song,body:has(#profileView) .comment,body:has(#profileView) .episode,body:has(#profileView) .hero p{color:var(--site-muted)!important}
 .load-more,.profile-share{background:var(--site-wine)!important;border-color:var(--site-wine)!important;color:#fff!important}
 .load-more:hover{background:var(--site-wine-dark)!important}
 .profile-back{background:#fffdf9!important;border-color:#ddcba9!important;color:var(--site-wine)!important}
