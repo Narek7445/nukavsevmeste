@@ -18,14 +18,17 @@
 input,select{width:100%;min-width:0;border:1px solid #d9cec5;border-radius:11px;background:#fffdf9;padding:13px 14px;font:600 14px 'DM Sans',sans-serif;color:var(--ink);outline:none}input:focus,select:focus{border-color:var(--wine);box-shadow:0 0 0 3px #71334b16}
 .section-label{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:30px 0 13px}.section-label h2{margin:0;font:700 22px 'Manrope',sans-serif;letter-spacing:-.04em}.section-label span{color:var(--muted);font-size:11px;font-weight:700}
 .podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;align-items:end}
-.podium-card{position:relative;overflow:hidden;min-width:0;padding:22px 16px 18px;text-align:center;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#fffdf9,#f4e9e2);box-shadow:0 10px 26px #3c20200c}
-.podium-card.first{background:linear-gradient(145deg,#fff8e8,#eed9b5);border-color:#d9b979;min-height:230px;padding-top:30px}
-.podium-card.second{min-height:202px}.podium-card.third{min-height:184px}
-.medal{width:46px;height:46px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:#fff9;color:#8c632a;font:800 22px Georgia,serif;border:1px solid #d5b779}
-.first .medal{width:58px;height:58px;font-size:28px;background:#fff9e8}
-.podium-name{font:800 clamp(15px,2vw,20px)/1.15 'Manrope',sans-serif;overflow-wrap:anywhere;margin:0 0 9px}
-.podium-votes{font:800 27px 'Manrope',sans-serif;color:var(--wine);letter-spacing:-.06em}.podium-caption{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
-.podium-support{display:inline-block;margin-top:12px;padding:6px 9px;border-radius:99px;background:#fff9;color:var(--green);font-size:10px;font-weight:800}
+.podium-card{position:relative;isolation:isolate;overflow:hidden;min-width:0;min-height:290px;padding:0;text-align:center;border:1px solid #d9b979;border-radius:19px;background:#4a3035;box-shadow:0 10px 26px #3c20200c;display:flex;align-items:flex-end;justify-content:center}
+.podium-card.first{min-height:320px;border-color:#c99d50}.podium-card.second{min-height:290px}.podium-card.third{min-height:270px}
+.podium-photo{position:absolute;z-index:-2;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;}
+.podium-card:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(180deg,#1c10101c 0%,#1c101008 30%,#1c101080 100%)}
+.podium-info{width:100%;margin: auto 10px 10px;padding:16px 12px 15px;border:1px solid #f3dcae;border-radius:13px;background:linear-gradient(135deg,#fff8e8f5 0%,#ecd5a9f2 52%,#e8c8a9f5 100%);box-shadow:0 8px 24px #24121638;backdrop-filter:blur(7px)}
+.podium-crown{margin:0 auto 5px;color:#91652a;font-size:25px;line-height:1}
+.podium-name{font:800 clamp(15px,2vw,20px)/1.15 'Manrope',sans-serif;color:#38252d;overflow-wrap:anywhere;margin:0 0 7px}
+.podium-votes{font:800 27px 'Manrope',sans-serif;color:var(--wine);letter-spacing:-.06em}.podium-caption{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#806d69;margin-top:1px}
+.podium-support{display:inline-block;margin-top:9px;padding:6px 10px;border:1px solid #d6b779;border-radius:99px;background:#fff9e8;color:#805c2c;font-size:10px;font-weight:900}
+.podium-card.first .podium-info{padding-top:19px}.podium-card.first .podium-crown{font-size:30px}
+
 .list{display:grid;gap:9px}.rank-row,.podium-card{cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s}.rank-row:hover,.podium-card:hover{transform:translateY(-2px);border-color:#c49a58;box-shadow:0 9px 22px #39212712}.rank-row:focus-visible,.podium-card:focus-visible{outline:3px solid #c49a58;outline-offset:3px}.rank-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:14px;padding:15px 17px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 15px #39212708}
 .rank-number{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#f1e8e4;color:var(--wine);font:800 13px 'Manrope',sans-serif}
 .rank-name{font:800 15px 'Manrope',sans-serif;overflow-wrap:anywhere}.rank-meta{margin-top:4px;color:var(--muted);font-size:11px}
@@ -107,7 +110,7 @@ function getRanking(){
  });
  return [...groups.values()].map(g=>({...g,total:g.yes+g.no,percent:g.yes+g.no?g.yes/(g.yes+g.no):0})).sort((a,b)=>b.yes-a.yes||b.percent-a.percent||b.total-a.total||a.name.localeCompare(b.name,'ru'));
 }
-function medalCard(p,place){return '<article class="podium-card '+(place===1?'first':place===2?'second':'third')+'" role="link" tabindex="0" data-fan-profile="'+safe(p.name)+'"><div class="medal">'+(place===1?'♛':place===2?'Ⅱ':'Ⅲ')+'</div><h3 class="podium-name">'+safe(p.name)+'</h3><div class="podium-votes">'+p.yes.toLocaleString('ru-RU')+'</div><div class="podium-caption">голосов «Да»</div><div class="podium-support">'+Math.round(p.percent*100)+'% поддержки</div></article>'}
+function medalCard(p,place){const person=entries.find(e=>personName(e).toLocaleLowerCase('ru')===p.name.toLocaleLowerCase('ru'));const photo=person?((Array.isArray(person.photos)?person.photos.find(Boolean):'')||person.photo||''):'';return '<article class="podium-card '+(place===1?'first':place===2?'second':'third')+'" role="link" tabindex="0" data-fan-profile="'+safe(p.name)+'">'+(photo?'<img class="podium-photo" src="'+safe(photo)+'" alt="" loading="lazy">':'')+'<div class="podium-info"><div class="podium-crown" aria-hidden="true">♛</div><h3 class="podium-name">'+safe(p.name)+'</h3><div class="podium-votes">'+p.yes.toLocaleString('ru-RU')+'</div><div class="podium-caption">голосов «Да»</div><div class="podium-support">'+Math.round(p.percent*100)+'% поддержки</div></div></article>'}
 function render(){
  const list=getRanking(),hasVotes=list.some(p=>p.total>0),leaders=list.filter(p=>p.total>0).slice(0,3),max=Math.max(1,...list.map(p=>p.yes));
  $('periodLabel').textContent=$('season').value==='all'?'Все сезоны':seasonLabel($('season').value);
