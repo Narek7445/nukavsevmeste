@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#21152f"><title>Игры — Ну-ка, все вместе!</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+:root{--ink:#392747;--muted:#796b80;--wine:#824b8b;--gold:#f4c879;--paper:#f8f2ec;--line:#e8dce8;--serif:Georgia,"Times New Roman",serif;--sans:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--sans);background:#21152f}
+body:before{content:"";position:fixed;inset:-20px;z-index:-2;background:url("https://tvmag.ru/upload/iblock/a03/hw0423ryj2i.jpg") center/cover;filter:blur(17px) brightness(.4) saturate(1.25);transform:scale(1.06)}
+body:after{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 12% 12%,#f06f5e55,transparent 38%),radial-gradient(ellipse at 88% 15%,#48adad45,transparent 36%),linear-gradient(125deg,#18112bbd,#31163988 55%,#0e2330aa)}
+a{color:inherit}.wrap{width:min(1180px,100%);margin:auto;padding:28px 22px 70px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:42px;color:#fff}.brand{font:700 12px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#ffe2a6}.back{padding:10px 15px;border:1px solid #ffffff55;border-radius:99px;text-decoration:none;font-size:12px;background:#ffffff12}.back:hover{background:#ffffff25}
+.hero{text-align:center;color:#fff;margin-bottom:30px}.kicker{color:var(--gold);font-size:10px;font-weight:900;letter-spacing:.22em;text-transform:uppercase}.hero h1{margin:10px 0;font:700 clamp(36px,6vw,62px)/1 var(--serif);letter-spacing:-.04em}.hero p{max-width:680px;margin:0 auto;color:#e9ddeb;font-size:14px;line-height:1.6}
+.games-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}.game-card{padding:clamp(18px,3vw,30px);border:1px solid #ffffff80;border-radius:24px 24px 24px 8px;background:linear-gradient(130deg,#fffaf3f7,#f4eafaF5 60%,#eaf5f0f5);box-shadow:0 20px 55px #08051566}.game-card h2{margin:0 0 7px;color:#432747;font:700 clamp(23px,3vw,31px)/1.1 var(--serif)}.game-card>p{margin:0 0 20px;color:#75677b;font-size:13px;line-height:1.55}.game-icon{display:grid;place-items:center;width:52px;height:52px;margin-bottom:15px;border-radius:17px 17px 17px 5px;background:linear-gradient(140deg,#f4c879,#df8e9b);color:#533451;font-size:26px}.primary,.secondary{border:0;border-radius:99px;padding:13px 19px;font:800 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}.primary{background:linear-gradient(100deg,#854a91,#bc5e83);color:#fff;box-shadow:0 6px 17px #8c4d9138}.secondary{background:#fff;border:1px solid #d9c5df;color:#684276}.primary:hover,.secondary:hover{transform:translateY(-2px)}button:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+.quiz-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}.quiz-photo{display:grid;place-items:center;min-height:210px;aspect-ratio:16/10;overflow:hidden;border-radius:14px;background:linear-gradient(135deg,#f1b66d,#d77d94,#7767a8)}.quiz-photo img{width:100%;height:100%;object-fit:contain}.quiz-photo span{color:white;font:700 90px var(--serif)}.quiz-controls label{display:block;margin:9px 0 6px;color:#725a79;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.quiz-controls select{width:100%;padding:12px;border:1px solid #d8c5dd;border-radius:11px;background:white;color:#422b50;font:600 13px var(--sans)}.quiz-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.feedback{min-height:38px;margin:12px 0 0;color:#66536d;font-size:12px;line-height:1.5}.feedback.good{color:#21613f}.feedback.bad{color:#a12d43}
+.instructions{padding:16px;border:1px solid #ead9c8;border-radius:15px;background:#fff8ed;color:#6e586c;font-size:12px;line-height:1.65}.instructions ul{margin:9px 0 0;padding-left:19px}.game-stage[hidden],.intro[hidden],.result[hidden]{display:none}
+.best-game{grid-column:1/-1}.best-intro{text-align:center}.best-intro .game-icon{margin:0 auto 15px}.best-intro h2{font-size:clamp(28px,4vw,40px)}.best-intro .instructions{max-width:720px;margin:18px auto;text-align:left}
+.progress-head{display:flex;justify-content:space-between;gap:10px;color:#745e78;font-size:11px;font-weight:800}.progress-track{height:7px;margin:10px 0 22px;overflow:hidden;border-radius:99px;background:#eadfea}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#e8ae60,#b65e83,#8d65a9);transition:width .3s}
+.duel{display:grid;grid-template-columns:1fr 1fr;gap:15px}.candidate{padding:12px;border:2px solid #e6d8e8;border-radius:19px;background:#fff;text-align:center;cursor:pointer;transition:border .2s,transform .2s,box-shadow .2s}.candidate:hover{transform:translateY(-4px);border-color:#bd8bb9;box-shadow:0 12px 25px #39214a20}.candidate-photo{display:grid;place-items:center;aspect-ratio:4/4.2;overflow:hidden;border-radius:13px;background:linear-gradient(135deg,#e8b2a1,#a58bc0 55%,#81b7ac)}.candidate-photo img{width:100%;height:100%;object-fit:cover}.candidate-photo span{color:#fff;font:500 55px var(--serif)}.candidate strong{display:block;margin:13px 4px 5px;color:#432747;font:700 clamp(15px,2vw,21px)/1.2 var(--serif);overflow-wrap:anywhere}.choose{display:block;margin:0 0 4px;color:#a15a8b;font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.versus{text-align:center;margin:14px 0;color:#b18caa;font:italic 14px var(--serif)}.stage-actions{display:flex;justify-content:center;margin-top:18px}.result{text-align:center;padding:20px 0 5px}.winner-photo{width:min(260px,70%);aspect-ratio:1;margin:0 auto 18px;overflow:hidden;border-radius:24px 24px 24px 7px;background:linear-gradient(135deg,#e8b2a1,#a58bc0 55%,#81b7ac);box-shadow:0 12px 30px #39214a28}.winner-photo img{width:100%;height:100%;object-fit:cover}.result h3{margin:8px 0;color:#432747;font:700 clamp(27px,4vw,39px) var(--serif)}.result p{color:#75677b;font-size:13px}.result-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:20px}.status{margin:12px 0;color:#796b80;font-size:12px;text-align:center}
+@media(max-width:780px){.wrap{padding:20px 14px 45px}.top{margin-bottom:30px}.games-grid{grid-template-columns:1fr}.best-game{grid-column:auto}.quiz-layout{grid-template-columns:1fr}.quiz-photo{min-height:0}.game-card{border-radius:19px 19px 19px 7px}.duel{gap:9px}.candidate{padding:8px}.candidate-photo{aspect-ratio:1/1.18}.hero p{font-size:13px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div class="brand">♫ Ну-ка, все вместе!</div><a class="back" href="/">← На главную</a></header>
+<section class="hero"><span class="kicker">ИНТЕРАКТИВНЫЙ РАЗДЕЛ</span><h1>Игры</h1><p>Проверь свою память о выступлениях и узнай, кто из участников станет твоим фаворитом.</p></section>
+<div class="games-grid">
+<section class="game-card" id="songGame">
+<div class="game-icon">♪</div><h2>Угадай песню и сезон</h2><p>Посмотри на фотографию участника и попробуй вспомнить, в каком сезоне он выступал и какую песню исполнял. Для победы должны совпасть оба ответа.</p>
+<div class="quiz-layout"><div class="quiz-photo" id="quizPhoto"><span>?</span></div><div class="quiz-controls"><label for="quizSeason">Сезон</label><select id="quizSeason"><option value="">Загрузка…</option></select><label for="quizSong">Песня</label><select id="quizSong" disabled><option value="">Сначала выбери сезон</option></select><div class="quiz-actions"><button class="primary" id="quizCheck" type="button">Проверить</button><button class="secondary" id="quizNext" type="button">Другое фото</button></div><p class="feedback" id="quizFeedback" role="status">Загружаем архив выступлений…</p></div></div>
+</section>
+<section class="game-card best-game" id="bestGame">
+<div class="intro best-intro" id="bestIntro"><div class="game-icon">♥</div><span class="kicker">ТВОЙ ЛИЧНЫЙ РЕЙТИНГ</span><h2>Лучший участник</h2><p>Сравни 20 случайных участников и выбери того, кто нравится тебе больше всех. В конце узнаешь своего фаворита!</p><div class="instructions"><strong>Правила игры</strong><ul><li>В игре участвуют 20 случайных участников архива — каждый встречается только один раз.</li><li>На каждом шаге выбирай одного из двух участников.</li><li>Победитель пары остаётся и встречается со следующим случайным участником.</li><li>Всего будет 19 сравнений. Последний выбранный участник станет твоим фаворитом.</li><li>Прогресс не сохраняется: перезагрузка страницы завершит текущую игру.</li></ul></div><button class="primary" id="bestStart" type="button">Начать игру →</button><p class="status" id="bestLoadStatus">Загружаем участников…</p></div>
+<div class="game-stage" id="bestStage" hidden><div class="progress-head"><span id="bestRoundLabel">Сравнение 1 из 19</span><span id="bestRemaining">Осталось 19</span></div><div class="progress-track"><div class="progress-fill" id="bestProgress"></div></div><div class="duel" id="bestDuel"></div><div class="versus">Кто тебе ближе?</div><div class="stage-actions"><button class="secondary" id="bestRestart" type="button">Начать сначала</button></div></div>
+<div class="result" id="bestResult" hidden><div class="winner-photo" id="winnerPhoto"></div><span class="kicker">ТВОЙ ФАВОРИТ</span><h3 id="winnerName"></h3><p>Ты выбрал своего фаворита среди 20 участников!</p><div class="result-actions"><a class="primary" id="winnerProfile" href="/contestants/" style="text-decoration:none">Перейти в профиль ↗</a><button class="secondary" id="bestAgain" type="button">Сыграть снова</button></div></div>
+</section>
+</div></main>
+<script>
+(()=> {
+const API='https://api.nukavsevmeste.org';
+const $=id=>document.getElementById(id);
+let performances=[],people=[],quizCurrent=null,quizAnswered=false;
+const photoOf=x=>(Array.isArray(x.photos)?x.photos.find(Boolean):'')||x.photo||'';
+const fullName=x=>(String(x.firstName||'')+' '+String(x.lastName||'')).trim();
+const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function randomItem(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function setQuizFeedback(text,kind=''){const el=$('quizFeedback');el.className='feedback '+kind;el.textContent=text}
+function nextQuiz(){
+ const pool=performances.filter(x=>x&&x.firstName&&x.lastName&&x.song&&Number(x.season)>0);
+ if(!pool.length){setQuizFeedback('В архиве пока недостаточно данных для игры.','bad');return}
+ let next=randomItem(pool);if(pool.length>1&&quizCurrent){let tries=0;while(next.id===quizCurrent.id&&tries++<20)next=randomItem(pool)}
+ quizCurrent=next;quizAnswered=false;
+ const img=photoOf(next);$('quizPhoto').innerHTML=img?'<img src="'+escapeHTML(img)+'" alt="Фотография участника">':'<span>♪</span>';
+ const seasons=[...new Set(pool.map(x=>Number(x.season)))].sort((a,b)=>a-b);
+ $('quizSeason').innerHTML='<option value="">Выбери сезон</option>'+seasons.map(x=>'<option value="'+x+'">'+x+' сезон</option>').join('');
+ $('quizSong').innerHTML='<option value="">Сначала выбери сезон</option>';$('quizSong').disabled=true;$('quizSeason').value='';$('quizCheck').disabled=false;
+ setQuizFeedback('Выбери сезон и песню, затем проверь себя.');
+}
+function checkQuiz(){
+ if(!quizCurrent||quizAnswered)return;
+ const season=$('quizSeason').value,song=$('quizSong').value;
+ if(!season||!song){setQuizFeedback('Сначала выбери и сезон, и песню.','bad');return}
+ quizAnswered=true;
+ const okSeason=Number(season)===Number(quizCurrent.season),okSong=song.trim().toLocaleLowerCase('ru')===String(quizCurrent.song).trim().toLocaleLowerCase('ru');
+ if(okSeason&&okSong)setQuizFeedback('Верно! '+fullName(quizCurrent)+' — «'+quizCurrent.song+'», '+quizCurrent.season+' сезон. Отличная память!','good');
+ else {const wrong=[...(!okSeason?['сезон']:[]),...(!okSong?['песня']:[])].join(' и ');setQuizFeedback('Не совсем: неверно указаны '+wrong+'. Правильный ответ: «'+quizCurrent.song+'», '+quizCurrent.season+' сезон.','bad')}
+ $('quizCheck').disabled=true;
+}
+$('quizSeason').addEventListener('change',()=>{const season=$('quizSeason').value,select=$('quizSong');select.value='';if(!season){select.innerHTML='<option value="">Сначала выбери сезон</option>';select.disabled=true;return}const songs=[...new Set(performances.filter(x=>String(x.season)===season&&x.song).map(x=>String(x.song).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ru'));select.innerHTML='<option value="">Выбери песню</option>'+songs.map(x=>'<option value="'+escapeHTML(x)+'">'+escapeHTML(x)+'</option>').join('');select.disabled=false});
+$('quizCheck').addEventListener('click',checkQuiz);$('quizNext').addEventListener('click',nextQuiz);
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+let draw=[],champion=null,round=0;
+function startBest(){
+ if(people.length<20){$('bestLoadStatus').textContent='Недостаточно участников: для игры нужно минимум 20 уникальных участников.';return}
+ draw=shuffle(people).slice(0,20);champion=draw[0];round=1;
+ $('bestIntro').hidden=true;$('bestResult').hidden=true;$('bestStage').hidden=false;renderDuel();
+}
+function renderDuel(){
+ if(round>19){finishBest();return}
+ const challenger=draw[round];const pair=Math.random()<.5?[champion,challenger]:[challenger,champion];
+ $('bestRoundLabel').textContent='Сравнение '+round+' из 19';$('bestRemaining').textContent='Осталось '+(20-round);
+ $('bestProgress').style.width=((round-1)/19*100)+'%';
+ $('bestDuel').innerHTML=pair.map((p,i)=>{const image=photoOf(p);return '<button class="candidate" type="button" data-choice="'+(p===champion?'champion':'challenger')+'"><span class="choose">Выбрать</span><span class="candidate-photo">'+(image?'<img src="'+escapeHTML(image)+'" alt="">':'<span>♫</span>')+'</span><strong>'+escapeHTML(fullName(p))+'</strong></button>'}).join('');
+ $('bestDuel').querySelectorAll('[data-choice]').forEach(btn=>btn.addEventListener('click',()=>{if(btn.dataset.choice==='challenger')champion=draw[round];round++;renderDuel()}));
+}
+function profileUrl(person){return '/contestants/?profile='+encodeURIComponent(fullName(person))}
+function finishBest(){
+ $('bestStage').hidden=true;$('bestResult').hidden=false;$('bestProgress').style.width='100%';$('winnerName').textContent=fullName(champion);
+ const img=photoOf(champion);$('winnerPhoto').innerHTML=img?'<img src="'+escapeHTML(img)+'" alt="'+escapeHTML(fullName(champion))+'">':'<span>♫</span>';
+ $('winnerProfile').href=profileUrl(champion);
+}
+function resetBest(){$('bestStage').hidden=true;$('bestResult').hidden=true;$('bestIntro').hidden=false;draw=[];champion=null;round=0}
+$('bestStart').addEventListener('click',startBest);$('bestAgain').addEventListener('click',startBest);$('bestRestart').addEventListener('click',resetBest);
+async function init(){
+ try{const res=await fetch(API+'/api/participants',{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();performances=Array.isArray(data.participants)?data.participants.filter(x=>!x.hidden):[];
+ const map=new Map();performances.filter(x=>x.firstName&&x.lastName).forEach(x=>{const key=fullName(x).toLocaleLowerCase('ru');if(!map.has(key))map.set(key,x);else if(!photoOf(map.get(key))&&photoOf(x))map.set(key,x)});people=[...map.values()];
+ $('bestLoadStatus').textContent=people.length>=20?'Доступно участников: '+people.length+'. Можно начинать!':'В архиве найдено только '+people.length+' уникальных участников; нужно не менее 20.';
+ nextQuiz();
+ }catch(e){console.error(e);$('bestLoadStatus').textContent='Не удалось загрузить архив. Обнови страницу чуть позже.';setQuizFeedback('Не удалось загрузить данные архива.','bad')}
+}
+init();
+})();
+</script></body></html>
