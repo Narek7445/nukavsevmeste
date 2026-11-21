@@ -413,6 +413,10 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 .participant-directory-placeholder{color:#fff8ed;font:500 38px var(--serif);text-transform:uppercase}
 .participant-directory-name{display:block;padding:11px 12px 13px;font:700 14px/1.3 var(--sans);overflow-wrap:anywhere}
 .participants-directory-empty{grid-column:1/-1;padding:25px;border:1px dashed #cbb5cb;border-radius:12px;color:#76677b;text-align:center;font:15px var(--sans)}
+.participants-directory-more{display:flex;align-items:center;justify-content:center;gap:12px;width:max-content;max-width:100%;margin:22px auto 0;padding:13px 21px;border:1px solid #8d5593;border-radius:999px;background:#8d5593;color:#fff;text-decoration:none;font:700 13px var(--sans);box-shadow:0 7px 18px #8d55932b;transition:transform .2s,background .2s}
+.participants-directory-more:hover{transform:translateY(-2px);background:#75427c}
+.participants-directory-more span{font-size:17px}
+
 @media(max-width:600px){.participants-directory{padding:15px;border-radius:18px 18px 18px 7px}.participants-directory-head{align-items:flex-start;flex-direction:column;gap:10px}.participants-directory-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.participant-directory-name{font-size:13px;padding:10px}.participants-directory-count{align-self:flex-start}}
 
 
@@ -563,7 +567,7 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
   <button class="carousel-arrow next" id="nextEntry" type="button" aria-label="Следующее выступление">›</button>
   <div class="carousel-bottom"><div class="carousel-dots" id="carouselDots" aria-label="Выбрать выступление"></div><span class="slide-position" id="slidePosition"></span></div>
  </div>
-  <section class="participants-directory" id="participantsDirectory" aria-labelledby="participantsDirectoryTitle"><div class="participants-directory-head"><div><div class="participants-directory-kicker">Голоса и лица шоу</div><h2 id="participantsDirectoryTitle">Участники</h2><p>Все участники архива в одном месте. Нажмите на карточку, чтобы открыть профиль.</p></div><span class="participants-directory-count" id="participantsDirectoryCount">0 участников</span></div><div class="participants-directory-grid" id="participantsDirectoryGrid"></div></section>
+  <section class="participants-directory" id="participantsDirectory" aria-labelledby="participantsDirectoryTitle"><div class="participants-directory-head"><div><div class="participants-directory-kicker">Голоса и лица шоу</div><h2 id="participantsDirectoryTitle">Участники</h2><p>Все участники архива в одном месте. Нажмите на карточку, чтобы открыть профиль.</p></div><span class="participants-directory-count" id="participantsDirectoryCount">0 участников</span></div><div class="participants-directory-grid" id="participantsDirectoryGrid"></div><a class="participants-directory-more" href="/hundred/">Посмотреть все стобальные выступления <span aria-hidden="true">↗</span></a></section>
 
 
 
@@ -782,11 +786,12 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
    if(!person.first.photo&&e.photo)person.first=e;
   });
   const people=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru'));
-  $('participantsDirectoryCount').textContent=people.length+' '+(people.length%10===1&&people.length%100!==11?'участник':people.length%10>=2&&people.length%10<=4&&(people.length%100<12||people.length%100>14)?'участника':'участников');
-  $('participantsDirectoryGrid').innerHTML=people.length?people.map(person=>{
+  const count=people.length;
+  $('participantsDirectoryCount').textContent=count+' '+(count%10===1&&count%100!==11?'участник':count%10>=2&&count%10<=4&&(count%100<12||count%100>14)?'участника':'участников');
+  $('participantsDirectoryGrid').innerHTML=people.length?people.slice(0,6).map(person=>{
    const photo=person.photos[0]||'';
    const initials=person.name.split(/\s+/).slice(0,2).map(x=>x[0]||'').join('');
-   return '<button type="button" class="participant-directory-card" data-profile="'+escapeHTML(person.name)+'" aria-label="Открыть профиль: '+escapeHTML(person.name)+'"><span class="participant-directory-photo">'+(photo?'<img src="'+photo+'" alt="Фото: '+escapeHTML(person.name)+'" loading="lazy">':'<span class="participant-directory-placeholder">'+escapeHTML(initials)+'</span>')+'<span class="participant-directory-name">'+escapeHTML(person.name)+'</span></span></button>';
+   return '<button type="button" class="participant-directory-card" data-profile="'+escapeHTML(person.name)+'" aria-label="Открыть профиль: '+escapeHTML(person.name)+'"><span class="participant-directory-photo">'+(photo?'<img src="'+photo+'" alt="Фото: '+escapeHTML(person.name)+'" loading="lazy">':'<span class="participant-directory-placeholder">'+escapeHTML(initials)+'</span>')+'</span><span class="participant-directory-name">'+escapeHTML(person.name)+'</span></button>';
   }).join(''):'<div class="participants-directory-empty">Участники появятся здесь после добавления выступлений в архив.</div>';
  }
 
