@@ -280,13 +280,11 @@ async function handleApi(request, env, url) {
       const actualHash = await hashForumPassword(password, fromBase64url(user.password_salt));
       const actualBytes = fromBase64url(actualHash);
       const expectedBytes = fromBase64url(user.password_hash);
-      if (actualBytes.length !== expectedBytes.length || !crypto.subtle.timingSafeEqual) {
-        if (actualHash !== user.password_hash) return json({ error: "Неверный никнейм или пароль." }, 401, { "cache-control": "no-store" });
-      } else {
-        let difference = 0;
-        for (let i = 0; i < actualBytes.length; i++) difference |= actualBytes[i] ^ expectedBytes[i];
-        if (difference !== 0) return json({ error: "Неверный никнейм или пароль." }, 401, { "cache-control": "no-store" });
+      let difference = actualBytes.length ^ expectedBytes.length;
+      for (let i = 0; i < Math.max(actualBytes.length, expectedBytes.length); i++) {
+        difference |= (actualBytes[i] || 0) ^ (expectedBytes[i] || 0);
       }
+      if (difference !== 0) return json({ error: "Неверный никнейм или пароль." }, 401, { "cache-control": "no-store" });
       const publicUser = await publicForumUser(env, user.id);
       return json({ token: await issueForumToken(env.SESSION_SECRET, user.id), expiresIn: FORUM_TOKEN_TTL_SECONDS, user: publicUser }, 200, { "cache-control": "no-store" });
     } catch {
