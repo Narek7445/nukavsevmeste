@@ -481,19 +481,19 @@ function renderArticleAttachments(){
  updateArticlePreview();
 }
 function buildArticleReferenceOptions(){
- const type=$('articleReferenceType').value,visible=entries.filter(e=>!e.hidden);
- let opts=[];
+ const type=$('articleReferenceType').value,visible=entries.filter(e=>!e.hidden);let opts=[];
  if(type==='profile'){
-  const groups=new Map();visible.forEach(e=>{const name=(String(e.firstName||'')+' '+String(e.lastName||'')).trim();if(name&&!groups.has(name.toLocaleLowerCase('ru')))groups.set(name.toLocaleLowerCase('ru'),{name,items:[]});if(name)groups.get(name.toLocaleLowerCase('ru')).items.push(e)});
+  const groups=new Map();visible.forEach(e=>{const name=(String(e.firstName||'')+' '+String(e.lastName||'')).trim(),key=name.toLocaleLowerCase('ru');if(name&&!groups.has(key))groups.set(key,{name,items:[]});if(name)groups.get(key).items.push(e)});
   opts=[...groups.values()].map(g=>({value:g.name,label:g.name,ref:{id:crypto.randomUUID(),type:'profile',name:g.name,photo:g.items.find(x=>x.primaryPhoto)?.primaryPhoto||g.items.flatMap(x=>[...(Array.isArray(x.photos)?x.photos:[]),x.photo||'']).find(Boolean)||'',href:'/contestants/?profile='+encodeURIComponent(g.name),details:g.items.length+' выступлений в архиве'}}));
  }else if(type==='performance'){
   opts=visible.map((e,i)=>{const name=(String(e.firstName||'')+' '+String(e.lastName||'')).trim();return {value:String(i),label:name+' — '+String(e.song||'Без названия')+' · '+e.season+' сезон, '+(e.episode||'выпуск не указан'),ref:{id:crypto.randomUUID(),type:'performance',name:name+' — '+String(e.song||'Выступление'),photo:e.primaryPhoto||e.photo||(Array.isArray(e.photos)?e.photos[0]:'')||'',href:'/contestants/?profile='+encodeURIComponent(name),details:'Сезон '+e.season+' · '+(e.episode||'выпуск не указан')+' · '+(e.score||'—')+' баллов'}}});
- }else{
+ }else if(type==='episode'){
   const groups=new Map();visible.forEach(e=>{const k=String(e.season||'')+'::'+String(e.episode||'');if(!groups.has(k))groups.set(k,{season:String(e.season||''),episode:String(e.episode||''),people:new Set()});groups.get(k).people.add((String(e.firstName||'')+' '+String(e.lastName||'')).trim())});
-  opts=[...groups.values()].map((g,i)=>({value:String(i),label:'Сезон '+g.season+' · '+(g.episode||'Выпуск не указан'),ref:{type:'episode',name:'Сезон '+g.season+' · '+(g.episode||'Выпуск не указан'),href:'/seasons/',details:[...g.people].filter(Boolean).join(', ')}}));
+  opts=[...groups.values()].map((g,i)=>({value:String(i),label:'Сезон '+g.season+' · '+(g.episode||'Выпуск не указан'),ref:{id:crypto.randomUUID(),type:'episode',name:'Сезон '+g.season+' · '+(g.episode||'Выпуск не указан'),href:'/seasons/',details:[...g.people].filter(Boolean).join(', ')}}));
+ }else if(type==='event'){
+  opts=adminEvents.map(e=>({value:String(e.id),label:e.title+' · '+new Date(e.dateTime).toLocaleString('ru-RU'),ref:{id:crypto.randomUUID(),type:'event',name:e.title,href:'/#eventCountdown',details:new Date(e.dateTime).toLocaleString('ru-RU')}}));
  }
- }else if(type==='event'){opts=adminEvents.map(e=>({value:String(e.id),label:e.title+' · '+new Date(e.dateTime).toLocaleString('ru-RU'),ref:{id:crypto.randomUUID(),type:'event',name:e.title,href:'/#eventCountdown',details:new Date(e.dateTime).toLocaleString('ru-RU')}}));}
- $('articleReferenceValue').innerHTML=opts.length?opts.map((o,i)=>'<option value="'+esc(o.value)+'">'+esc(o.label)+'</option>').join(''):'<option value="">Нет доступных записей</option>';
+ $('articleReferenceValue').innerHTML=opts.length?opts.map(o=>'<option value="'+esc(o.value)+'">'+esc(o.label)+'</option>').join(''):'<option value="">Нет доступных записей</option>';
  $('articleReferenceValue')._articleOptions=opts;
 }
 async function loadArticleArchive(){if(articleArchiveLoaded)return;const d=await req('/api/admin/participants',{cache:'no-store'});entries=Array.isArray(d.participants)?d.participants:[];articleArchiveLoaded=true;buildArticleReferenceOptions()}
