@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Панель управления не предназначена для поисковой выдачи
+Disallow: /admin/
+
+Sitemap: https://nukavsevmeste.org/sitemap.xml
