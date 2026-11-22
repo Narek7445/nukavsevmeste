@@ -38,11 +38,11 @@
 
 .article-card-link{display:flex;flex:1;min-width:0;flex-direction:column;color:inherit;text-decoration:none}.article-card-link:hover h2{color:var(--wine2)}
 
-/* Star guest attachment — wide editorial card */
-.article-star-guest-card{position:relative;isolation:isolate;display:flex;align-items:flex-end;overflow:hidden;width:100%;min-height:148px;margin:28px 0;border-radius:8px;background:linear-gradient(115deg,#4d1e30,#241720);box-shadow:0 14px 32px #24172024;color:#fff}
-.article-star-guest-card>img{position:absolute;z-index:-2;inset:0;width:100%!important;height:100%!important;object-fit:cover;object-position:center 35%;opacity:.84}
-.article-star-guest-shade{position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(25,13,21,.12),rgba(25,13,21,.54) 35%,rgba(25,13,21,.95) 100%),linear-gradient(0deg,rgba(20,10,17,.48),transparent 75%)}
-.article-star-guest-copy{display:grid;gap:8px;width:100%;padding:22px 28px 22px 39%;color:#fff;text-shadow:0 2px 12px #000}
+/* Star guest attachment — vertical portrait card */
+.article-star-guest-card{position:relative;isolation:isolate;display:flex;align-items:flex-end;overflow:hidden;width:min(100%,320px);aspect-ratio:4/5;min-height:0;margin:28px 0;border-radius:8px;background:linear-gradient(145deg,#4d1e30,#241720);box-shadow:0 14px 32px #24172024;color:#fff}
+.article-star-guest-card>img{position:absolute;z-index:-2;inset:0;width:100%!important;height:100%!important;object-fit:cover;object-position:center 30%;opacity:.88}
+.article-star-guest-shade{position:absolute;z-index:-1;inset:0;background:linear-gradient(0deg,rgba(20,10,17,.96),rgba(20,10,17,.36) 42%,rgba(20,10,17,.02) 100%)}
+.article-star-guest-copy{display:grid;gap:8px;width:100%;padding:22px;color:#fff;text-shadow:0 2px 12px #000}
 .article-star-guest-copy small{color:#f2d59c;font-size:10px;font-weight:950;letter-spacing:.2em}
 .article-star-guest-copy strong{color:#fff;font:700 clamp(22px,3.4vw,32px)/1.12 Georgia,serif;overflow-wrap:anywhere}
 @media(max-width:640px){
@@ -55,8 +55,8 @@
  .article-card h2{margin:0 0 8px;font-size:22px;line-height:1.18;overflow-wrap:anywhere}
  .article-card p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;margin:0;font-size:12px;line-height:1.55}
  .article-date{display:block;padding-top:12px;font-size:9px}
- .article-star-guest-card{min-height:120px;margin:22px 0;border-radius:7px}
- .article-star-guest-copy{padding:17px 14px 17px 34%;gap:6px}
+ .article-star-guest-card{width:min(100%,280px);aspect-ratio:4/5;min-height:0;margin:22px 0;border-radius:7px}
+ .article-star-guest-copy{padding:17px;gap:6px}
  .article-star-guest-copy small{font-size:8px;letter-spacing:.14em}
  .article-star-guest-copy strong{font-size:21px}
 }
