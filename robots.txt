@@ -1,3 +1,31 @@
+User-agent: GPTBot
+Disallow: /admin/
+Disallow: /api/admin/
+
+User-agent: OAI-SearchBot
+Disallow: /admin/
+Disallow: /api/admin/
+
+User-agent: ChatGPT-User
+Disallow: /admin/
+Disallow: /api/admin/
+
+User-agent: ClaudeBot
+Disallow: /admin/
+Disallow: /api/admin/
+
+User-agent: anthropic-ai
+Disallow: /admin/
+Disallow: /api/admin/
+
+User-agent: PerplexityBot
+Disallow: /admin/
+Disallow: /api/admin/
+
+User-agent: Google-Extended
+Disallow: /admin/
+Disallow: /api/admin/
+
 User-agent: *
 Allow: /
 
