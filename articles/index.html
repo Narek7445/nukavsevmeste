@@ -60,7 +60,29 @@
  .article-star-guest-copy small{font-size:8px;letter-spacing:.14em}
  .article-star-guest-copy strong{font-size:21px}
 }
-.article-poll{margin:34px 0;padding:26px;border:1px solid #e5d8c8;border-radius:18px;background:#fffaf2}.article-poll h2{margin:0 0 8px;font-size:23px}.article-poll-option{display:flex;align-items:center;gap:12px;padding:12px 14px;margin:9px 0;border:1px solid #e7ddd2;border-radius:12px;background:#fff;cursor:pointer}.article-poll-option input{accent-color:#783d55}.article-poll-submit{margin-top:12px;padding:12px 20px;border:0;border-radius:999px;background:#55263b;color:#fff;font-weight:700;cursor:pointer}.article-poll-submit:disabled{opacity:.5;cursor:default}.article-poll-result{margin:12px 0}.article-poll-result-head{display:flex;justify-content:space-between;gap:12px;font-size:14px}.article-poll-track{height:8px;margin-top:6px;border-radius:99px;background:#eee5dc;overflow:hidden}.article-poll-fill{height:100%;background:#b28a52;border-radius:99px}.article-poll-note{color:#82777d;font-size:13px;margin-top:10px}.article-poll-error{color:#9b3c3c;font-size:13px;margin-top:10px}@media(max-width:600px){.article-poll{padding:18px}}\n</style>
+/* Article poll — editorial wine & gold treatment */
+.article-poll{position:relative;isolation:isolate;overflow:hidden;margin:48px 0 34px;padding:clamp(22px,4vw,36px);border:1px solid #d8c39e;border-radius:9px;background:radial-gradient(ellipse at 100% 0%,#f4e8d3 0,transparent 38%),linear-gradient(145deg,#fffdf8,#f5eee5);box-shadow:0 16px 38px #2a1d2310}
+.article-poll:before{content:"♫";position:absolute;z-index:-1;right:20px;top:-25px;color:#55263b08;font:180px/1 Georgia,serif;pointer-events:none}
+.article-poll .article-topline{margin:0 0 13px;color:#a27e4e;font-size:9px;letter-spacing:.22em}
+.article-poll h2{max-width:760px;margin:0 0 23px;color:var(--night);font:500 clamp(25px,4vw,34px)/1.15 Georgia,serif;letter-spacing:-.025em}
+.article-poll-option{position:relative;display:flex;align-items:center;gap:14px;min-height:58px;padding:13px 17px;margin:10px 0;border:1px solid #e3d8ca;border-radius:6px;background:#fffefa;color:#453640;font-size:14px;line-height:1.45;cursor:pointer;transition:border-color .18s,background .18s,transform .18s,box-shadow .18s}
+.article-poll-option:hover{transform:translateY(-1px);border-color:#c9ad7d;box-shadow:0 5px 14px #2a1d230d}
+.article-poll-option:has(input:checked){border-color:#9c6d4c;background:#f8f0e3;box-shadow:inset 3px 0 #b28a52}
+.article-poll-option input{appearance:none;flex:0 0 19px;width:19px;height:19px;margin:0;border:1.5px solid #b9a99a;border-radius:50%;background:#fff;cursor:pointer;transition:.18s}
+.article-poll-option input:checked{border:6px solid #783d55;background:#fff}
+.article-poll-option input:focus-visible{outline:3px solid #d6b477;outline-offset:3px}
+.article-poll-submit{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-width:170px;margin-top:15px;padding:13px 23px;border:1px solid #d5b77f;border-radius:99px;background:linear-gradient(135deg,#5a263d,#351b2a);color:#f7e5bd;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 7px 17px #55263b25;transition:transform .18s,box-shadow .18s,background .18s}
+.article-poll-submit:after{content:"↗";font-size:15px}
+.article-poll-submit:hover{transform:translateY(-2px);background:linear-gradient(135deg,#71354e,#482438);box-shadow:0 11px 22px #55263b30}
+.article-poll-submit:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.article-poll-result{margin:13px 0;padding:13px 15px;border:1px solid #e8dfd3;border-radius:6px;background:#fffefa}
+.article-poll-result-head{display:flex;align-items:center;justify-content:space-between;gap:14px;color:#453640;font-size:13px}
+.article-poll-result-head strong{flex:none;color:#783d55;font-size:12px;font-variant-numeric:tabular-nums}
+.article-poll-track{height:9px;margin-top:10px;border-radius:99px;background:#eee6dc;overflow:hidden}
+.article-poll-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#783d55,#d0ad70);transition:width .35s ease}
+.article-poll-note{margin-top:16px;color:#897c78;font-size:11px;letter-spacing:.025em}
+.article-poll-error{margin-top:12px;color:#9b3c3c;font-size:12px}
+@media(max-width:600px){.article-poll{margin:34px 0 25px;padding:20px 16px;border-radius:7px}.article-poll-option{min-height:54px;padding:12px;font-size:13px}.article-poll-submit{width:100%}.article-poll-result{padding:12px}.article-poll-result-head{font-size:12px}}\n</style>
   <script src="/maintenance-guard.js" defer></script>
 <link rel="stylesheet" href="/assets/site-theme.css">
 </head>
