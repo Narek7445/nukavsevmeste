@@ -562,11 +562,37 @@ input:focus,textarea:focus{border-color:#9c65a0;box-shadow:0 0 0 4px #9c65a01b}
 <script src="/maintenance-guard.js" defer></script>
 <link rel="stylesheet" href="/assets/site-theme.css?v=1.0.44">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Ну-ка, все вместе! — фан-база","url":"https://nukavsevmeste.org/","inLanguage":"ru","description":"Архив выступлений, участники, сезоны, выпуски и статьи о шоу «Ну-ка, все вместе!»."}</script>
+<style id="daily-article-card-style">
+.daily-article-card{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px;overflow:hidden;margin:0 0 30px;padding:clamp(22px,3.5vw,34px) clamp(22px,4vw,42px);border:1px solid rgba(255,224,166,.62);border-radius:23px 23px 23px 7px;background:radial-gradient(ellipse at 88% 8%,rgba(244,184,75,.24),transparent 35%),linear-gradient(115deg,rgba(76,35,83,.97),rgba(111,48,91,.96) 52%,rgba(48,66,82,.97));box-shadow:0 20px 48px rgba(13,8,28,.34);color:#fff8ef;animation:dailyArticleIn .5s ease both}
+.daily-article-card[hidden]{display:none}
+.daily-article-copy{position:relative;z-index:1;min-width:0}
+.daily-article-kicker{display:inline-flex;align-items:center;gap:9px;color:#ffdc9c;font-size:9px;font-weight:950;letter-spacing:.22em}
+.daily-article-kicker:before{content:"✦";font-size:13px}
+.daily-article-copy h2{max-width:820px;margin:10px 0 8px;color:#fffaf2;font:700 clamp(24px,3.6vw,38px)/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+.daily-article-copy p{max-width:760px;margin:0;color:rgba(255,248,239,.78);font-size:13px;line-height:1.65}
+.daily-article-meta{margin-top:13px;color:#f3cc8b;font-size:9px;font-weight:850;letter-spacing:.15em;text-transform:uppercase}
+.daily-article-actions{position:relative;z-index:1;display:flex;flex-direction:column;align-items:stretch;gap:10px;min-width:150px}
+.daily-article-read,.daily-article-hide{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:43px;padding:11px 17px;border-radius:999px;font:900 10px/1.2 Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:transform .2s,background .2s,box-shadow .2s}
+.daily-article-read{border:1px solid #ffe0a6;background:linear-gradient(110deg,#ffe4ad,#f2bd73);color:#45263f;text-decoration:none;box-shadow:0 7px 18px #120b2938}
+.daily-article-read:hover{transform:translateY(-2px);box-shadow:0 11px 24px #120b294d}
+.daily-article-read span{font-size:15px}
+.daily-article-hide{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff4e9}
+.daily-article-hide:hover{transform:translateY(-1px);background:rgba(255,255,255,.17)}
+.daily-article-ornament{position:absolute;z-index:0;right:20%;top:50%;transform:translateY(-56%);color:rgba(255,255,255,.055);font:clamp(130px,20vw,230px)/1 Georgia,serif;pointer-events:none}
+@keyframes dailyArticleIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:760px){.daily-article-card{grid-template-columns:1fr;gap:18px;margin-bottom:23px;padding:22px 19px;border-radius:18px 18px 18px 6px}.daily-article-copy h2{font-size:26px}.daily-article-copy p{font-size:12px}.daily-article-actions{display:grid;grid-template-columns:1fr auto;align-items:center;min-width:0}.daily-article-read{min-width:0}.daily-article-hide{padding-inline:14px}}
+@media(prefers-reduced-motion:reduce){.daily-article-card{animation:none}}
+</style>
 </head>
 <body>
 <div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div>
 <main class="page" id="archivePage">
   <header class="topline"><div class="topline-brand"><div class="eyebrow">Ну-ка, все вместе!</div><h1 class="home-title"><span class="home-title-line">Стобальные</span><span class="home-title-line home-title-accent">выступления</span></h1></div><div class="site-menu-wrap"><button class="site-menu-toggle" id="siteMenuToggle" type="button" aria-label="Открыть меню" title="Меню" aria-expanded="false" aria-controls="siteMenu"><span class="menu-lines" aria-hidden="true"><i></i><i></i><i></i></span></button><nav class="site-menu" id="siteMenu" aria-label="Разделы сайта" hidden><a href="/seasons/">Сезоны</a><a href="/contestants/">Все конкурсанты</a><a href="/rating/">Любимцы зрителей</a><a href="#participantsDirectory">Участники</a><a href="#record-holder">Рекордсмен</a><a href="/stats/">Статистика</a><a href="/winners/">Победители</a><a href="/experts/">Эксперты сотни</a><a href="/games/">Игры</a><a href="/articles/">Статьи</a><a href="#visitorFeedbackTitle">Оставить отзыв</a></nav></div></header>
+  <section class="daily-article-card" id="dailyArticleCard" aria-label="Новая статья" hidden>
+   <div class="daily-article-ornament" aria-hidden="true">♫</div>
+   <div class="daily-article-copy"><span class="daily-article-kicker">СВЕЖАЯ ПУБЛИКАЦИЯ</span><h2 id="dailyArticleTitle"></h2><p id="dailyArticleSummary"></p><div class="daily-article-meta" id="dailyArticleDate"></div></div>
+   <div class="daily-article-actions"><a class="daily-article-read" id="dailyArticleRead" href="/articles/">Читать статью <span>↗</span></a><button class="daily-article-hide" id="dailyArticleHide" type="button">Скрыть</button></div>
+  </section>
   <div class="events-section-heading" id="eventsSectionHeading" hidden><h2>События</h2></div>
   <section class="event-countdown" id="eventCountdown" aria-live="polite" hidden>
    <div class="event-countdown-copy"><span class="event-countdown-kicker">СЛЕДУЮЩЕЕ СОБЫТИЕ</span><h2 id="eventCountdownTitle"></h2><p id="eventCountdownDate"></p></div>
@@ -1000,5 +1026,33 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
 </script>
 <script>
 (()=>{const API='https://api.nukavsevmeste.org',el=id=>document.getElementById(id);const box=el('sitePolls');if(!box)return;let polls=[],index=0,selected=[],results=null;const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));function voter(){let id=localStorage.getItem('nuka-site-voter');if(!id){id='voter_'+crypto.randomUUID().replace(/-/g,'');localStorage.setItem('nuka-site-voter',id)}return id}async function restoreVote(){const p=polls[index];if(!p)return;const pollId=p.id;try{const r=await fetch(API+'/api/site-polls/results?id='+encodeURIComponent(pollId)+'&voterId='+encodeURIComponent(voter()),{cache:'no-store'});if(!r.ok)return;const data=await r.json();if(polls[index]?.id!==pollId)return;if(data.alreadyVoted){results=data;selected=Array.isArray(data.optionIds)?data.optionIds:[];draw()}}catch{}}function draw(){if(!polls.length){box.hidden=true;return}box.hidden=false;const p=polls[index],limit=Math.max(1,Math.min(3,Number(p.maxSelections)||1));el('sitePollTitle').textContent=p.title;el('sitePollPosition').textContent=results?.alreadyVoted?'Вы уже проголосовали':(index+1)+' / '+polls.length+' · Можно выбрать до '+limit;el('sitePollPrev').disabled=polls.length<2;el('sitePollNext').disabled=polls.length<2;el('sitePollPrev').parentElement.hidden=polls.length<2;el('sitePollOptions').innerHTML=p.options.map(o=>'<button class="site-poll-option '+(selected.includes(o.id)?'selected':'')+'" type="button" data-site-option="'+esc(o.id)+'" '+(results?'disabled':'')+'><i>'+(selected.includes(o.id)?'✓':'')+'</i>'+esc(o.label)+'</button>').join('');el('sitePollResults').hidden=!results;if(results){const total=results.total||0;el('sitePollResults').innerHTML=p.options.map(o=>{const count=results.counts?.[o.id]||0,pct=total?Math.round(count/total*100):0;return '<div class="site-poll-result-row"><strong>'+esc(o.label)+'</strong><div class="site-poll-result-track"><span style="width:'+pct+'%"></span></div><span class="site-poll-result-value">'+pct+'% · '+count+'</span></div>'}).join('')+'<small>Всего выборов: '+total+'</small>'}el('sitePollVote').hidden=!!results;el('sitePollVote').disabled=!selected.length;el('sitePollVote').textContent='Выбрать ('+selected.length+'/'+limit+')'}el('sitePollOptions').addEventListener('click',e=>{const b=e.target.closest('[data-site-option]');if(!b||results)return;const id=b.dataset.siteOption;if(selected.includes(id))selected=selected.filter(x=>x!==id);else{const limit=Math.max(1,Math.min(3,Number(polls[index].maxSelections)||1));if(selected.length>=limit){el('sitePollPosition').textContent='Можно выбрать не более '+limit+' вариантов';return}selected=[...selected,id]}draw()});el('sitePollVote').addEventListener('click',async()=>{if(!selected.length)return;const b=el('sitePollVote');b.disabled=true;try{const r=await fetch(API+'/api/site-polls/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pollId:polls[index].id,voterId:voter(),optionIds:selected})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Не удалось проголосовать');results={...d,alreadyVoted:true,optionIds:[...selected]};draw()}catch(err){b.disabled=false;b.textContent=err.message||'Ошибка голосования'}});function move(n){index=(index+n+polls.length)%polls.length;selected=[];results=null;draw();restoreVote()}el('sitePollPrev').addEventListener('click',()=>move(-1));el('sitePollNext').addEventListener('click',()=>move(1));async function load(){try{const r=await fetch(API+'/api/site-polls',{cache:'no-store'});if(!r.ok)return;const d=await r.json();polls=Array.isArray(d.polls)?d.polls:[];if(index>=polls.length)index=0;draw();restoreVote()}catch{box.hidden=true}}load();setInterval(load,60000)})();
+</script>
+<script>
+(()=> {
+ const API='https://api.nukavsevmeste.org',card=document.getElementById('dailyArticleCard');
+ if(!card)return;
+ const $=id=>document.getElementById(id),dismissKey='nuka-hidden-daily-article';
+ const localDay=value=>{const d=new Date(value);if(!Number.isFinite(d.getTime()))return null;return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()};
+ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ function hide(){try{localStorage.setItem(dismissKey,card.dataset.slug||'')}catch{}card.hidden=true}
+ $('dailyArticleHide').addEventListener('click',hide);
+ async function load(){try{
+  const response=await fetch(API+'/api/articles',{cache:'no-store'});if(!response.ok)return;
+  const data=await response.json(),articles=Array.isArray(data.articles)?data.articles:[];
+  const today=localDay(Date.now()),yesterday=today-86400000;
+  const eligible=articles.map(a=>({...a,_publishedDate:localDay(a.publishedAt||a.createdAt)}))
+   .filter(a=>a._publishedDate===today||a._publishedDate===yesterday)
+   .sort((a,b)=>b._publishedDate-a._publishedDate||Date.parse(b.publishedAt||b.createdAt||0)-Date.parse(a.publishedAt||a.createdAt||0));
+  const article=eligible[0];if(!article)return;
+  let dismissed='';try{dismissed=localStorage.getItem(dismissKey)||''}catch{}
+  if(dismissed===article.slug)return;
+  $('dailyArticleTitle').textContent=article.title||'Новая статья';
+  $('dailyArticleSummary').textContent=article.summary||'Новая публикация о шоу «Ну-ка, все вместе!». Откройте статью, чтобы прочитать полностью.';
+  $('dailyArticleDate').textContent='ОПУБЛИКОВАНО · '+new Date(article.publishedAt||article.createdAt).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+  $('dailyArticleRead').href='/articles/?id='+encodeURIComponent(article.slug);
+  card.dataset.slug=article.slug;card.hidden=false;
+ }catch{}}
+ load();
+})();
 </script>
 </body></html>
