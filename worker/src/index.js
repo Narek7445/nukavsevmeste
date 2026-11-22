@@ -464,7 +464,7 @@ async function handleApi(request, env, url) {
       if(coverImage&&(!coverImage.startsWith("https://")||coverImage.length>2048))return json({error:"Некорректная обложка статьи."},400);
       if(!["draft","published"].includes(status))return json({error:"Некорректный статус статьи."},400);
       if(!Array.isArray(attachments)||attachments.length>50)return json({error:"Допускается не более 50 вложений."},400);
-      const allowedTypes=new Set(["image","file","profile","performance","episode","event"]);
+      const allowedTypes=new Set(["image","file","profile","performance","episode","event","starGuest"]);
       for(const item of attachments){if(!item||!allowedTypes.has(item.type)||typeof item.name!=="string"||!item.name.trim()||item.name.length>300)return json({error:"Проверьте список вложений."},400);if(["image","file"].includes(item.type)&&(!String(item.url||"").startsWith("https://")||String(item.url).length>2048))return json({error:"Некорректная ссылка вложения."},400);if(item.href&&(!String(item.href).startsWith("/")||String(item.href).startsWith("//")))return json({error:"Некорректная ссылка на материал архива."},400)}
       const serialized=JSON.stringify(attachments);if(new TextEncoder().encode(serialized).length>100000)return json({error:"Вложения слишком велики."},413);
       try{
