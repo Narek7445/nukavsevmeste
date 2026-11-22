@@ -587,7 +587,6 @@ $('wizardNext').addEventListener('click',wizardNext);$('resumeDraft').addEventLi
 if(token){showApp().catch(()=>{})}
 
 // Bulk import: Markdown / pipe-separated / TSV tables.
-(()=>{
  const $=id=>document.getElementById(id), norm=v=>String(v??'').normalize('NFKC').trim().replace(/\\s+/g,' ').toLocaleLowerCase('ru');
  let parsed=[];
  const seasonSort=(a,b)=>{const x=Number(a),y=Number(b);return Number.isFinite(x)&&Number.isFinite(y)?x-y:Number.isFinite(x)?-1:Number.isFinite(y)?1:a.localeCompare(b,'ru')};
