@@ -105,13 +105,35 @@ async function ensureArticlesTable(env) {
   await ensureD1Tables(env, "articles", [
     "CREATE TABLE IF NOT EXISTS articles (slug TEXT PRIMARY KEY, title TEXT NOT NULL, summary TEXT NOT NULL DEFAULT '', content TEXT NOT NULL, cover_image TEXT, attachments_json TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL CHECK(status IN ('draft','published')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL, published_at TEXT)",
     "CREATE TABLE IF NOT EXISTS article_reactions (article_slug TEXT NOT NULL, voter_id TEXT NOT NULL, reaction TEXT NOT NULL CHECK(reaction IN ('❤️','👍','😂','😮','😢')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY(article_slug, voter_id))",
-    "CREATE INDEX IF NOT EXISTS idx_article_reactions_slug ON article_reactions(article_slug)"
+    "CREATE INDEX IF NOT EXISTS idx_article_reactions_slug ON article_reactions(article_slug)",
+    "CREATE TABLE IF NOT EXISTS article_polls (article_slug TEXT PRIMARY KEY, poll_json TEXT NOT NULL, updated_at TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS article_poll_votes (article_slug TEXT NOT NULL, voter_id TEXT NOT NULL, option_ids_json TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(article_slug,voter_id))"
   ]);
 }
 function parseArticleRow(row) {
   if (!row) return null;
   let attachments=[];try{attachments=JSON.parse(row.attachments_json||"[]")}catch{}
   return {slug:row.slug,title:row.title,summary:row.summary||"",content:row.content||"",coverImage:row.cover_image||"",attachments:Array.isArray(attachments)?attachments:[],status:row.status,createdAt:row.created_at,updatedAt:row.updated_at,publishedAt:row.published_at||null};
+}
+
+
+async function getArticlePoll(env, slug, voterId = "") {
+  const row = await env.DB.prepare("SELECT poll_json FROM article_polls WHERE article_slug = ?").bind(slug).first();
+  if (!row) return null;
+  let poll; try { poll = JSON.parse(row.poll_json); } catch { return null; }
+  const rows = await env.DB.prepare("SELECT option_ids_json FROM article_poll_votes WHERE article_slug = ?").bind(slug).all();
+  const counts = {}; let total = 0; let selected = [];
+  for (const vote of rows.results || []) {
+    let ids = []; try { ids = JSON.parse(vote.option_ids_json || "[]"); } catch {}
+    if (!Array.isArray(ids)) continue;
+    total++;
+    for (const id of ids) counts[id] = (counts[id] || 0) + 1;
+  }
+  if (voterId) {
+    const mine = await env.DB.prepare("SELECT option_ids_json FROM article_poll_votes WHERE article_slug = ? AND voter_id = ?").bind(slug, voterId).first();
+    if (mine) { try { selected = JSON.parse(mine.option_ids_json || "[]"); } catch {} }
+  }
+  return { ...poll, results: { counts, total }, alreadyVoted: selected.length > 0, selected };
 }
 
 async function readArchive(env) {
@@ -318,6 +340,25 @@ async function handleApi(request, env, url) {
     }catch(error){return json({error:"Не удалось сохранить реакцию."},500);}
   }
 
+
+  if (request.method === "POST" && path === "/api/article-polls/vote") {
+    let body; try { body = await request.json(); } catch { return json({error:"Некорректный JSON."},400); }
+    const slug=String(body?.slug||""),voterId=String(body?.voterId||""),optionIds=Array.isArray(body?.optionIds)?[...new Set(body.optionIds.map(String))]:[];
+    if(!/^[a-z0-9-]{1,180}$/.test(slug)||!/^[a-zA-Z0-9_-]{16,80}$/.test(voterId)||!optionIds.length||optionIds.length>3)return json({error:"Проверьте выбранные варианты."},400);
+    try{
+      await ensureArticlesTable(env);
+      const article=await env.DB.prepare("SELECT slug FROM articles WHERE slug=? AND status='published'").bind(slug).first();
+      if(!article)return json({error:"Статья не найдена."},404);
+      const poll=await env.DB.prepare("SELECT poll_json FROM article_polls WHERE article_slug=?").bind(slug).first();
+      if(!poll)return json({error:"Опрос недоступен."},404);
+      const config=JSON.parse(poll.poll_json),valid=new Set((config.options||[]).map(o=>o.id));
+      if(optionIds.length>Number(config.maxSelections||1)||optionIds.some(id=>!valid.has(id)))return json({error:"Выберите допустимое количество вариантов."},400);
+      const inserted=await env.DB.prepare("INSERT OR IGNORE INTO article_poll_votes (article_slug,voter_id,option_ids_json,created_at) VALUES (?,?,?,?)").bind(slug,voterId,JSON.stringify(optionIds),new Date().toISOString()).run();
+      if(!(inserted.meta?.changes>0))return json({error:"Вы уже голосовали в этом опросе."},409);
+      return json({ok:true,poll:await getArticlePoll(env,slug,voterId)},200,{"cache-control":"no-store"});
+    }catch(error){return json({error:"Не удалось сохранить голос.",detail:error.message},500)}
+  }
+
   if (request.method === "GET" && path === "/api/articles") {
     try {
       await ensureArticlesTable(env);
@@ -331,7 +372,7 @@ async function handleApi(request, env, url) {
         const stats=await env.DB.prepare("SELECT reaction,COUNT(*) AS count FROM article_reactions WHERE article_slug = ? GROUP BY reaction").bind(slug).all();
         const reactionCounts={};for(const item of stats.results||[])reactionCounts[item.reaction]=Number(item.count)||0;
         const mine=voterId?await env.DB.prepare("SELECT reaction FROM article_reactions WHERE article_slug = ? AND voter_id = ?").bind(slug,voterId).first():null;
-        return json({article:{...parseArticleRow(row),reactionCounts,myReaction:mine?.reaction||null}},200,{"cache-control":"no-store"});
+        const articlePoll=await getArticlePoll(env,slug,voterId);return json({article:{...parseArticleRow(row),reactionCounts,myReaction:mine?.reaction||null,poll:articlePoll}},200,{"cache-control":"no-store"});
       }
       const result=await env.DB.prepare("SELECT * FROM articles WHERE status = 'published' ORDER BY published_at DESC, created_at DESC LIMIT 100").all();
       const articles=(result.results||[]).map(parseArticleRow);
@@ -451,13 +492,13 @@ async function handleApi(request, env, url) {
 
 
     if (request.method === "GET" && path === "/api/admin/articles") {
-      try { await ensureArticlesTable(env);const result=await env.DB.prepare("SELECT * FROM articles ORDER BY updated_at DESC").all();return json({articles:(result.results||[]).map(parseArticleRow)},200,{ "cache-control":"no-store" }); }
+      try { await ensureArticlesTable(env);const result=await env.DB.prepare("SELECT * FROM articles ORDER BY updated_at DESC").all();const articles=[];for(const row of result.results||[]){const article=parseArticleRow(row);article.poll=await getArticlePoll(env,row.slug);articles.push(article)}return json({articles},200,{ "cache-control":"no-store" }); }
       catch(error){return json({error:"Не удалось загрузить статьи.",detail:error.message},500);}
     }
     if (request.method === "PUT" && path === "/api/admin/articles") {
       let body;try{body=await request.json()}catch{return json({error:"Некорректный JSON."},400)}
       const a=body?.article;if(!a||typeof a!=="object"||Array.isArray(a))return json({error:"Некорректная статья."},400);
-      const slug=String(a.slug||"").trim(),title=String(a.title||"").trim(),summary=String(a.summary||""),content=String(a.content||""),coverImage=String(a.coverImage||""),status=String(a.status||"draft"),attachments=a.attachments;
+      const slug=String(a.slug||"").trim(),title=String(a.title||"").trim(),summary=String(a.summary||""),content=String(a.content||""),coverImage=String(a.coverImage||""),status=String(a.status||"draft"),attachments=a.attachments;const poll=a.poll&&typeof a.poll==="object"?a.poll:null;
       if(!/^[a-z0-9-]{1,180}$/.test(slug))return json({error:"Некорректный уникальный адрес статьи."},400);
       if(!title||title.length>160)return json({error:"Заголовок обязателен и не должен превышать 160 символов."},400);
       if(summary.length>400||!content.trim()||content.length>150000)return json({error:"Проверьте описание и текст статьи."},400);
@@ -474,13 +515,20 @@ async function handleApi(request, env, url) {
         await env.DB.prepare("INSERT INTO articles (slug,title,summary,content,cover_image,attachments_json,status,created_at,updated_at,published_at) VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(slug) DO UPDATE SET title=excluded.title,summary=excluded.summary,content=excluded.content,cover_image=excluded.cover_image,attachments_json=excluded.attachments_json,status=excluded.status,updated_at=excluded.updated_at,published_at=excluded.published_at")
           .bind(slug,title,summary,content,coverImage,serialized,status,existing?.created_at||now,now,publishedAt).run();
         const row=await env.DB.prepare("SELECT * FROM articles WHERE slug = ?").bind(slug).first();
-        return json({ok:true,article:parseArticleRow(row)},200,{ "cache-control":"no-store" });
+        if(poll){
+          const question=String(poll.question||"").trim(),options=Array.isArray(poll.options)?poll.options:[];
+          if(!question||question.length>240||options.length<2||options.length>8||options.some(o=>!o||typeof o.id!=="string"||!/^[a-zA-Z0-9_-]{1,80}$/.test(o.id)||typeof o.label!=="string"||!o.label.trim()||o.label.length>120)||new Set(options.map(o=>o.id)).size!==options.length)return json({error:"Проверьте вопрос и варианты опроса (от 2 до 8)."},400);
+          const maxSelections=Number(poll.maxSelections)||1;if(!Number.isInteger(maxSelections)||maxSelections<1||maxSelections>3)return json({error:"Можно разрешить от 1 до 3 вариантов."},400);
+          await env.DB.prepare("INSERT INTO article_polls (article_slug,poll_json,updated_at) VALUES (?,?,?) ON CONFLICT(article_slug) DO UPDATE SET poll_json=excluded.poll_json,updated_at=excluded.updated_at").bind(slug,JSON.stringify({question,options,maxSelections}),now).run();
+        } else { await env.DB.prepare("DELETE FROM article_polls WHERE article_slug = ?").bind(slug).run(); }
+        const savedPoll=await getArticlePoll(env,slug);
+        return json({ok:true,article:{...parseArticleRow(row),poll:savedPoll}},200,{ "cache-control":"no-store" });
       }catch(error){return json({error:"Не удалось сохранить статью.",detail:error.message},500)}
     }
     if(request.method==="DELETE"&&path.startsWith("/api/admin/articles/")){
       let slug;try{slug=decodeURIComponent(path.slice("/api/admin/articles/".length))}catch{return json({error:"Некорректный адрес статьи."},400)}
       if(!/^[a-z0-9-]{1,180}$/.test(slug))return json({error:"Некорректный адрес статьи."},400);
-      try{await ensureArticlesTable(env);const result=await env.DB.prepare("DELETE FROM articles WHERE slug = ?").bind(slug).run();if(!(result.meta?.changes>0))return json({error:"Статья не найдена."},404);return json({ok:true})}catch(error){return json({error:"Не удалось удалить статью.",detail:error.message},500)}
+      try{await ensureArticlesTable(env);await env.DB.prepare("DELETE FROM article_poll_votes WHERE article_slug = ?").bind(slug).run();await env.DB.prepare("DELETE FROM article_polls WHERE article_slug = ?").bind(slug).run();const result=await env.DB.prepare("DELETE FROM articles WHERE slug = ?").bind(slug).run();if(!(result.meta?.changes>0))return json({error:"Статья не найдена."},404);return json({ok:true})}catch(error){return json({error:"Не удалось удалить статью.",detail:error.message},500)}
     }
     if(request.method==="POST"&&path==="/api/admin/article-upload"){
       if(!env.IMAGES)return json({error:"Хранилище R2 ещё не подключено."},503);
