@@ -109,8 +109,19 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
   const initials=(name.split(/\s+/).slice(0,2).map(part=>part[0]||'').join('')||'♫').toLocaleUpperCase('ru');
   return '<article class="performance-card participant-profile-link " role="link" tabindex="0" data-profile-name="'+escapeHTML(name)+'" aria-label="Открыть профиль участника '+escapeHTML(name)+'"><div class="performance-photo">'+(photo?'<img src="'+escapeHTML(photo)+'" alt="Фотография: '+escapeHTML(name)+'" loading="lazy">':'<div class="photo-placeholder"><span>'+escapeHTML(initials)+'</span></div>')+'</div><div class="card-body"><div class="card-overline">Выступление · '+String(index+1).padStart(2,'0')+' '+(item.battle?'<span class="battle-label">Баттл</span>':'')+'</div><h3 class="participant-name">'+escapeHTML(name||'Участник не указан')+'</h3><p class="song-label">Исполненная песня</p><p class="song-title">'+escapeHTML(item.song||'Название не указано')+'</p><div class="card-bottom"><span class="season-chip">'+escapeHTML(item.season)+(item.episode?' · выпуск '+escapeHTML(item.episode):'')+'</span><div class="score-block '+(score===100?'perfect':'')+'"><span class="score-number">'+(validScore?escapeHTML(score):'—')+'</span><span class="score-word">'+(validScore?scoreWord(score):'баллов')+'</span></div></div></div></article>';
  }
+ function updateSeoMetadata(title,description,canonicalUrl){
+ document.title=title;
+ const setMeta=(selector,attr,value)=>{let node=document.head.querySelector(selector);if(!node){node=document.createElement('meta');const parts=selector.match(/\[(name|property)=["']?([^"']+)["']?\]/);if(parts)node.setAttribute(parts[1],parts[2]);document.head.appendChild(node)}node.setAttribute(attr,value)};
+ setMeta('meta[name="description"]','content',description);
+ setMeta('meta[property="og:title"]','content',title);
+ setMeta('meta[property="og:description"]','content',description);
+ setMeta('meta[property="og:url"]','content',canonicalUrl);
+ setMeta('meta[name="twitter:title"]','content',title);
+ setMeta('meta[name="twitter:description"]','content',description);
+ let canonical=document.head.querySelector('link[rel="canonical"]');if(!canonical){canonical=document.createElement('link');canonical.rel='canonical';document.head.appendChild(canonical)}canonical.href=canonicalUrl;
+}
  function renderSeason(season){
-  const selected=entries.filter(item=>normalize(item.season)===season);
+  const selected=entries.filter(item=>normalize(item.season)===season);const seasonUrl=new URL('/seasons/',location.origin);seasonUrl.searchParams.set('season',season);const episodeParam=new URLSearchParams(location.search).get('episode');if(episodeParam)seasonUrl.searchParams.set('episode',episodeParam);history.replaceState(null,'',seasonUrl.href);const episodeCount=new Set(selected.map(item=>normalize(item.episode)).filter(Boolean)).size;updateSeoMetadata((season==='Битва сезонов'?season:season+' сезон')+' — выпуски и выступления | Ну-ка, все вместе!', 'Архив '+(season==='Битва сезонов'?season:season+' сезона')+' шоу «Ну-ка, все вместе!»: '+episodeCount+' выпусков, '+selected.length+' выступлений, песни участников и баллы.',seasonUrl.href);
   $('summaryCount').textContent=selected.length.toLocaleString('ru-RU');
   $('summaryCaption').textContent=selected.length===1?'выступление в сезоне':selected.length>=2&&selected.length<=4?'выступления в сезоне':'выступлений в сезоне';
   if(!selected.length){$('seasonContent').innerHTML='<div class="empty"><strong>Пока нет выступлений</strong>Для выбранного сезона ещё нет записей в архиве.</div>';return}
