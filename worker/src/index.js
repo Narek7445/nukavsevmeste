@@ -519,8 +519,8 @@ async function handleApi(request, env, url) {
           const question=String(poll.question||"").trim(),options=Array.isArray(poll.options)?poll.options:[];
           if(!question||question.length>240||options.length<2||options.length>8||options.some(o=>!o||typeof o.id!=="string"||!/^[a-zA-Z0-9_-]{1,80}$/.test(o.id)||typeof o.label!=="string"||!o.label.trim()||o.label.length>120)||new Set(options.map(o=>o.id)).size!==options.length)return json({error:"Проверьте вопрос и варианты опроса (от 2 до 8)."},400);
           const maxSelections=Number(poll.maxSelections)||1;if(!Number.isInteger(maxSelections)||maxSelections<1||maxSelections>3)return json({error:"Можно разрешить от 1 до 3 вариантов."},400);
-          await env.DB.prepare("INSERT INTO article_polls (article_slug,poll_json,updated_at) VALUES (?,?,?) ON CONFLICT(article_slug) DO UPDATE SET poll_json=excluded.poll_json,updated_at=excluded.updated_at").bind(slug,JSON.stringify({question,options,maxSelections}),now).run();
-        } else { await env.DB.prepare("DELETE FROM article_polls WHERE article_slug = ?").bind(slug).run(); }
+          const pollJson=JSON.stringify({question,options,maxSelections});const oldPoll=await env.DB.prepare("SELECT poll_json FROM article_polls WHERE article_slug = ?").bind(slug).first();if(oldPoll&&oldPoll.poll_json!==pollJson)await env.DB.prepare("DELETE FROM article_poll_votes WHERE article_slug = ?").bind(slug).run();await env.DB.prepare("INSERT INTO article_polls (article_slug,poll_json,updated_at) VALUES (?,?,?) ON CONFLICT(article_slug) DO UPDATE SET poll_json=excluded.poll_json,updated_at=excluded.updated_at").bind(slug,pollJson,now).run();
+        } else { await env.DB.prepare("DELETE FROM article_poll_votes WHERE article_slug = ?").bind(slug).run();await env.DB.prepare("DELETE FROM article_polls WHERE article_slug = ?").bind(slug).run(); }
         const savedPoll=await getArticlePoll(env,slug);
         return json({ok:true,article:{...parseArticleRow(row),poll:savedPoll}},200,{ "cache-control":"no-store" });
       }catch(error){return json({error:"Не удалось сохранить статью.",detail:error.message},500)}
