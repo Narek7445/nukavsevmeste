@@ -160,19 +160,24 @@ function relatedArticlesMarkup(items,currentSlug){
 
 
 function initArticleImageViewer(){
- const images=[...document.querySelectorAll('.article-cover,.article-body img,.article-inline-image img')].filter(img=>img.currentSrc||img.src);
- if(!images.length)return;
+ const root=document.querySelector('.article-shell');
+ if(!root||root.dataset.imageViewerReady)return;
+ root.dataset.imageViewerReady='1';
  const viewer=document.createElement('div');
  viewer.className='article-viewer';
  viewer.setAttribute('role','dialog');viewer.setAttribute('aria-modal','true');viewer.setAttribute('aria-label','Просмотр фотографий');
  viewer.innerHTML='<button class="article-viewer-close" type="button" aria-label="Закрыть">×</button><button class="article-viewer-nav article-viewer-prev" type="button" aria-label="Предыдущее фото">‹</button><img class="article-viewer-image" alt=""><button class="article-viewer-nav article-viewer-next" type="button" aria-label="Следующее фото">›</button><div class="article-viewer-count"></div>';
  document.body.appendChild(viewer);
  const picture=viewer.querySelector('.article-viewer-image'),count=viewer.querySelector('.article-viewer-count');
- let index=0,previousFocus=null;
- function show(next){index=(next+images.length)%images.length;const source=images[index];picture.src=source.currentSrc||source.src;picture.alt=source.alt||'';count.textContent=(index+1)+' / '+images.length;viewer.querySelector('.article-viewer-prev').hidden=images.length<2;viewer.querySelector('.article-viewer-next').hidden=images.length<2}
+ let images=[],index=0,previousFocus=null;
+ function collectImages(){return [...root.querySelectorAll('img')].filter(img=>!img.closest('.article-viewer')&&img.getAttribute('src'))}
+ function show(next){images=collectImages();if(!images.length)return;index=(next+images.length)%images.length;const source=images[index];picture.src=source.currentSrc||source.src;picture.alt=source.alt||'';count.textContent=(index+1)+' / '+images.length;viewer.querySelector('.article-viewer-prev').hidden=images.length<2;viewer.querySelector('.article-viewer-next').hidden=images.length<2}
  function close(){viewer.classList.remove('open');document.body.classList.remove('article-viewer-open');picture.removeAttribute('src');if(previousFocus?.isConnected)previousFocus.focus()}
- function open(i){previousFocus=document.activeElement;show(i);viewer.classList.add('open');document.body.classList.add('article-viewer-open');viewer.querySelector('.article-viewer-close').focus()}
- images.forEach((img,i)=>{img.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();open(i)});img.setAttribute('tabindex','0');img.setAttribute('role','button');img.setAttribute('aria-label','Открыть изображение в полноэкранном просмотре');img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();open(i)}})});
+ function open(image){images=collectImages();index=images.indexOf(image);if(index<0)return;previousFocus=image;show(index);viewer.classList.add('open');document.body.classList.add('article-viewer-open');viewer.querySelector('.article-viewer-close').focus()}
+ // Capture the click before any enclosing link can navigate or change the scroll position.
+ root.addEventListener('click',e=>{const image=e.target.closest('img');if(!image||!root.contains(image))return;e.preventDefault();e.stopPropagation();if(typeof e.stopImmediatePropagation==='function')e.stopImmediatePropagation();open(image)},true);
+ root.addEventListener('keydown',e=>{const image=e.target.closest('img');if(!image||!root.contains(image))return;if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();open(image)}});
+ root.querySelectorAll('img').forEach(img=>{img.tabIndex=0;img.setAttribute('role','button');img.setAttribute('aria-label','Открыть изображение в полноэкранном просмотре')});
  viewer.querySelector('.article-viewer-close').addEventListener('click',close);
  viewer.querySelector('.article-viewer-prev').addEventListener('click',()=>show(index-1));
  viewer.querySelector('.article-viewer-next').addEventListener('click',()=>show(index+1));
