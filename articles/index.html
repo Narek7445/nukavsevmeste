@@ -84,19 +84,6 @@
 .article-poll-error{margin-top:12px;color:#9b3c3c;font-size:12px}
 @media(max-width:600px){.article-poll{margin:34px 0 25px;padding:20px 16px;border-radius:7px}.article-poll-option{min-height:54px;padding:12px;font-size:13px}.article-poll-submit{width:100%}.article-poll-result{padding:12px}.article-poll-result-head{font-size:12px}}\n
 /* Article image viewer */
-.article-viewer{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:58px 76px;background:rgba(13,10,15,.94);backdrop-filter:blur(8px)}
-.article-viewer.open{display:flex}
-.article-viewer-image{position:relative;z-index:1;display:block;visibility:visible;opacity:1;max-width:calc(100vw - 170px);max-height:calc(100vh - 116px);width:auto;height:auto;min-width:1px;min-height:1px;object-fit:contain;user-select:none;box-shadow:0 18px 70px #0008}.article-viewer-image:not([src]),.article-viewer-image:not(.loaded){visibility:hidden}.article-viewer-error{position:absolute;z-index:2;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font:14px Inter,Arial,sans-serif;text-align:center}.article-viewer-error[hidden]{display:none}
-.article-viewer-close,.article-viewer-nav{position:absolute;display:grid;place-items:center;border:1px solid #ffffff40;border-radius:50%;background:#ffffff12;color:#fff;cursor:pointer;transition:background .2s,transform .2s}
-.article-viewer-close:hover,.article-viewer-nav:hover{background:#ffffff30;transform:scale(1.06)}
-.article-viewer-close{top:20px;right:22px;width:44px;height:44px;font-size:27px}
-.article-viewer-nav{top:50%;width:48px;height:48px;font-size:30px;transform:translateY(-50%)}
-.article-viewer-nav:hover{transform:translateY(-50%) scale(1.06)}
-.article-viewer-prev{left:18px}.article-viewer-next{right:18px}
-.article-viewer-count{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:#ffffffc9;font:700 11px Inter,Arial,sans-serif;letter-spacing:.12em}
-.article-body img,.article-cover,.article-inline-image img{cursor:zoom-in}
-body.article-viewer-open{overflow:hidden}
-@media(max-width:600px){.article-viewer{padding:55px 12px}.article-viewer-image{max-height:calc(100vh - 110px)}.article-viewer-nav{width:40px;height:40px;background:#17141a99}.article-viewer-prev{left:8px}.article-viewer-next{right:8px}.article-viewer-close{top:10px;right:10px}}
 </style>
   <script src="/maintenance-guard.js" defer></script>
 <link rel="stylesheet" href="/assets/site-theme.css">
@@ -159,47 +146,7 @@ function relatedArticlesMarkup(items,currentSlug){
 }
 
 
-function initArticleImageViewer(){
- const root=document.querySelector('.article-shell');
- if(!root||root.dataset.imageViewerReady)return;
- root.dataset.imageViewerReady='1';
- const viewer=document.createElement('div');
- viewer.className='article-viewer';
- viewer.setAttribute('role','dialog');viewer.setAttribute('aria-modal','true');viewer.setAttribute('aria-label','Просмотр фотографий');
- viewer.innerHTML='<button class="article-viewer-close" type="button" aria-label="Закрыть">×</button><button class="article-viewer-nav article-viewer-prev" type="button" aria-label="Предыдущее фото">‹</button><img class="article-viewer-image" alt=""><div class="article-viewer-error" role="status" hidden>Не удалось загрузить изображение</div><button class="article-viewer-nav article-viewer-next" type="button" aria-label="Следующее фото">›</button><div class="article-viewer-count"></div>';
- document.body.appendChild(viewer);
- const picture=viewer.querySelector('.article-viewer-image'),count=viewer.querySelector('.article-viewer-count'),error=viewer.querySelector('.article-viewer-error');
- let images=[],index=0,previousFocus=null;
- function collectImages(){return [...root.querySelectorAll('img')].filter(img=>!img.closest('.article-viewer')&&(img.getAttribute('src')||img.currentSrc||img.src))}
- function show(next){
-  images=collectImages();if(!images.length)return;
-  index=(next+images.length)%images.length;
-  const source=images[index];
-  const imageUrl=source.getAttribute('src')||source.src||source.currentSrc;
-  picture.removeAttribute('src');picture.classList.remove('loaded');error.hidden=true;
-  picture.alt=source.alt||'';
-  picture.onload=()=>{picture.classList.add('loaded');error.hidden=true};
-  picture.onerror=()=>{picture.classList.remove('loaded');error.hidden=false};
-  picture.src=imageUrl;
-  count.textContent=(index+1)+' / '+images.length;
-  viewer.querySelector('.article-viewer-prev').hidden=images.length<2;
-  viewer.querySelector('.article-viewer-next').hidden=images.length<2;
- }
- function close(){viewer.classList.remove('open');document.body.classList.remove('article-viewer-open');picture.removeAttribute('src');if(previousFocus?.isConnected)previousFocus.focus()}
- function open(image){images=collectImages();index=images.indexOf(image);if(index<0)return;previousFocus=image;show(index);viewer.classList.add('open');document.body.classList.add('article-viewer-open');viewer.querySelector('.article-viewer-close').focus()}
- root.addEventListener('click',e=>{const image=e.target.closest('img');if(!image||!root.contains(image))return;e.preventDefault();e.stopPropagation();if(typeof e.stopImmediatePropagation==='function')e.stopImmediatePropagation();open(image)},true);
- root.addEventListener('keydown',e=>{const image=e.target.closest('img');if(!image||!root.contains(image))return;if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();open(image)}});
- root.querySelectorAll('img').forEach(img=>{img.tabIndex=0;img.setAttribute('role','button');img.setAttribute('aria-label','Открыть изображение в полноэкранном просмотре')});
- viewer.querySelector('.article-viewer-close').addEventListener('click',close);
- viewer.querySelector('.article-viewer-prev').addEventListener('click',()=>show(index-1));
- viewer.querySelector('.article-viewer-next').addEventListener('click',()=>show(index+1));
- viewer.addEventListener('click',e=>{if(e.target===viewer)close()});
- document.addEventListener('keydown',e=>{if(!viewer.classList.contains('open'))return;if(e.key==='Escape')close();else if(e.key==='ArrowLeft')show(index-1);else if(e.key==='ArrowRight')show(index+1)});
- let touchStart=0;
- viewer.addEventListener('touchstart',e=>{touchStart=e.changedTouches[0]?.clientX||0},{passive:true});
- viewer.addEventListener('touchend',e=>{const delta=(e.changedTouches[0]?.clientX||0)-touchStart;if(Math.abs(delta)>55)show(index+(delta<0?1:-1))},{passive:true});
-}
-async function load(){try{if(id){const r=await fetch(API+'/api/articles?id='+encodeURIComponent(id)+'&voterId='+encodeURIComponent(getArticleVoterId()),{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.error||'Статья не найдена.');const a=d.article;currentAttachments=Array.isArray(a.attachments)?a.attachments:[];const articleUrl=new URL('/articles/',location.origin);articleUrl.searchParams.set('id',a.slug);const articleDescription=String(a.summary||a.content||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,155)||'Статья о шоу «Ну-ка, все вместе!».';updateSeoMetadata(a.title+' — Ну-ка, все вместе!',articleDescription,articleUrl.href);hero.hidden=true;root.innerHTML='<article class="article-shell">'+(a.coverImage?'<img class="article-cover" src="'+esc(a.coverImage)+'" alt="">':'')+'<div class="article-topline">Журнал · Материал сообщества</div><h1 class="article-title">'+esc(a.title)+'</h1>'+(a.summary?'<p class="article-summary">'+esc(a.summary)+'</p>':'')+'<div class="article-meta">ОПУБЛИКОВАНО '+esc(date(a.publishedAt||a.createdAt).toLocaleUpperCase('ru'))+'</div><div class="article-body">'+markdown(a.content)+'</div>'+(a.poll?articlePollMarkup(a.poll,a.slug):'')+(a.attachments?.some(x=>!x.id||!String(a.content||'').includes('{{attachment:'+x.id+'}}'))?'<section class="article-attachments"><h2>Дополнительные материалы</h2>'+a.attachments.filter(x=>!x.id||!String(a.content||'').includes('{{attachment:'+x.id+'}}')).map(attachmentMarkup).join('')+'</section>':'')+'<div class="share-row"><button class="share" id="shareArticle">Поделиться статьёй ↗</button></div></article><div id="relatedArticlesMount"></div>';if(a.poll)bindArticlePoll(a.poll,a.slug);initArticleImageViewer();document.getElementById('shareArticle').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);document.getElementById('shareArticle').textContent='Ссылка скопирована ✓'}catch{prompt('Скопируйте ссылку:',location.href)}});try{const relatedResponse=await fetch(API+'/api/articles',{cache:'no-store'});if(relatedResponse.ok){const relatedData=await relatedResponse.json();document.getElementById('relatedArticlesMount').innerHTML=relatedArticlesMarkup(Array.isArray(relatedData.articles)?relatedData.articles:[],a.slug)}}catch{}return}
+async function load(){try{if(id){const r=await fetch(API+'/api/articles?id='+encodeURIComponent(id)+'&voterId='+encodeURIComponent(getArticleVoterId()),{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.error||'Статья не найдена.');const a=d.article;currentAttachments=Array.isArray(a.attachments)?a.attachments:[];const articleUrl=new URL('/articles/',location.origin);articleUrl.searchParams.set('id',a.slug);const articleDescription=String(a.summary||a.content||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,155)||'Статья о шоу «Ну-ка, все вместе!».';updateSeoMetadata(a.title+' — Ну-ка, все вместе!',articleDescription,articleUrl.href);hero.hidden=true;root.innerHTML='<article class="article-shell">'+(a.coverImage?'<img class="article-cover" src="'+esc(a.coverImage)+'" alt="">':'')+'<div class="article-topline">Журнал · Материал сообщества</div><h1 class="article-title">'+esc(a.title)+'</h1>'+(a.summary?'<p class="article-summary">'+esc(a.summary)+'</p>':'')+'<div class="article-meta">ОПУБЛИКОВАНО '+esc(date(a.publishedAt||a.createdAt).toLocaleUpperCase('ru'))+'</div><div class="article-body">'+markdown(a.content)+'</div>'+(a.poll?articlePollMarkup(a.poll,a.slug):'')+(a.attachments?.some(x=>!x.id||!String(a.content||'').includes('{{attachment:'+x.id+'}}'))?'<section class="article-attachments"><h2>Дополнительные материалы</h2>'+a.attachments.filter(x=>!x.id||!String(a.content||'').includes('{{attachment:'+x.id+'}}')).map(attachmentMarkup).join('')+'</section>':'')+'<div class="share-row"><button class="share" id="shareArticle">Поделиться статьёй ↗</button></div></article><div id="relatedArticlesMount"></div>';if(a.poll)bindArticlePoll(a.poll,a.slug);document.getElementById('shareArticle').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);document.getElementById('shareArticle').textContent='Ссылка скопирована ✓'}catch{prompt('Скопируйте ссылку:',location.href)}});try{const relatedResponse=await fetch(API+'/api/articles',{cache:'no-store'});if(relatedResponse.ok){const relatedData=await relatedResponse.json();document.getElementById('relatedArticlesMount').innerHTML=relatedArticlesMarkup(Array.isArray(relatedData.articles)?relatedData.articles:[],a.slug)}}catch{}return}
 const r=await fetch(API+'/api/articles',{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.error||'Не удалось загрузить статьи.');const articles=Array.isArray(d.articles)?d.articles:[];root.innerHTML=articles.length?'<div class="section-head"><div><div class="section-kicker">НОВОЕ И ИНТЕРЕСНОЕ</div><h2>Последние публикации</h2></div><span class="section-count">'+articles.length+' МАТЕРИАЛОВ</span></div><div class="article-grid">'+articles.map(a=>'<article class="article-card"><a class="article-card-link" href="/articles/?id='+encodeURIComponent(a.slug)+'">'+(a.coverImage?'<img class="article-card-cover" src="'+esc(a.coverImage)+'" alt="" loading="lazy">':'<div class="article-card-placeholder">♫</div>')+'<div class="article-card-copy"><div class="article-card-tag">История · Ну-ка, все вместе!</div><h2>'+esc(a.title)+'</h2><p>'+esc(a.summary||'')+'</p><span class="article-date">'+esc(date(a.publishedAt||a.createdAt))+'</span></div></a>'+'</article>').join('')+'</div>':'<div class="empty">Пока нет опубликованных статей.<br>Здесь скоро появятся новые истории и материалы.</div>';
 }catch(e){root.innerHTML='<div class="error">'+esc(e.message||'Не удалось загрузить страницу.')+'</div>'}}
 load()})();
