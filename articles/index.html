@@ -172,7 +172,7 @@ function initArticleImageViewer(){
  function show(next){index=(next+images.length)%images.length;const source=images[index];picture.src=source.currentSrc||source.src;picture.alt=source.alt||'';count.textContent=(index+1)+' / '+images.length;viewer.querySelector('.article-viewer-prev').hidden=images.length<2;viewer.querySelector('.article-viewer-next').hidden=images.length<2}
  function close(){viewer.classList.remove('open');document.body.classList.remove('article-viewer-open');picture.removeAttribute('src');if(previousFocus?.isConnected)previousFocus.focus()}
  function open(i){previousFocus=document.activeElement;show(i);viewer.classList.add('open');document.body.classList.add('article-viewer-open');viewer.querySelector('.article-viewer-close').focus()}
- images.forEach((img,i)=>{img.addEventListener('click',()=>open(i));img.setAttribute('tabindex','0');img.setAttribute('aria-label','Открыть изображение в полноэкранном просмотре');img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open(i)}})});
+ images.forEach((img,i)=>{img.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();open(i)});img.setAttribute('tabindex','0');img.setAttribute('role','button');img.setAttribute('aria-label','Открыть изображение в полноэкранном просмотре');img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();open(i)}})});
  viewer.querySelector('.article-viewer-close').addEventListener('click',close);
  viewer.querySelector('.article-viewer-prev').addEventListener('click',()=>show(index-1));
  viewer.querySelector('.article-viewer-next').addEventListener('click',()=>show(index+1));
