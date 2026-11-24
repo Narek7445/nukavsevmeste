@@ -3,8 +3,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - "contestants/**"
-      - "articles/**"
+      - "contestants/*/index.html"
+      - "articles/*/index.html"
       - "sitemap.xml"
   schedule:
     - cron: "17 3 * * *"
