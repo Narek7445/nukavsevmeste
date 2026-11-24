@@ -101,7 +101,7 @@ async function triggerSeoGeneration(env, participantCount) {
   if (!response.ok) {
     const detail = await response.text();
     console.error("SEO dispatch failed:", response.status, detail.slice(0, 500));
-    return { queued: false, reason: "dispatch_failed" };
+    return { queued: false, reason: "dispatch_failed", status: response.status };
   }
   return { queued: true };
 }
