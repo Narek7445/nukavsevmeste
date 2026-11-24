@@ -1,4 +1,4 @@
-const fs=require("node:fs/promises");
+import fs from "node:fs/promises";
 const SITE="https://nukavsevmeste.org",API="https://api.nukavsevmeste.org";
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const slug=v=>{const m={а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ё:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"ts",ч:"ch",ш:"sh",щ:"sch",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya"};return String(v||"").toLowerCase().replace(/[а-яё]/g,c=>m[c]||c).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,150)||"item"};
