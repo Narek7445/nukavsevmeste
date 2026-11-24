@@ -89,6 +89,7 @@ async function triggerSeoGeneration(env, participantCount) {
     method: "POST",
     headers: {
       "Accept": "application/vnd.github+json",
+      "User-Agent": "nukavsevmeste-seo-worker",
       "Authorization": "Bearer " + token,
       "X-GitHub-Api-Version": "2022-11-28",
       "Content-Type": "application/json"
