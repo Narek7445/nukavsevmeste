@@ -1,7 +1,7 @@
 name: Generate SEO pages
 on:
   push:
-    branches: [main, seo/match-site-design, seo-static-contestant-profiles]
+    branches: [main, seo/match-site-design]
     paths-ignore:
       - "contestants/*/index.html"
       - "articles/*/index.html"
