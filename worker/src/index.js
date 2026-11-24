@@ -475,13 +475,12 @@ async function handleApi(request, env, url) {
   if (request.method === "GET" && path === "/api/site-polls/results") {const pollId=String(url.searchParams.get("id")||""),voterId=String(url.searchParams.get("voterId")||"");if(!/^[a-zA-Z0-9_-]{1,100}$/.test(pollId)|| (voterId&&!/^[a-zA-Z0-9_-]{16,100}$/.test(voterId)))return json({error:"Некорректный опрос."},400);try{const result=await cachedSitePollResults(request,env,pollId);let optionIds=[];if(voterId){await ensureSitePollVoteTable(env);await ensureSitePollMultiVoteTable(env);const mine=await env.DB.prepare("SELECT option_id FROM site_poll_votes WHERE poll_id=? AND voter_id=? UNION SELECT option_id FROM site_poll_multi_votes WHERE poll_id=? AND voter_id=?").bind(pollId,voterId,pollId,voterId).all();optionIds=[...new Set((mine.results||[]).map(row=>String(row.option_id||"")))];}const alreadyVoted=optionIds.length>0;return json({...result,alreadyVoted,optionIds},200,{"cache-control":"no-store"})}catch(error){return json({error:"Не удалось загрузить результаты.",detail:error.message},500)}}
   if (request.method === "GET" && path === "/api/polls") {
     const ids = [...new Set((url.searchParams.get("ids") || "").split(",").map(x => x.trim()).filter(x => /^[a-zA-Z0-9._-]{1,100}$/.test(x)))].slice(0, 100);
-    return cachedJsonResponse(request, 10, async () => {
-      try {
-        return json({ polls: await readPolls(env, ids) });
-      } catch (error) {
-        return json({ error: "Не удалось загрузить результаты опроса.", detail: error.message }, 500);
-      }
-    });
+    try {
+      // Votes change frequently: never serve poll totals from the edge cache.
+      return json({ polls: await readPolls(env, ids) }, 200, { "cache-control": "no-store, max-age=0" });
+    } catch (error) {
+      return json({ error: "Не удалось загрузить результаты опроса.", detail: error.message }, 500, { "cache-control": "no-store" });
+    }
   }
 
   if (request.method === "POST" && path === "/api/polls/vote") {
