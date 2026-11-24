@@ -30,3 +30,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://nukavsevmeste.org/sitemap.xml
+# Participant and article profile pages are pre-rendered for search engines.
