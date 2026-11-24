@@ -48,8 +48,6 @@ function unique(s,set){let v=s,n=2;while(set.has(v))v=s+"-"+n++;set.add(v);retur
 async function main(){
  const data=await Promise.all([api("/api/participants"),api("/api/articles")]);
  if(!Array.isArray(data[0].participants)||!Array.isArray(data[1].articles))throw Error("Unexpected API response shape; no files changed.");
- const people=new Map(),entries=data[0].participants.filter(x=>!(x.hidden===true||x.hidden===1||["true","1"].includes(String(x.hidden||"").toLowerCase())));
- for(const x of entries){const n=(String(x.firstName||"")+" "+String(x.lastName||"")).replace(/\s+/g," ").trim();if(!n)continue;const k=n.toLowerCase().replace(/ё/g,"е");if(!people.has(k))people.set(k,{name:n,items:[]});people.get(k).items.push(x)}
  const [contestantsSource,articlesSource]=await Promise.all([fs.readFile("contestants/index.html","utf8"),fs.readFile("articles/index.html","utf8")]);
  const participantStyles=stylesFrom(contestantsSource),articleStyles=stylesFrom(articlesSource);
  const ps=new Set(),as=new Set(),extra=[];
