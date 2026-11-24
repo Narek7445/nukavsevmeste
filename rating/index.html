@@ -94,6 +94,7 @@ input,select{width:100%;min-width:0;border:1px solid #d9cec5;border-radius:11px;
 
 <script src="/maintenance-guard.js" defer></script>
 <link rel="stylesheet" href="/assets/site-theme.css">
+<script src="/assets/profile-url.js"></script>
 </head>
 <body>
 <div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div><main class="page">
@@ -162,12 +163,12 @@ function renderFanProfile(person){
  document.title=person+' — Любимчик зрителей';
  return true;
 }
-function openFanProfile(person){const u=new URL('/contestants/',location.origin);u.searchParams.set('profile',person);location.assign(u.href)}
+function openFanProfile(person){location.assign(window.contestantProfilePath(person))}
 document.addEventListener('click',event=>{const card=event.target.closest('[data-fan-profile]');if(card)openFanProfile(card.dataset.fanProfile)});
 document.addEventListener('keydown',event=>{if(event.key!=='Enter'&&event.key!==' ')return;const card=event.target.closest('[data-fan-profile]');if(!card)return;event.preventDefault();openFanProfile(card.dataset.fanProfile)});
 async function init(){
  const legacyProfile=new URLSearchParams(location.search).get('profile')||'';
- if(legacyProfile){const target=new URL('/contestants/',location.origin);target.searchParams.set('profile',legacyProfile);location.replace(target.href);return;}
+ if(legacyProfile){location.replace(window.contestantProfilePath(legacyProfile));return;}
  try{
   const ar=await fetch(API+'/api/participants',{cache:'no-store'});
   if(!ar.ok)throw new Error('Не удалось загрузить архив.');
