@@ -3,6 +3,7 @@ main = "worker/src/index.js"
 compatibility_date = "2026-11-19"
 
 [vars]
+GITHUB_REPOSITORY = "Narek7445/nukavsevmeste"
 # Set this to the exact public GitHub Pages origin, e.g. https://narek7445.github.io
 ALLOWED_ORIGIN = "https://nukavsevmeste.org"
 

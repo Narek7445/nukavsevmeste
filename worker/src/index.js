@@ -81,6 +81,31 @@ async function issueToken(secret) {
   return payload + "." + base64url(new Uint8Array(signature));
 }
 
+async function triggerSeoGeneration(env, participantCount) {
+  const token = env.GITHUB_TOKEN;
+  if (!token) return { queued: false, reason: "not_configured" };
+  const repository = String(env.GITHUB_REPOSITORY || "Narek7445/nukavsevmeste");
+  const response = await fetch("https://api.github.com/repos/" + repository + "/dispatches", {
+    method: "POST",
+    headers: {
+      "Accept": "application/vnd.github+json",
+      "Authorization": "Bearer " + token,
+      "X-GitHub-Api-Version": "2022-11-28",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      event_type: "participants-updated",
+      client_payload: { participantCount, updatedAt: new Date().toISOString() }
+    })
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    console.error("SEO dispatch failed:", response.status, detail.slice(0, 500));
+    return { queued: false, reason: "dispatch_failed" };
+  }
+  return { queued: true };
+}
+
 async function isAdmin(request, env) {
   if (!env.SESSION_SECRET) return false;
   const authorization = request.headers.get("Authorization") || "";
@@ -744,7 +769,10 @@ async function handleApi(request, env, url) {
         await env.DB.prepare("INSERT INTO app_state (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at")
           .bind("participants", serialized, updatedAt).run();
         await invalidatePublicCache(request, "/api/participants");
-        return json({ ok: true, count: participants.length, updatedAt });
+        let seoGeneration = { queued: false, reason: "not_configured" };
+        try { seoGeneration = await triggerSeoGeneration(env, participants.length); }
+        catch (error) { console.error("SEO dispatch error:", error.message); seoGeneration = { queued: false, reason: "dispatch_failed" }; }
+        return json({ ok: true, count: participants.length, updatedAt, seoGeneration });
       } catch (error) {
         return json({ error: "Не удалось сохранить архив в D1.", detail: error.message }, 500);
       }
