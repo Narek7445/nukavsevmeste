@@ -287,6 +287,7 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #176b681b
 
 <script src="/maintenance-guard.js" defer></script>
 <link rel="stylesheet" href="/assets/site-theme.css">
+<script src="/assets/profile-url.js"></script>
 </head>
 <body>
 <div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div>
@@ -405,7 +406,7 @@ function scoreWord(value){const n=Math.abs(Math.trunc(Number(value)||0)),m10=n%1
  document.body.appendChild(lightbox);
  lightbox.addEventListener('click',e=>{if(e.target===lightbox||e.target.closest('.lightbox-close'))closeLightbox();else if(e.target.closest('.lightbox-prev'))moveLightbox(-1);else if(e.target.closest('.lightbox-next'))moveLightbox(1)});
  document.addEventListener('keydown',e=>{if(!lightbox.classList.contains('open'))return;if(e.key==='Escape')closeLightbox();if(e.key==='ArrowLeft')moveLightbox(-1);if(e.key==='ArrowRight')moveLightbox(1)});
-function openProfile(personName){const target=new URL('/contestants/',location.href);target.searchParams.set('profile',personName);location.assign(target.href)}
+function openProfile(personName){location.assign(window.contestantProfilePath(personName))}
 async function init(){
   try{
    const API_BASE='https://api.nukavsevmeste.org';
@@ -417,7 +418,7 @@ async function init(){
    const params=new URLSearchParams(window.location.search);
    const requested=params.get('profile')||params.get('name')||'';
    allEntries=d;
-   entries=d.filter(item=>!isHiddenPerformance(item));try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}if(requested){const profileKey=normalizeProfileName(requested);await loadPolls(entries.filter(item=>normalizeProfileName(name(item))===profileKey).map(item=>item.id));}
+   entries=d.filter(item=>!isHiddenPerformance(item));if(requested){const match=entries.find(item=>normalizeProfileName(name(item))===normalizeProfileName(requested));if(match){location.replace(window.contestantProfilePath(name(match)));return}}try{const eventResponse=await fetch(API_BASE+'/api/events',{cache:'no-store'});if(eventResponse.ok){const eventData=await eventResponse.json();profileUpcomingEvents=(Array.isArray(eventData.events)?eventData.events:[]).filter(e=>e&&e.title&&Date.parse(e.dateTime)>Date.now()).sort((a,b)=>Date.parse(a.dateTime)-Date.parse(b.dateTime));}}catch{}if(requested){const profileKey=normalizeProfileName(requested);await loadPolls(entries.filter(item=>normalizeProfileName(name(item))===profileKey).map(item=>item.id));}
    const people=new Set(entries.map(e=>name(e).toLocaleLowerCase('ru')).filter(Boolean));
    const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))].sort((a,b)=>{const an=Number(a),bn=Number(b);return Number.isFinite(an)&&Number.isFinite(bn)?an-bn:Number.isFinite(an)?-1:Number.isFinite(bn)?1:a.localeCompare(b,'ru')});
    $('performanceCount').textContent=entries.length.toLocaleString('ru-RU');
@@ -434,7 +435,7 @@ async function init(){
      $('grid').style.display='none';
      $('profileView').removeAttribute('hidden');
      $('profileContent').addEventListener('click',e=>{const photo=e.target.closest('[data-photo-index]');if(photo){showLightbox(Number(photo.dataset.photoIndex));return}const vote=e.target.closest('[data-vote]');if(vote){e.stopPropagation();submitPollVote(vote)}});$('profileBack').addEventListener('click',()=>{location.href='/contestants/'});
-     $('profileShare').addEventListener('click',async()=>{const shortUrl=location.origin+'/contestants/?profile='+requested.trim().replace(/ /g,'%20');try{await navigator.clipboard.writeText(shortUrl)}catch{const field=document.createElement('textarea');field.value=shortUrl;field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();try{document.execCommand('copy')}catch{}field.remove()}$('profileShare').textContent='Ссылка скопирована'});
+     $('profileShare').addEventListener('click',async()=>{const shortUrl=location.origin+window.contestantProfilePath(requested);try{await navigator.clipboard.writeText(shortUrl)}catch{const field=document.createElement('textarea');field.value=shortUrl;field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();try{document.execCommand('copy')}catch{}field.remove()}$('profileShare').textContent='Ссылка скопирована'});
     }else{
      $('resultCount').textContent='Профиль не найден';
      $('grid').innerHTML='<div class="empty">Не удалось найти участника «'+safe(requested)+'» в общем архиве.</div>';

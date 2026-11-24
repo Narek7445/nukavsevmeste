@@ -66,6 +66,7 @@
 
 <script src="/maintenance-guard.js" defer></script>
 <link rel="stylesheet" href="/assets/site-theme.css">
+<script src="/assets/profile-url.js"></script>
 </head>
 <body>
 <div class="fan-disclaimer" role="note"><span class="fan-disclaimer-icon" aria-hidden="true">ⓘ</span><span><strong>Фан-база.</strong> Сайт создан поклонниками и не является официальным сайтом шоу «Ну-ка, все вместе!».</span></div><main class="page">
@@ -85,7 +86,7 @@
  let winners=[];
  function renderCarousel(){
   if(!winners.length){root.innerHTML='<div class="winner-empty">Победители пока не указаны.</div>';return}
-  root.innerHTML=winners.map(p=>'<div class="winner-slide"><a class="winner-card" href="/contestants/?profile='+encodeURIComponent(p.name)+'" aria-label="Открыть профиль '+esc(p.name)+'">'+(p.photo?'<img class="winner-card-photo" src="'+esc(p.photo)+'" alt="Фото '+esc(p.name)+'" loading="lazy">':'')+'<div class="winner-card-info"><div class="winner-card-crown" aria-hidden="true">♛</div><h2 class="winner-card-name">'+esc(p.name)+'</h2><div class="winner-card-season">'+esc(p.seasonLabel)+'</div></div></a></div>').join('');
+  root.innerHTML=winners.map(p=>'<div class="winner-slide"><a class="winner-card" href="'+window.contestantProfilePath(p.name)+'" aria-label="Открыть профиль '+esc(p.name)+'">'+(p.photo?'<img class="winner-card-photo" src="'+esc(p.photo)+'" alt="Фото '+esc(p.name)+'" loading="lazy">':'')+'<div class="winner-card-info"><div class="winner-card-crown" aria-hidden="true">♛</div><h2 class="winner-card-name">'+esc(p.name)+'</h2><div class="winner-card-season">'+esc(p.seasonLabel)+'</div></div></a></div>').join('');
  }
  async function load(){
   try{
