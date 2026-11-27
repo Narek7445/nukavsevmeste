@@ -53,7 +53,7 @@
 .winner-card:hover .winner-card-crown,.winner-card:focus-visible .winner-card-crown{transform:translateY(-2px) scale(1.09);text-shadow:0 3px 10px #392127ed,0 0 16px #f5d99f99}
 .winner-card:hover .winner-card-name,.winner-card:focus-visible .winner-card-name{transform:scale(1.035);text-shadow:0 3px 10px #392127ed,0 0 18px #f5d99f88}
 .winner-card:hover .winner-card-season,.winner-card:focus-visible .winner-card-season{transform:translateY(-2px) scale(1.045);border-color:#fff;background:#392127a8}
-@media(prefers-reduced-motion:reduce){.winner-card,.winner-card:after,.winner-card-photo,.winner-card-crown,.winner-card-name,.winner-card-season{transition:none}}
+@media(prefers-reduced-motion:reduce){.winner-card,.winner-card:after,.winner-card-photo,.winner-card-crown,.winner-card-name,.winner-card-season{transition:none}}\n.winner-card-unknown{cursor:default;border-style:dashed;border-color:#d9b979;background:linear-gradient(145deg,#49384d,#211a2d)}.winner-card-unknown .winner-card-info{background:linear-gradient(to top,rgba(37,25,43,.97),rgba(53,36,58,.82) 55%,rgba(53,36,58,.48))}.winner-card-unknown .winner-card-crown{display:grid;place-items:center;width:76px;height:76px;margin-bottom:18px;border:1px solid #d9b979;border-radius:50%;background:#ffffff12;color:#f2d69f;font:600 52px Georgia,serif}.winner-card-unknown .winner-card-name{max-width:260px;font-size:clamp(19px,2.8vw,27px)}.winner-card-unknown:hover{transform:none;box-shadow:0 22px 55px #160c2c55;border-color:#d9b979}.winner-card-unknown:after{border-color:rgba(245,216,157,.3)}\n
 
 .winner-empty{padding:48px 20px;border:1px dashed #d7c7bb;border-radius:18px;text-align:center;color:var(--muted);background:#fff9}
 @media(max-width:900px){.winner-carousel{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.winner-card{min-height:390px}}
@@ -86,17 +86,18 @@
  let winners=[];
  function renderCarousel(){
   if(!winners.length){root.innerHTML='<div class="winner-empty">Победители пока не указаны.</div>';return}
-  root.innerHTML=winners.map(p=>'<div class="winner-slide"><a class="winner-card" href="'+window.contestantProfilePath(p.name)+'" aria-label="Открыть профиль '+esc(p.name)+'">'+(p.photo?'<img class="winner-card-photo" src="'+esc(p.photo)+'" alt="Фото '+esc(p.name)+'" loading="lazy">':'')+'<div class="winner-card-info"><div class="winner-card-crown" aria-hidden="true">♛</div><h2 class="winner-card-name">'+esc(p.name)+'</h2><div class="winner-card-season">'+esc(p.seasonLabel)+'</div></div></a></div>').join('');
+  root.innerHTML=winners.map(p=>p.isUnknown?'<div class="winner-slide"><div class="winner-card winner-card-unknown" role="img" aria-label="Победитель '+esc(p.seasonLabel)+' пока не указан"><div class="winner-card-info"><div class="winner-card-crown" aria-hidden="true">?</div><h2 class="winner-card-name">Победитель пока не указан</h2><div class="winner-card-season">'+esc(p.seasonLabel)+'</div></div></div></div>':'<div class="winner-slide"><a class="winner-card" href="'+window.contestantProfilePath(p.name)+'" aria-label="Открыть профиль '+esc(p.name)+'">'+(p.photo?'<img class="winner-card-photo" src="'+esc(p.photo)+'" alt="Фото '+esc(p.name)+'" loading="lazy">':'')+'<div class="winner-card-info"><div class="winner-card-crown" aria-hidden="true">♛</div><h2 class="winner-card-name">'+esc(p.name)+'</h2><div class="winner-card-season">'+esc(p.seasonLabel)+'</div></div></a></div>').join('');
  }
  async function load(){
   try{
    const response=await fetch(API+'/api/participants',{cache:'no-store'});if(!response.ok)throw new Error('Не удалось загрузить архив.');
    const data=await response.json();if(!Array.isArray(data.participants))throw new Error('Некорректный формат архива.');
    const entries=data.participants.filter(e=>e&&!e.hidden&&name(e));
-   const seasons=[...new Set(entries.map(e=>String(e.season||'').trim()).filter(Boolean))];
+   const seasons=[...new Set([...entries.map(e=>String(e.season||'').trim()).filter(Boolean),...Array.from({length:8},(_,i)=>String(i+1))])];
    const order=(a,b)=>{const x=Number(a),y=Number(b);return Number.isFinite(x)&&Number.isFinite(y)?x-y:Number.isFinite(x)?-1:Number.isFinite(y)?1:a.localeCompare(b,'ru')};
    seasons.sort(order);
    winners=[];
+   let confirmedWinnerCount=0;
    seasons.forEach(season=>{
     const people=new Map();
     entries.filter(e=>String(e.season||'').trim()===season).forEach(e=>{
@@ -104,10 +105,13 @@
      if(!old)people.set(key,{name:name(e),winner:!!e.winner,photo:photos[0]||'',season});
      else{old.winner=old.winner||!!e.winner;if(!old.photo&&photos.length)old.photo=photos[0]}
     });
-    [...people.values()].filter(p=>p.winner).forEach(p=>winners.push({...p,seasonLabel:season+(Number.isFinite(Number(season))?' сезон':'')}));
+    const seasonWinners=[...people.values()].filter(p=>p.winner);
+    seasonWinners.forEach(p=>winners.push({...p,seasonLabel:season+(Number.isFinite(Number(season))?' сезон':'')}));
+    confirmedWinnerCount+=seasonWinners.length;
+    if(!seasonWinners.length)winners.push({name:'?',isUnknown:true,season,seasonLabel:season+(Number.isFinite(Number(season))?' сезон':'')});
    });
    winners.sort((a,b)=>order(a.season,b.season)||a.name.localeCompare(b.name,'ru'));
-   document.getElementById('winnerSummary').innerHTML='<strong>'+winners.length.toLocaleString('ru-RU')+'</strong> отмечено победителей';
+   document.getElementById('winnerSummary').innerHTML='<strong>'+confirmedWinnerCount.toLocaleString('ru-RU')+'</strong> отмечено победителей';
    renderCarousel();
   }catch(error){root.innerHTML='<div class="winner-empty">'+esc(error.message||'Не удалось загрузить список победителей.')+'</div>';document.getElementById('winnerSummary').textContent='Ошибка загрузки'}
  }
