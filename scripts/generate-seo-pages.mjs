@@ -44,6 +44,14 @@ function html(o){
  return '<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="'+(o.kind==="article"?"#17141a":"#f2f3ec")+'"><title>'+esc(o.title)+'</title><meta name="description" content="'+esc(o.description)+'"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="'+esc(o.url)+'"><meta property="og:type" content="'+o.type+'"><meta property="og:site_name" content="Ну-ка, все вместе! — фан-база"><meta property="og:locale" content="ru_RU"><meta property="og:title" content="'+esc(o.title)+'"><meta property="og:description" content="'+esc(o.description)+'"><meta property="og:url" content="'+esc(o.url)+'"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="'+esc(o.title)+'"><meta name="twitter:description" content="'+esc(o.description)+'">'+image+'<link rel="icon" href="/favicon.svg"><script type="application/ld+json">'+JSON.stringify(o.schema).replace(/</g,"\\u003c")+'</script><link rel="stylesheet" href="/assets/site-theme.css"><style>'+o.styles+'</style></head><body>'+o.body+'<script src="/maintenance-guard.js" defer></script></body></html>';
 }
 async function write(file,content){const parts=file.split("/");const name=parts.pop();const dir=parts.join("/");await fs.mkdir(dir,{recursive:true});await fs.writeFile(file,content+"\n","utf8")}
+async function pruneGeneratedDirectories(root,validSlugs){
+ const entries=await fs.readdir(root,{withFileTypes:true}).catch(error=>error.code==="ENOENT"?[]:Promise.reject(error));
+ for(const entry of entries){
+  if(!entry.isDirectory()||validSlugs.has(entry.name))continue;
+  const index= root+"/"+entry.name+"/index.html"; 
+  try{await fs.access(index);await fs.rm(root+"/"+entry.name,{recursive:true,force:true});console.log("Removed stale generated page: "+root+"/"+entry.name)}catch(error){if(error.code!=="ENOENT")throw error}
+ }
+}
 function unique(s,set){let v=s,n=2;while(set.has(v))v=s+"-"+n++;set.add(v);return v}
 async function main(){
  const data=await Promise.all([api("/api/participants"),api("/api/articles"),api("/api/events").catch(()=>({events:[]}))]);
@@ -103,6 +111,8 @@ async function main(){
   const body='<main class="page"><header class="top"><a class="brand" href="/"><span class="brand-mark">♫</span><span>НУ-КА, ВСЕ ВМЕСТЕ!</span></a><div class="top-right"><span class="top-note">Архив историй и впечатлений</span><a class="back" href="/articles/">← Все статьи</a></div></header><article class="article-shell">'+(a.coverImage?'<img class="article-cover" src="'+esc(a.coverImage)+'" alt="">':"")+'<div class="article-topline">Журнал · Материал сообщества</div><h1 class="article-title">'+esc(a.title)+'</h1>'+(a.summary?'<p class="article-summary">'+esc(a.summary)+'</p>':"")+'<div class="article-meta">ОПУБЛИКОВАНО '+esc(dateLabel(published).toLocaleUpperCase("ru"))+'</div><div class="article-body">'+markdown(a.content,a.attachments)+'</div><div class="share-row"><a class="share" href="/articles/">← Ко всем статьям</a></div></article>'+relatedHtml+'<footer class="footer">НЕЗАВИСИМАЯ ФАН-БАЗА · ИСТОРИИ И ВЫСТУПЛЕНИЯ</footer></main>';
   await write("articles/"+s+"/index.html",html({kind:"article",styles:articleStyles,title:a.title+" — Ну-ка, все вместе!",description:summary,url:url,image:a.coverImage,type:"article",schema:schema,body:body}));extra.push({url:url,last:date(modified)});
  }
+ await pruneGeneratedDirectories("contestants",ps);
+ await pruneGeneratedDirectories("articles",as);
  const fixed=["/","/seasons/","/contestants/","/articles/","/stats/","/winners/","/experts/","/rating/","/games/"];
  const xml='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+fixed.map(x=>"<url><loc>"+SITE+x+"</loc></url>").join("\n")+"\n"+extra.map(x=>"<url><loc>"+esc(x.url)+"</loc>"+(x.last?"<lastmod>"+x.last.slice(0,10)+"</lastmod>":"")+"</url>").join("\n")+"\n</urlset>";
  await fs.writeFile("sitemap.xml",xml+"\n","utf8");console.log("Generated "+people.size+" participant profiles and "+(extra.length-people.size)+" article pages.");
