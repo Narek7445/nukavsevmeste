@@ -34,4 +34,26 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add contestants articles sitemap.xml
           git commit -m "chore(seo): regenerate indexed content pages"
-          git push
+          # Retry safely if another workflow or maintainer updated main meanwhile.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push rejected; syncing with latest main (attempt $attempt/3)."
+            git fetch origin main
+            if git rebase origin/main; then
+              continue
+            fi
+            # SEO output may overlap with another generation; rebuild against latest main.
+            git rebase --abort || true
+            git reset --hard origin/main
+            node scripts/generate-seo-pages.mjs
+            git add contestants articles sitemap.xml
+            if [ -z "$(git status --porcelain)" ]; then
+              echo "Latest main already contains current SEO output."
+              exit 0
+            fi
+            git commit -m "chore(seo): regenerate indexed content pages"
+          done
+          echo "Failed to push SEO updates after 3 attempts."
+          exit 1
